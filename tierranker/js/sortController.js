@@ -41,7 +41,7 @@ function startSeeding() {
         btn.style.setProperty('--accent-primary', tier.color);
         dom.seedTierButtonsEl.appendChild(btn);
     });
-    
+
     showView(dom.viewSeeding);
     displayNextSeedItem();
 }
@@ -80,7 +80,7 @@ async function onSeedingComplete() {
 
     state.isSorting = true;
     showView(dom.viewComparison);
-    
+
     // This cache prevents redundant comparisons like A-B and B-A.
     const generateKey = (id1, id2) => [id1, id2].sort().join('-');
 
@@ -115,7 +115,7 @@ async function onSeedingComplete() {
                             }
                             onResult(result);
                         };
-                        
+
                         state.progress.current++;
                         state.comparison = { items: itemsToCompare, callback: onResultWithCache };
                         updateComparisonView();
@@ -130,7 +130,7 @@ async function onSeedingComplete() {
             sortedGroups.push(group[0]);
         }
     }
-    
+
     onSortDone(sortedGroups);
 }
 
@@ -142,7 +142,7 @@ function updateComparisonView() {
         dom.triLayoutControls.style.display = 'flex';
         const ranks = ['1st', '2nd', '3rd'];
         dom.comparisonTitleEl.textContent = `Drag to rank the items (1st is best), then confirm.`;
-        
+
         dom.comparisonAreaEl.innerHTML = `
             <div id="triwise-ranking-list">
                 ${items.map((item, index) => `
@@ -161,7 +161,7 @@ function updateComparisonView() {
                 <button id="confirm-ranking-btn" class="btn btn-primary">Confirm Ranking</button>
             </div>
         `;
-        
+
         const rankingListEl = document.getElementById('triwise-ranking-list');
         const confirmBtn = document.getElementById('confirm-ranking-btn');
 
@@ -182,10 +182,10 @@ function updateComparisonView() {
                 });
             }
         });
-        
+
         rankingListEl.addEventListener('mouseover', (e) => showPreview(e, '.triwise-image-wrapper'));
         rankingListEl.addEventListener('mouseout', () => hidePreview());
-        
+
         confirmBtn.onclick = () => {
             hidePreview();
             const rankedItemElements = rankingListEl.querySelectorAll('.triwise-rank-item');
@@ -219,7 +219,7 @@ function updateComparisonView() {
             else if (choice === 'tie') callback(0);
         };
     }
-    
+
     dom.progressTextEl.textContent = `Comparison ${state.progress.current} of ~${state.progress.total}`;
     dom.progressBarInnerEl.style.width = `${state.progress.total > 0 ? (state.progress.current / state.progress.total) * 100 : 0}%`;
 }

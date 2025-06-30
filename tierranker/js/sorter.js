@@ -62,7 +62,7 @@ async function ternaryInsertionSort(arr, onCompare, onDone) {
         const itemToInsert = arr[i];
         const sortedPart = arr.slice(0, i);
         const insertIndex = await findInsertIndex(sortedPart, itemToInsert, 0, i - 1);
-        
+
         // Remove item from its current position and insert it at the correct one.
         arr.splice(i, 1);
         arr.splice(insertIndex, 0, itemToInsert);
@@ -99,18 +99,18 @@ async function pairwiseQuicksort(arr, onCompare, onDone) {
             const low_vs_mid = await compareAsync(arr[low], arr[mid]);
             const mid_vs_high = await compareAsync(arr[mid], arr[high]);
             const low_vs_high = await compareAsync(arr[low], arr[high]);
-    
+
             if (low_vs_mid >= 0) {
-                if (mid_vs_high >= 0) { pivotIndex = mid; } 
-                else if (low_vs_high >= 0) { pivotIndex = high; } 
+                if (mid_vs_high >= 0) { pivotIndex = mid; }
+                else if (low_vs_high >= 0) { pivotIndex = high; }
                 else { pivotIndex = low; }
             } else {
-                if (mid_vs_high <= 0) { pivotIndex = mid; } 
-                else if (low_vs_high >= 0) { pivotIndex = low; } 
+                if (mid_vs_high <= 0) { pivotIndex = mid; }
+                else if (low_vs_high >= 0) { pivotIndex = low; }
                 else { pivotIndex = high; }
             }
         }
-        
+
         // Place the chosen pivot at the end of the partition for convenience.
         [arr[pivotIndex], arr[high]] = [arr[high], arr[pivotIndex]];
         const pivot = arr[high];

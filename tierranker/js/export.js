@@ -24,10 +24,10 @@ export async function exportElementAsImage(elementToCapture, fileName) {
             scale: scale, // Use the calculated high-res scale
             useCORS: true, // Allows loading of cross-origin images if any
             allowTaint: true,
-            
+
             // This tells html2canvas to use the element's actual background color
             backgroundColor: getComputedStyle(elementToCapture).backgroundColor,
-            
+
             // Improve rendering by setting width and height explicitly
             width: elementToCapture.offsetWidth,
             height: elementToCapture.offsetHeight,

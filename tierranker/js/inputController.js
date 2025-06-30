@@ -43,7 +43,7 @@ export async function handleFileInput(files) { // This function is already async
 
     const promises = Array.from(files).map(async (file) => {
         const text = file.name.split('.').slice(0, -1).join('.') || file.name;
-        
+
         if (existingTexts.has(text)) {
             console.warn(`Skipping duplicate item: ${text}`);
             return;

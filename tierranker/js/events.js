@@ -69,7 +69,7 @@ export function initializeEventListeners() {
             renderStagingList();
         }
     });
-    
+
     dom.stagingListEl.addEventListener('dragstart', () => setDragging(true));
     dom.stagingListEl.addEventListener('dragend', () => setDragging(false));
     dom.stagingListEl.addEventListener('mouseover', (e) => showPreview(e, '.staging-item-thumbnail-wrapper'));
@@ -104,7 +104,7 @@ export function initializeEventListeners() {
         dom.viewListBtn.classList.remove('active');
         renderStagingList();
     });
-    
+
     // --- Config and Seeding Events ---
     dom.comparisonModeRadios.forEach(radio => {
         radio.addEventListener('change', (e) => setComparisonMode(e.target.value));
@@ -143,7 +143,7 @@ export function initializeEventListeners() {
 
     dom.btnAddTier.addEventListener('click', handleAddTier);
     dom.btnRemoveTier.addEventListener('click', handleRemoveLastTier);
-    
+
     dom.btnRestart.addEventListener('click', () => {
         if (confirm("Are you sure you want to start over? This will clear all items and reset the page.")) {
             window.location.reload();
@@ -161,26 +161,26 @@ export function initializeEventListeners() {
         e.preventDefault();
         const tierLabel = e.target.closest('.tier-label');
         if (!tierLabel || tierLabel.querySelector('textarea')) return;
-    
+
         const tierId = tierLabel.dataset.tierId;
         const originalText = state.tiers.find(t => t.id === tierId).label;
-    
+
         const editInput = document.createElement('textarea');
         editInput.className = 'tier-label-edit';
         editInput.value = originalText;
-    
+
         const saveChanges = () => {
             const newLabel = editInput.value.trim();
-            if(newLabel) updateTierLabel(tierId, newLabel);
+            if (newLabel) updateTierLabel(tierId, newLabel);
             renderResultsView();
         };
-    
+
         editInput.addEventListener('blur', saveChanges);
         editInput.addEventListener('keydown', (evt) => {
-            if (evt.key === 'Enter' && !evt.shiftKey) { evt.preventDefault(); saveChanges(); } 
+            if (evt.key === 'Enter' && !evt.shiftKey) { evt.preventDefault(); saveChanges(); }
             else if (evt.key === 'Escape') { renderResultsView(); }
         });
-    
+
         tierLabel.innerHTML = '';
         tierLabel.appendChild(editInput);
         editInput.focus();
@@ -195,34 +195,34 @@ export function initializeEventListeners() {
             updateTierColor(editingTierIdForColor, e.target.value);
         }
     });
-    
+
     dom.resultsListTitle.addEventListener('click', () => {
         if (dom.resultsListTitle.querySelector('input')) return;
-    
+
         const originalTitle = state.title;
         const input = document.createElement('input');
         input.type = 'text';
         input.className = 'title-edit-input';
         input.value = originalTitle;
-    
+
         const saveChanges = () => {
             const newTitle = input.value.trim();
             updateTitle(newTitle || "Tier List");
             renderResultsView();
         };
-    
+
         input.addEventListener('blur', saveChanges);
         input.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') { e.preventDefault(); saveChanges(); } 
+            if (e.key === 'Enter') { e.preventDefault(); saveChanges(); }
             else if (e.key === 'Escape') { e.preventDefault(); renderResultsView(); }
         });
-    
+
         dom.resultsListTitle.innerHTML = '';
         dom.resultsListTitle.appendChild(input);
         input.focus();
         input.select();
     });
-    
+
     // --- Export and Session Events ---
     dom.btnSizeIncrease.addEventListener('click', handleSizeIncrease);
     dom.btnSizeDecrease.addEventListener('click', handleSizeDecrease);
@@ -246,7 +246,7 @@ export function initializeEventListeners() {
             }, 100);
         });
     };
-    
+
     dom.btnCopyImage.addEventListener('click', async () => {
         const elementToCapture = document.getElementById('tier-list-export-area');
         const originalButtonText = dom.btnCopyImage.textContent;
@@ -287,7 +287,7 @@ export function initializeEventListeners() {
             dom.btnExportSession.disabled = false;
         }
     });
-    
+
     dom.btnImportSession.addEventListener('click', () => dom.sessionFileInput.click());
 
     dom.sessionFileInput.addEventListener('change', async (e) => {

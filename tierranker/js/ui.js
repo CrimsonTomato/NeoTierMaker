@@ -24,7 +24,7 @@ function createStagingItemElement(item) {
     } else {
         itemDiv.classList.add('text-only');
     }
-    
+
     if (dom.stagingListEl.classList.contains('view-grid')) {
         itemDiv.title = item.text;
     }
@@ -44,9 +44,9 @@ function createStagingItemElement(item) {
         imageEl.style.backgroundColor = 'transparent';
         imageEl.textContent = '';
     }
-    
+
     thumbnailWrapper.appendChild(imageEl);
-    
+
     let textEl;
     if (isEditing) {
         textEl = document.createElement('input');
@@ -62,7 +62,7 @@ function createStagingItemElement(item) {
             textEl.title = item.text;
         }
     }
-    
+
     const actionsDiv = document.createElement('div');
     actionsDiv.className = 'staging-item-actions';
     if (isEditing) {
@@ -101,7 +101,7 @@ export function renderStagingList() {
 
 export function setDragging(status) {
     isDragging = status;
-    if(status) hidePreview();
+    if (status) hidePreview();
 }
 
 export function hidePreview() {
@@ -112,7 +112,7 @@ export function hidePreview() {
 export function showPreview(e, wrapperSelector) {
     if (isDragging) return;
     const wrapper = e.target.closest(wrapperSelector);
-    const imgEl = wrapper?.querySelector('img[src]'); 
+    const imgEl = wrapper?.querySelector('img[src]');
     if (imgEl) {
         const hoverDelay = 500;
         previewTimeoutId = setTimeout(() => {

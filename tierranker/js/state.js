@@ -2,7 +2,7 @@ export const state = {
     items: [],
     title: 'Tier List', // The title for the generated results view
     editingItemId: null,
-    
+
     // --- NEW: CONFIGURATION ---
     comparisonMode: 2, // 2 for pairwise, 3 for tri-wise
 
@@ -11,7 +11,7 @@ export const state = {
     // comparison.items holds the array of items to compare (2 or 3)
     comparison: { items: [], callback: null },
     progress: { current: 0, total: 0 },
-    
+
     // --- NEW SEEDING STAGE STATE ---
     isSeeding: false,
     seedingProgress: { current: 0, total: 0 },
@@ -52,7 +52,7 @@ export function removeItem(id) {
 export function updateItemText(id, newText) {
     // FIX: The original code was `item.id === item.id`, which is always true.
     // It should compare the passed `id` with the item's `id`.
-    const item = state.items.find(item => item.id === id); 
+    const item = state.items.find(item => item.id === id);
     if (item) {
         item.text = newText;
     }

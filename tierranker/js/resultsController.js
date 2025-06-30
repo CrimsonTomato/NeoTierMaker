@@ -55,10 +55,10 @@ export function updateTierColor(tierId, newHexColor) {
     const g = parseInt(newHexColor.slice(3, 5), 16);
     const b = parseInt(newHexColor.slice(5, 7), 16);
     const textColor = isColorDark([r, g, b]) ? '#FFFFFF' : '#000000';
-    
+
     // Update state (This part doesn't exist yet, so we'll add it)
     const tierInState = state.tiers.find(t => t.id === tierId);
-    if(tierInState) {
+    if (tierInState) {
         tierInState.color = newHexColor;
         tierInState.textColor = textColor;
     }

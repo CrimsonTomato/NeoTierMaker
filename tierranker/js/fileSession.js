@@ -27,7 +27,7 @@ export async function exportSessionToFile() {
 
     // Create a deep copy of the state to modify without affecting the live app
     const stateToSave = JSON.parse(JSON.stringify(state));
-    
+
     // --- FIX: Clear transient sorting state before saving. ---
     // If a sort was in progress, we don't save its state. The user can restart 
     // the sort after loading. This prevents saving large base64 strings from 
@@ -50,17 +50,17 @@ export async function exportSessionToFile() {
             // For the JSON file, we restore the original path reference.
             item.image = item.originalImagePath;
 
-        } 
+        }
         // Case 2: Item has a NEW image (a data URL without an original path).
         // This happens for images added during the current session.
         else if (item.image && item.image.startsWith('data:image/')) {
             const fileExtension = item.image.startsWith('data:image/jpeg') ? 'jpg' : 'png';
             const fileName = `${item.id}.${fileExtension}`;
             const imagePath = `images/${fileName}`;
-            
+
             const imageBlob = dataURLtoBlob(item.image);
             imagesFolder.file(fileName, imageBlob);
-            
+
             // Replace the huge data URL with a simple path reference.
             item.image = imagePath;
         }
@@ -78,7 +78,7 @@ export async function exportSessionToFile() {
         compression: "DEFLATE",
         compressionOptions: { level: 9 }
     });
-    
+
     const downloadLink = document.createElement('a');
     downloadLink.href = URL.createObjectURL(zipBlob);
     downloadLink.download = `TierRanker-Session-${new Date().toISOString().split('T')[0]}.zip`;
@@ -115,10 +115,10 @@ export async function importSessionFromFile(file) {
             if (imageFile) {
                 const base64 = await imageFile.async('base64');
                 const mimeType = originalPath.endsWith('jpg') || originalPath.endsWith('jpeg') ? 'image/jpeg' : 'image/png';
-                
+
                 // Set the displayable image to the rehydrated base64 data URL
                 item.image = `data:${mimeType};base64,${base64}`;
-                
+
                 // Store the original path on the item for the next save operation.
                 item.originalImagePath = originalPath;
             } else {
