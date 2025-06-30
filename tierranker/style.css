@@ -111,14 +111,14 @@ textarea { width: 100%; height: 150px; background-color: var(--bg-secondary); bo
 .view.active { display: block; }
 
 /* === Comparison View === */
-.comparison-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+.comparison-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 16px; }
+.comparison-header h2 { flex-grow: 1; }
 .progress-container { text-align: right; }
 .progress-bar { width: 200px; height: 8px; background-color: var(--bg-tertiary); border-radius: 4px; overflow: hidden; margin-top: 4px; }
 .progress-bar-inner { width: 0%; height: 100%; background-color: var(--accent-primary); transition: width 0.3s ease; }
-.comparison-container { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px; }
+/* .comparison-container is now .pairwise-container */
 .comparison-card { background-color: var(--bg-secondary); border-radius: var(--radius); padding: 24px; text-align: center; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; border: 2px solid transparent; }
 .comparison-card:hover { transform: translateY(-5px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); border-color: var(--accent-primary); }
-.card-image-container { width: 100%; aspect-ratio: 1 / 1; margin-bottom: 16px; display: flex; align-items: center; justify-content: center; }
 .comparison-card img { max-width: 100%; max-height: 100%; border-radius: var(--radius); object-fit: contain; }
 .comparison-card .card-text { font-size: 1.2rem; word-break: break-word; }
 .tie-button-container { display: flex; justify-content: center; }
@@ -131,16 +131,15 @@ textarea { width: 100%; height: 150px; background-color: var(--bg-secondary); bo
 .results-container { display: grid; grid-template-columns: 450px 1fr; gap: 24px; height: calc(100vh - 150px); }
 .results-column { background-color: var(--bg-secondary); border-radius: var(--radius); padding: 16px; display: flex; flex-direction: column; }
 #ranked-list-container { gap: 16px; }
-/* This is the new wrapper for the content we want to export. */
 #tier-list-export-area {
     display: flex;
     flex-direction: column;
-    flex-grow: 1; /* It should take up all available space */
-    overflow: hidden; /* It clips its children, but has its own scrollbar on the grid */
-    background-color: var(--bg-secondary); /* Give it the column's background color */
+    flex-grow: 1; 
+    overflow: hidden; 
+    background-color: var(--bg-secondary); 
     padding: 16px;
-    margin: -16px; /* Counteract the parent's padding to fill the column */
-    padding-bottom: 16px; /* Add back padding at the bottom */
+    margin: -16px;
+    padding-bottom: 16px;
 }
 
 
@@ -171,7 +170,7 @@ body.assign-mode .tier-boundary:hover .tier-boundary-line { background-color: va
 /* --- Automated Tier List (Right side) --- */
 #tier-list-container h4 {
     flex-shrink: 0;
-    padding: 0; /* Remove padding from h4 itself */
+    padding: 0;
 }
 #tier-list-container .tier-list-controls { flex-shrink: 0; margin-top: auto; padding-top: 16px; display: flex; gap: 10px; }
 #tier-list-grid {
@@ -179,18 +178,16 @@ body.assign-mode .tier-boundary:hover .tier-boundary-line { background-color: va
     overflow-y: auto;
     display: flex;
     flex-direction: column;
-    --tier-item-size: 64px; /* Default size */
-    padding-right: 8px; /* Space for scrollbar */
+    --tier-item-size: 64px;
+    padding-right: 8px;
 }
 .tier-row { display: flex; min-height: 80px; margin-bottom: 4px; }
 .tier-label { display: flex; align-items: center; justify-content: center; width: 80px; flex-shrink: 0; font-weight: bold; font-size: 1.5rem; cursor: pointer; text-shadow: 0 1px 1px rgba(0,0,0,0.2); text-align: center; white-space: pre-wrap; padding: 4px; }
 .tier-items { background-color: var(--bg-tertiary); border: 1px solid var(--border-color); flex-grow: 1; padding: 8px; display: flex; flex-wrap: wrap; align-content: flex-start; gap: 8px; }
 .tier-item {
-    /* Use a CSS variable for the height. We'll set the default in the parent. */
     height: var(--tier-item-size, 64px); 
-    
     width: auto;
-    max-width: 150px; /* Increased max-width for larger sizes */
+    max-width: 150px;
     object-fit: contain;
 }
 
@@ -212,20 +209,13 @@ body.assign-mode .tier-boundary:hover .tier-boundary-line { background-color: va
 }
 
 /* === EXPORT STYLES === */
-
-/* While exporting, hide scrollbars on the captured element */
-body.is-exporting #tier-list-grid::-webkit-scrollbar {
-    display: none;
-}
-body.is-exporting #tier-list-grid {
-    -ms-overflow-style: none;  /* IE and Edge */
-    scrollbar-width: none;  /* Firefox */
-}
+body.is-exporting #tier-list-grid::-webkit-scrollbar { display: none; }
+body.is-exporting #tier-list-grid { -ms-overflow-style: none; scrollbar-width: none; }
 
 /* === Tier List Size Controls === */
 .tier-list-controls {
     display: flex;
-    flex-wrap: wrap; /* Allow controls to wrap on smaller screens */
+    flex-wrap: wrap;
     gap: 10px;
     align-items: center;
 }
@@ -233,7 +223,7 @@ body.is-exporting #tier-list-grid {
     display: flex;
     align-items: center;
     gap: 4px;
-    margin-left: auto; /* Push to the right */
+    margin-left: auto;
 }
 .size-controls span {
     font-size: 0.9rem;
@@ -254,27 +244,15 @@ body.is-exporting #tier-list-grid {
     justify-content: center;
     line-height: 1;
 }
-.btn-adjust:hover {
-    background-color: var(--bg-tertiary);
-}
-
-/* While exporting, hide scrollbars on the captured element AND its children */
+.btn-adjust:hover { background-color: var(--bg-tertiary); }
 body.is-exporting #tier-list-container::-webkit-scrollbar,
-body.is-exporting #tier-list-grid::-webkit-scrollbar {
-    display: none;
-}
+body.is-exporting #tier-list-grid::-webkit-scrollbar { display: none; }
 body.is-exporting #tier-list-container,
-body.is-exporting #tier-list-grid {
-    -ms-overflow-style: none;  /* IE and Edge */
-    scrollbar-width: none;  /* Firefox */
-}
+body.is-exporting #tier-list-grid { -ms-overflow-style: none; scrollbar-width: none; }
+
 /* --- Editable Title --- */
-#results-list-title {
-    cursor: pointer;
-}
-#results-list-title:hover {
-    background-color: var(--bg-tertiary);
-}
+#results-list-title { cursor: pointer; }
+#results-list-title:hover { background-color: var(--bg-tertiary); }
 .title-edit-input {
     width: 100%;
     font-family: inherit;
@@ -283,5 +261,133 @@ body.is-exporting #tier-list-grid {
     border: 2px solid var(--accent-primary);
     border-radius: var(--radius);
     padding: 4px 8px;
-    margin: -4px -8px; /* Counteract padding to maintain layout */
+    margin: -4px -8px;
+}
+
+/* === SEEDING VIEW STYLES === */
+.seeding-card-container { display: flex; justify-content: center; margin-bottom: 24px; }
+#seeding-card { width: 50%; max-width: 400px; }
+.seed-tier-container { display: flex; justify-content: center; gap: 16px; flex-wrap: wrap; }
+.seed-tier-container .btn { width: auto; flex-grow: 1; max-width: 200px; }
+
+/* LEFT SIDEBAR CONFIG */
+.config-group { margin-top: 8px; font-size: 0.9rem; }
+.config-group label { font-weight: 600; }
+.radio-group { display: flex; align-items: center; gap: 8px; margin-top: 4px; }
+
+/* === DYNAMIC COMPARISON VIEW STYLES (REPLACED) === */
+#comparison-area {
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Center the list horizontally */
+    gap: 24px;
+}
+
+/* --- Pairwise Styles --- */
+.pairwise-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    margin-bottom: 24px;
+    width: 100%;
+}
+
+/* --- Tri-wise Sortable List Styles --- */
+#triwise-ranking-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    width: 100%;
+    max-width: 600px;
+}
+.triwise-rank-item {
+    display: flex;
+    align-items: stretch;
+    gap: 12px;
+    background-color: var(--bg-secondary);
+    border-radius: var(--radius);
+    padding: 8px;
+    border: 1px solid var(--border-color);
+}
+.triwise-rank-label {
+    flex-shrink: 0;
+    width: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #212529; /* Dark text for better contrast on bright colors */
+    text-shadow: 0 1px 1px rgba(255,255,255,0.4);
+    border-radius: 4px;
+    transition: background-color 0.2s ease-in-out;
+}
+
+/* -- New Rank Colors -- */
+.triwise-rank-label.rank-1 { background-color: #ffd700; } /* Gold */
+.triwise-rank-label.rank-2 { background-color: #d1d5db; } /* Silver */
+.triwise-rank-label.rank-3 { background-color: #d97706; } /* Vibrant Bronze/Copper */
+
+.comparison-card-draggable {
+    flex-grow: 1;
+    width: auto;
+    background-color: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    padding: 12px;
+    border-radius: var(--radius);
+    text-align: left;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    cursor: grab;
+    transition: none;
+}
+.triwise-image-wrapper {
+    width: 60px;
+    height: 60px;
+    margin-bottom: 0;
+    flex-shrink: 0;
+    border-radius: var(--radius);
+    overflow: hidden;
+    background-color: var(--bg-tertiary);
+    position: relative; /* For the preview functionality */
+}
+.triwise-image {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+#triwise-ranking-list .card-text {
+    font-size: 1.1rem;
+    word-break: break-word;
+}
+.triwise-rank-item.sortable-ghost {
+    background-color: var(--bg-tertiary);
+    border: 2px dashed var(--accent-primary);
+}
+.triwise-rank-item.sortable-ghost > * {
+    visibility: hidden;
+}
+.triwise-rank-item.sortable-drag {
+    cursor: grabbing !important;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+    transform: scale(1.02);
+    z-index: 10;
+}
+
+/* === NEW: Horizontal Item Layout Overrides === */
+#triwise-ranking-list.layout-horizontal .comparison-card-draggable {
+    flex-direction: column;
+    text-align: center;
+    gap: 12px;
+    padding: 16px;
+}
+
+#triwise-ranking-list.layout-horizontal .triwise-image-wrapper {
+    width: 100%;
+    height: 120px; /* More height for image */
+}
+
+#triwise-ranking-list.layout-horizontal .card-text {
+    width: 100%; /* Ensure text can wrap if needed */
 }

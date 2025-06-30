@@ -3,19 +3,30 @@ export const state = {
     title: 'Tier List', // The title for the generated results view
     editingItemId: null,
     
-    // --- NEW SORTING STATE ---
-    isSorting: false,
-    comparison: {
-        a: null, // Item A
-        b: null, // Item B
-        callback: null, // The function to call with the result
-    },
-    progress: {
-        current: 0,
-        total: 0,
-    },
+    // --- NEW: CONFIGURATION ---
+    comparisonMode: 2, // 2 for pairwise, 3 for tri-wise
 
-    // --- NEW TIER LIST STATE ---
+    // --- SORTING STATE ---
+    isSorting: false,
+    // comparison.items holds the array of items to compare (2 or 3)
+    comparison: { items: [], callback: null },
+    progress: { current: 0, total: 0 },
+    
+    // --- NEW SEEDING STAGE STATE ---
+    isSeeding: false,
+    seedingProgress: { current: 0, total: 0 },
+    seedTiers: [
+        { label: 'Top Tier', value: 5, color: '#ff7f7f' },
+        { label: 'High Tier', value: 4, color: '#ffbf7f' },
+        { label: 'Mid Tier', value: 3, color: '#ffff7f' },
+        { label: 'Low Tier', value: 2, color: '#7fff7f' },
+        { label: 'Bottom Tier', value: 1, color: '#7fbfff' },
+    ],
+    // A mapping of itemId -> seedValue
+    itemSeedValues: {},
+
+
+    // --- TIER LIST STATE ---
     tiers: [
         { id: crypto.randomUUID(), label: 'S', color: '#ff7f7f', textColor: '#000000', threshold: 90 },
         { id: crypto.randomUUID(), label: 'A', color: '#ffbf7f', textColor: '#000000', threshold: 75 },
@@ -23,7 +34,6 @@ export const state = {
         { id: crypto.randomUUID(), label: 'C', color: '#7fff7f', textColor: '#000000', threshold: 45 },
         { id: crypto.randomUUID(), label: 'D', color: '#7fbfff', textColor: '#000000', threshold: 0 },
     ],
-    // This will hold items not yet placed in a tier
     unrankedItemIds: [],
 };
 
@@ -95,4 +105,12 @@ export function updateTierThreshold(tierId, newThreshold) {
         // Re-sort tiers by threshold after update to maintain order
         state.tiers.sort((a, b) => b.threshold - a.threshold);
     }
+}
+
+export function setItemSeedValue(itemId, seedValue) {
+    state.itemSeedValues[itemId] = seedValue;
+}
+
+export function setComparisonMode(mode) {
+    state.comparisonMode = parseInt(mode, 10);
 }

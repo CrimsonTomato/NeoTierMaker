@@ -1,82 +1,149 @@
-// A non-recursive implementation of the 3-way Quicksort algorithm.
+/**
+ * Creates and starts a sorter for a list of items.
+ * @param {Array<object>} items The array of items to sort.
+ * @param {number} mode The comparison mode (2 for pairwise, 3 for tri-wise).
+ * @param {function} onCompare The comparison callback. It receives an array of items and a result callback.
+ * @param {function} onDone The final callback.
+ */
+export function createSorter(items, mode, onCompare, onDone) {
+    const arrCopy = [...items];
 
-// This function will be called by our main controller to get the next comparison.
-export function createSorter(items, onCompare, onDone) {
-    const arr = [...items]; // Work on a copy
-    
-    // Stack for managing sub-arrays [low, high]
-    const stack = [];
-    stack.push(0);
-    stack.push(arr.length - 1);
+    if (mode === 3) {
+        // Use the new, more efficient Ternary Insertion Sort for 3-item comparisons.
+        ternaryInsertionSort(arrCopy, onCompare, onDone)
+            .catch(err => console.error("Error in Ternary Sort:", err));
+    } else {
+        // Use the robust Quicksort for standard pairwise comparisons.
+        pairwiseQuicksort(arrCopy, onCompare, onDone)
+            .catch(err => console.error("Error in Pairwise Sort:", err));
+    }
+}
 
-    let comparisons = 0;
+// --- ALGORITHM 1: Ternary Insertion Sort (for 3-item comparison) ---
 
-    // Main sorting loop
-    function next() {
-        if (stack.length > 0) {
-            const high = stack.pop();
-            const low = stack.pop();
-            
-            partition(low, high);
-        } else {
-            // Sorting is complete
-            onDone(arr);
+async function ternaryInsertionSort(arr, onCompare, onDone) {
+    // Helper to wrap the callback-based onCompare into a promise.
+    function compareAsync(itemsToCompare) {
+        return new Promise(resolve => onCompare(itemsToCompare, resolve));
+    }
+
+    // A recursive ternary search to find the correct insertion index.
+    async function findInsertIndex(sortedPart, itemToInsert, low, high) {
+        if (high < low) {
+            return low;
+        }
+
+        // Base case: for small sub-arrays, do a simple pairwise comparison.
+        if (high - low < 2) {
+            // The result will be an array of the two items, sorted.
+            const result = await compareAsync([itemToInsert, sortedPart[low]]);
+            // If the item to insert is first in the result, it's higher-ranked.
+            // Its correct index is `low`. Otherwise, its index is `low + 1`.
+            return result[0].id === itemToInsert.id ? low : low + 1;
+        }
+
+        const oneThird = low + Math.floor((high - low) / 3);
+        const twoThirds = high - Math.floor((high - low) / 3);
+
+        const pivots = [itemToInsert, sortedPart[oneThird], sortedPart[twoThirds]];
+        const result = await compareAsync(pivots);
+
+        if (result[0].id === itemToInsert.id) { // Item belongs in the first third
+            return await findInsertIndex(sortedPart, itemToInsert, low, oneThird - 1);
+        } else if (result[1].id === itemToInsert.id) { // Item belongs in the middle third
+            return await findInsertIndex(sortedPart, itemToInsert, oneThird, twoThirds - 1);
+        } else { // Item belongs in the last third
+            return await findInsertIndex(sortedPart, itemToInsert, twoThirds, high);
         }
     }
 
-    // Partitioning function
-    function partition(low, high) {
-        if (high <= low) {
-            next(); // This segment is sorted, move to the next
-            return;
+    // Main sort loop
+    for (let i = 1; i < arr.length; i++) {
+        const itemToInsert = arr[i];
+        const sortedPart = arr.slice(0, i);
+        const insertIndex = await findInsertIndex(sortedPart, itemToInsert, 0, i - 1);
+        
+        // Remove item from its current position and insert it at the correct one.
+        arr.splice(i, 1);
+        arr.splice(insertIndex, 0, itemToInsert);
+    }
+
+    onDone(arr);
+}
+
+
+// --- ALGORITHM 2: Pairwise Quicksort (from previous step) ---
+
+async function pairwiseQuicksort(arr, onCompare, onDone) {
+    // Helper to wrap the callback-based onCompare into a promise for async/await.
+    function compareAsync(itemA, itemB) {
+        return new Promise(resolve => onCompare([itemA, itemB], resolve));
+    }
+
+    // Main recursive function for Quicksort
+    async function quickSort(arr, low, high) {
+        if (low >= high) {
+            return; // Base case: the partition has 0 or 1 elements.
         }
 
-        // Choose a pivot (we'll use the last element)
-        const pivotIndex = high;
-        const pivot = arr[pivotIndex];
+        // --- 1. PIVOT SELECTION (Median-of-Three) ---
+        // FIX: The Median-of-Three logic is only safe for partitions of 3 or more items.
+        // For smaller partitions, we use a simpler (and safe) pivot selection.
+        let pivotIndex;
+        if (high - low + 1 < 3) {
+            pivotIndex = high; // Just use the last element as the pivot.
+        } else {
+            // This logic is now only run on partitions where low, mid, and high are distinct.
+            const mid = low + Math.floor((high - low) / 2);
+
+            const low_vs_mid = await compareAsync(arr[low], arr[mid]);
+            const mid_vs_high = await compareAsync(arr[mid], arr[high]);
+            const low_vs_high = await compareAsync(arr[low], arr[high]);
+    
+            if (low_vs_mid >= 0) {
+                if (mid_vs_high >= 0) { pivotIndex = mid; } 
+                else if (low_vs_high >= 0) { pivotIndex = high; } 
+                else { pivotIndex = low; }
+            } else {
+                if (mid_vs_high <= 0) { pivotIndex = mid; } 
+                else if (low_vs_high >= 0) { pivotIndex = low; } 
+                else { pivotIndex = high; }
+            }
+        }
         
-        let i = low; // Pointer for elements less than pivot
-        let j = high - 1; // Pointer for elements greater than pivot
-        let p = low; // Current element being compared
+        // Place the chosen pivot at the end of the partition for convenience.
+        [arr[pivotIndex], arr[high]] = [arr[high], arr[pivotIndex]];
+        const pivot = arr[high];
 
-        // Ask the user to compare the pivot with the first element
-        onCompare(pivot, arr[p], (result) => processComparison(result, p));
+        // --- 2. PARTITIONING (3-Way Dutch National Flag) ---
+        let i = low;
+        let lt = low;
+        let gt = high - 1;
 
-        function processComparison(result, currentIndex) {
-            comparisons++;
-            // result: 1 (A > B), -1 (A < B), 0 (A == B)
-            // Here, A is the pivot.
-            
-            if (result === 1) { // pivot > arr[currentIndex]
-                [arr[i], arr[currentIndex]] = [arr[currentIndex], arr[i]]; // Swap
+        while (i <= gt) {
+            const comparisonResult = await compareAsync(arr[i], pivot);
+
+            if (comparisonResult > 0) { // arr[i] > pivot
+                [arr[i], arr[lt]] = [arr[lt], arr[i]];
+                i++;
+                lt++;
+            } else if (comparisonResult < 0) { // arr[i] < pivot
+                [arr[i], arr[gt]] = [arr[gt], arr[i]];
+                gt--;
+            } else { // arr[i] == pivot
                 i++;
             }
-            // If pivot < arr[currentIndex], we do nothing, it's already in the right place conceptually.
-            // If pivot == arr[currentIndex], we also do nothing for now.
-            
-            // Move to the next element to compare
-            let nextIndex = currentIndex + 1;
-            if (nextIndex <= j) {
-                // More elements to compare in this partition
-                onCompare(pivot, arr[nextIndex], (res) => processComparison(res, nextIndex));
-            } else {
-                // End of this partition. Place the pivot in its final sorted position.
-                [arr[i], arr[pivotIndex]] = [arr[pivotIndex], arr[i]]; // Swap pivot into place
-
-                // Push new sub-arrays to the stack
-                // Left side of the pivot
-                stack.push(low);
-                stack.push(i - 1);
-                // Right side of the pivot
-                stack.push(i + 1);
-                stack.push(high);
-                
-                // Move to the next partition from the stack
-                next();
-            }
         }
+
+        // The pivot was at 'high'; now we move it to its correct spot.
+        [arr[high], arr[gt + 1]] = [arr[gt + 1], arr[high]];
+
+        // --- 3. RECURSIVE CALLS ---
+        await quickSort(arr, low, lt - 1);
+        await quickSort(arr, gt + 2, high);
     }
 
-    // Start the first step
-    next();
+    // --- Main execution ---
+    await quickSort(arr, 0, arr.length - 1);
+    onDone(arr);
 }
