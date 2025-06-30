@@ -1,20 +1,26 @@
 import { defineConfig } from 'vite';
 
-export default defineConfig({
-  // 1. Set the project root to the 'tierranker' subdirectory
-  // Vite will now look for index.html in /tierranker/index.html
-  root: 'tierranker',
+// We use a function form of defineConfig to get access to the 'command' variable.
+// 'command' will be 'serve' for the dev server (npm run dev)
+// 'command' will be 'build' for production builds (npm run build)
+export default defineConfig(({ command }) => {
+  const isProduction = command === 'build';
 
-  // 2. Set the base URL for the deployed site.
-  // This MUST match the final URL structure: /<repo-name>/<subdirectory>/
-  base: '/NeoTierMaker/tierranker/',
+  return {
+    // Tell Vite that the root of our app is inside the 'tierranker' folder
+    root: 'tierranker',
 
-  build: {
-    // 3. Set the output directory to be 'dist' at the repository's root.
-    // The path is relative to the `root` option, so '../dist' places it
-    // one level up from 'tierranker', which is the repo root.
-    outDir: '../dist',
-    // Optional: Empty the output directory before building
-    emptyOutDir: true,
-  }
+    // This is the key:
+    // - For production builds, use the full GitHub Pages path.
+    // - For local development, use a simple root path '/'.
+    base: isProduction ? '/NeoTierMaker/tierranker/' : '/',
+
+    build: {
+      // Place the build output in a 'dist' folder at the project's root.
+      // The path is relative to the `root` option, so '../dist' goes up
+      // one level from 'tierranker'.
+      outDir: '../dist',
+      emptyOutDir: true,
+    }
+  };
 });
