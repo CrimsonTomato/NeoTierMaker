@@ -1,7 +1,8 @@
 import { state } from './state.js';
+import * as dom from './dom.js';
 
-const stagingListEl = document.getElementById('staging-list');
-const itemCountEl = document.getElementById('item-count');
+let previewTimeoutId = null;
+let isDragging = false;
 
 function createStagingItemElement(item) {
     const isEditing = state.editingItemId === item.id;
@@ -13,30 +14,24 @@ function createStagingItemElement(item) {
         itemDiv.draggable = true;
     }
 
-    // Apply colors to the main container
     if (item.color) {
         itemDiv.style.backgroundColor = item.color.background;
         itemDiv.style.color = item.color.text;
     }
 
-    // Add classes for view-specific styling
     if (item.image) {
         itemDiv.classList.add('has-image');
     } else {
         itemDiv.classList.add('text-only');
     }
     
-    // --- SMART TOOLTIP ASSIGNMENT ---
-    // For Grid view, the whole card gets a tooltip (useful for image-only items)
-    if (stagingListEl.classList.contains('view-grid')) {
+    if (dom.stagingListEl.classList.contains('view-grid')) {
         itemDiv.title = item.text;
     }
 
-    // --- Create a wrapper for the thumbnail and its preview ---
     const thumbnailWrapper = document.createElement('div');
     thumbnailWrapper.className = 'staging-item-thumbnail-wrapper';
 
-    // --- Create the visible thumbnail (image or text placeholder) ---
     let imageEl;
     if (item.image) {
         imageEl = document.createElement('img');
@@ -52,7 +47,6 @@ function createStagingItemElement(item) {
     
     thumbnailWrapper.appendChild(imageEl);
     
-    // --- Create the text or input element ---
     let textEl;
     if (isEditing) {
         textEl = document.createElement('input');
@@ -64,14 +58,11 @@ function createStagingItemElement(item) {
         textEl = document.createElement('span');
         textEl.className = 'staging-item-text';
         textEl.textContent = item.text;
-        // --- SMART TOOLTIP ASSIGNMENT ---
-        // For List view, only the text element gets a tooltip
-        if (stagingListEl.classList.contains('view-list')) {
+        if (dom.stagingListEl.classList.contains('view-list')) {
             textEl.title = item.text;
         }
     }
     
-    // --- Create the actions element ---
     const actionsDiv = document.createElement('div');
     actionsDiv.className = 'staging-item-actions';
     if (isEditing) {
@@ -91,19 +82,49 @@ function createStagingItemElement(item) {
 }
 
 export function renderStagingList() {
-    stagingListEl.innerHTML = ''; // Clear the list
+    dom.stagingListEl.innerHTML = '';
+    const itemCountEl = document.getElementById('item-count');
 
     if (state.items.length === 0) {
-        stagingListEl.innerHTML = `<p>No items yet.</p>`;
+        dom.stagingListEl.innerHTML = `<p>No items yet.</p>`;
     } else {
-        // --- SIMPLIFIED RENDER LOOP ---
-        // This loop is now "dumb". It just creates and appends.
-        // All styling logic is self-contained in createStagingItemElement.
         for (const item of state.items) {
             const itemEl = createStagingItemElement(item);
-            stagingListEl.appendChild(itemEl);
+            dom.stagingListEl.appendChild(itemEl);
         }
     }
 
     itemCountEl.textContent = state.items.length;
+}
+
+// --- Preview Logic ---
+
+export function setDragging(status) {
+    isDragging = status;
+    if(status) hidePreview();
+}
+
+export function hidePreview() {
+    if (previewTimeoutId) clearTimeout(previewTimeoutId);
+    dom.globalPreviewEl.classList.remove('visible');
+}
+
+export function showPreview(e, wrapperSelector) {
+    if (isDragging) return;
+    const wrapper = e.target.closest(wrapperSelector);
+    const imgEl = wrapper?.querySelector('img[src]'); 
+    if (imgEl) {
+        const hoverDelay = 500;
+        previewTimeoutId = setTimeout(() => {
+            dom.globalPreviewEl.style.backgroundImage = `url(${imgEl.src})`;
+            const rect = wrapper.getBoundingClientRect();
+            const previewHeight = 200;
+            const gap = 12;
+            let top = (rect.top > previewHeight + gap) ? rect.top - previewHeight - gap : rect.bottom + gap;
+            const left = rect.left + rect.width / 2 - 100;
+            dom.globalPreviewEl.style.top = `${top}px`;
+            dom.globalPreviewEl.style.left = `${left}px`;
+            dom.globalPreviewEl.classList.add('visible');
+        }, hoverDelay);
+    }
 }

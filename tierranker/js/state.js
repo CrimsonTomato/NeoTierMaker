@@ -50,7 +50,9 @@ export function removeItem(id) {
 }
 
 export function updateItemText(id, newText) {
-    const item = state.items.find(item => item.id === id); // FIX: Was item.id === item.id
+    // FIX: The original code was `item.id === item.id`, which is always true.
+    // It should compare the passed `id` with the item's `id`.
+    const item = state.items.find(item => item.id === id); 
     if (item) {
         item.text = newText;
     }

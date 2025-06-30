@@ -1,0 +1,323 @@
+import * as dom from './dom.js';
+import { state, clearItems, removeItem, setEditingItemId, updateItemText, updateTierLabel, updateTitle, setComparisonMode } from './state.js';
+import { handleTextInput, handleFileInput } from './inputController.js';
+import { renderStagingList, showPreview, hidePreview, setDragging } from './ui.js';
+import { startSort, handleSeedButtonClick } from './sortController.js';
+import { renderResultsView, handleTierTagClick, handleRankedListClick, handleAddTier, handleRemoveLastTier, updateTierColor, setEditingTierIdForColor, editingTierIdForColor, handleSizeIncrease, handleSizeDecrease } from './resultsController.js';
+import { exportElementAsImage, copyElementAsImage } from './export.js';
+import { exportSessionToFile, importSessionFromFile } from './fileSession.js';
+import { showView } from './view.js';
+import Sortable from 'sortablejs';
+
+export function initializeEventListeners() {
+    // --- Input View Events ---
+    dom.addFromTextBtn.addEventListener('click', async () => {
+        await handleTextInput(dom.textInputArea.value);
+        dom.textInputArea.value = "";
+    });
+
+    dom.clearStagingBtn.addEventListener('click', () => {
+        if (state.items.length > 0 && confirm("Are you sure you want to clear all items?")) {
+            clearItems();
+            renderStagingList();
+        }
+    });
+
+    dom.uploadImagesBtn.addEventListener('click', () => dom.imageInput.click());
+    dom.imageInput.addEventListener('change', async (e) => {
+        if (e.target.files.length > 0) {
+            await handleFileInput(e.target.files);
+        }
+        e.target.value = null; // Reset for next selection
+    });
+
+    dom.imageDropZone.addEventListener('dragenter', (e) => { e.preventDefault(); dom.imageDropZone.classList.add('drag-over'); });
+    dom.imageDropZone.addEventListener('dragover', (e) => { e.preventDefault(); dom.imageDropZone.classList.add('drag-over'); });
+    dom.imageDropZone.addEventListener('dragleave', (e) => { e.preventDefault(); dom.imageDropZone.classList.remove('drag-over'); });
+    dom.imageDropZone.addEventListener('drop', async (e) => {
+        e.preventDefault();
+        dom.imageDropZone.classList.remove('drag-over');
+        if (e.dataTransfer.files.length > 0) {
+            await handleFileInput(e.dataTransfer.files);
+        }
+    });
+
+    dom.startSortBtn.addEventListener('click', startSort);
+
+    // --- Staging List Events ---
+    dom.stagingListEl.addEventListener('click', (e) => {
+        const action = e.target.dataset.action;
+        if (!action) return;
+        const itemId = e.target.closest('.staging-item')?.dataset.id;
+        if (!itemId) return;
+
+        if (action === 'delete') {
+            if (confirm(`Are you sure you want to delete "${state.items.find(i => i.id === itemId).text}"?`)) {
+                removeItem(itemId);
+                renderStagingList();
+            }
+        } else if (action === 'edit') {
+            setEditingItemId(itemId);
+            renderStagingList();
+        } else if (action === 'save') {
+            const inputEl = e.target.closest('.staging-item').querySelector('.staging-item-edit-input');
+            updateItemText(itemId, inputEl.value.trim());
+            setEditingItemId(null);
+            renderStagingList();
+        } else if (action === 'cancel') {
+            setEditingItemId(null);
+            renderStagingList();
+        }
+    });
+    
+    dom.stagingListEl.addEventListener('dragstart', () => setDragging(true));
+    dom.stagingListEl.addEventListener('dragend', () => setDragging(false));
+    dom.stagingListEl.addEventListener('mouseover', (e) => showPreview(e, '.staging-item-thumbnail-wrapper'));
+    dom.stagingListEl.addEventListener('mouseout', () => hidePreview());
+
+    new Sortable(dom.stagingListEl, {
+        animation: 150,
+        ghostClass: 'sortable-ghost',
+        dragClass: 'sortable-drag',
+        onEnd: function (evt) {
+            const { oldIndex, newIndex } = evt;
+            const itemsCopy = [...state.items];
+            const [draggedItem] = itemsCopy.splice(oldIndex, 1);
+            itemsCopy.splice(newIndex, 0, draggedItem);
+            state.items = itemsCopy;
+        },
+    });
+
+    // --- Staging View Toggles ---
+    dom.viewListBtn.addEventListener('click', () => {
+        dom.stagingListEl.classList.remove('view-grid');
+        dom.stagingListEl.classList.add('view-list');
+        dom.viewListBtn.classList.add('active');
+        dom.viewGridBtn.classList.remove('active');
+        renderStagingList();
+    });
+
+    dom.viewGridBtn.addEventListener('click', () => {
+        dom.stagingListEl.classList.remove('view-list');
+        dom.stagingListEl.classList.add('view-grid');
+        dom.viewGridBtn.classList.add('active');
+        dom.viewListBtn.classList.remove('active');
+        renderStagingList();
+    });
+    
+    // --- Config and Seeding Events ---
+    dom.comparisonModeRadios.forEach(radio => {
+        radio.addEventListener('change', (e) => setComparisonMode(e.target.value));
+    });
+
+    dom.seedTierButtonsEl.addEventListener('click', (e) => {
+        const value = e.target.closest('[data-value]')?.dataset.value;
+        handleSeedButtonClick(value);
+    });
+
+    // --- Tri-wise Layout Controls ---
+    dom.btnTriLayoutVertical.addEventListener('click', () => {
+        const list = document.getElementById('triwise-ranking-list');
+        if (list) {
+            list.classList.remove('layout-horizontal');
+            dom.btnTriLayoutVertical.classList.add('active');
+            dom.btnTriLayoutHorizontal.classList.remove('active');
+        }
+    });
+    dom.btnTriLayoutHorizontal.addEventListener('click', () => {
+        const list = document.getElementById('triwise-ranking-list');
+        if (list) {
+            list.classList.add('layout-horizontal');
+            dom.btnTriLayoutHorizontal.classList.add('active');
+            dom.btnTriLayoutVertical.classList.remove('active');
+        }
+    });
+
+    // --- Results View Events ---
+    dom.tierTagContainer.addEventListener('click', (e) => {
+        const tierId = e.target.closest('.tier-tag')?.dataset.tierId;
+        handleTierTagClick(tierId);
+    });
+
+    dom.rankedListWrapper.addEventListener('click', handleRankedListClick);
+
+    dom.btnAddTier.addEventListener('click', handleAddTier);
+    dom.btnRemoveTier.addEventListener('click', handleRemoveLastTier);
+    
+    dom.btnRestart.addEventListener('click', () => {
+        if (confirm("Are you sure you want to start over? This will clear all items and reset the page.")) {
+            window.location.reload();
+        }
+    });
+
+    dom.tierListGridEl.addEventListener('click', (e) => {
+        const tierLabel = e.target.closest('.tier-label');
+        if (!tierLabel || tierLabel.querySelector('textarea')) return;
+        setEditingTierIdForColor(tierLabel.dataset.tierId);
+        dom.tierColorInput.click();
+    });
+
+    dom.tierListGridEl.addEventListener('contextmenu', (e) => {
+        e.preventDefault();
+        const tierLabel = e.target.closest('.tier-label');
+        if (!tierLabel || tierLabel.querySelector('textarea')) return;
+    
+        const tierId = tierLabel.dataset.tierId;
+        const originalText = state.tiers.find(t => t.id === tierId).label;
+    
+        const editInput = document.createElement('textarea');
+        editInput.className = 'tier-label-edit';
+        editInput.value = originalText;
+    
+        const saveChanges = () => {
+            const newLabel = editInput.value.trim();
+            if(newLabel) updateTierLabel(tierId, newLabel);
+            renderResultsView();
+        };
+    
+        editInput.addEventListener('blur', saveChanges);
+        editInput.addEventListener('keydown', (evt) => {
+            if (evt.key === 'Enter' && !evt.shiftKey) { evt.preventDefault(); saveChanges(); } 
+            else if (evt.key === 'Escape') { renderResultsView(); }
+        });
+    
+        tierLabel.innerHTML = '';
+        tierLabel.appendChild(editInput);
+        editInput.focus();
+        editInput.select();
+    });
+
+    // --- FIX: The corrected event listener ---
+    dom.tierColorInput.addEventListener('input', (e) => {
+        // `editingTierIdForColor` is a live binding to the variable in resultsController.
+        // No async/await or dynamic import is needed.
+        if (editingTierIdForColor) {
+            updateTierColor(editingTierIdForColor, e.target.value);
+        }
+    });
+    
+    dom.resultsListTitle.addEventListener('click', () => {
+        if (dom.resultsListTitle.querySelector('input')) return;
+    
+        const originalTitle = state.title;
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.className = 'title-edit-input';
+        input.value = originalTitle;
+    
+        const saveChanges = () => {
+            const newTitle = input.value.trim();
+            updateTitle(newTitle || "Tier List");
+            renderResultsView();
+        };
+    
+        input.addEventListener('blur', saveChanges);
+        input.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') { e.preventDefault(); saveChanges(); } 
+            else if (e.key === 'Escape') { e.preventDefault(); renderResultsView(); }
+        });
+    
+        dom.resultsListTitle.innerHTML = '';
+        dom.resultsListTitle.appendChild(input);
+        input.focus();
+        input.select();
+    });
+    
+    // --- Export and Session Events ---
+    dom.btnSizeIncrease.addEventListener('click', handleSizeIncrease);
+    dom.btnSizeDecrease.addEventListener('click', handleSizeDecrease);
+
+    const setupExportButton = (button, handler, elementId, fileName) => {
+        button.addEventListener('click', async () => {
+            const elementToCapture = document.getElementById(elementId);
+            const originalText = button.textContent;
+            button.textContent = 'Generating...';
+            button.disabled = true;
+            document.body.classList.add('is-exporting');
+
+            setTimeout(async () => {
+                try {
+                    await handler(elementToCapture, fileName);
+                } finally {
+                    document.body.classList.remove('is-exporting');
+                    button.textContent = originalText;
+                    button.disabled = false;
+                }
+            }, 100);
+        });
+    };
+    
+    dom.btnCopyImage.addEventListener('click', async () => {
+        const elementToCapture = document.getElementById('tier-list-export-area');
+        const originalButtonText = dom.btnCopyImage.textContent;
+        dom.btnCopyImage.textContent = 'Copying...';
+        dom.btnCopyImage.disabled = true;
+        document.body.classList.add('is-exporting');
+
+        setTimeout(async () => {
+            try {
+                const success = await copyElementAsImage(elementToCapture);
+                if (success) {
+                    dom.btnCopyImage.textContent = 'Copied!';
+                    setTimeout(() => dom.btnCopyImage.textContent = originalButtonText, 2000);
+                } else {
+                    dom.btnCopyImage.textContent = originalButtonText;
+                }
+            } finally {
+                document.body.classList.remove('is-exporting');
+                dom.btnCopyImage.disabled = false;
+            }
+        }, 100);
+    });
+
+    setupExportButton(dom.btnExportImage, exportElementAsImage, 'tier-list-export-area', 'my-tier-list.png');
+
+    dom.btnExportSession.addEventListener('click', async () => {
+        if (state.items.length === 0) { alert("There is nothing to export."); return; }
+        const originalText = dom.btnExportSession.textContent;
+        dom.btnExportSession.textContent = "Exporting...";
+        dom.btnExportSession.disabled = true;
+        try {
+            await exportSessionToFile();
+        } catch (error) {
+            console.error("Export failed:", error);
+            alert("An error occurred during export.");
+        } finally {
+            dom.btnExportSession.textContent = originalText;
+            dom.btnExportSession.disabled = false;
+        }
+    });
+    
+    dom.btnImportSession.addEventListener('click', () => dom.sessionFileInput.click());
+
+    dom.sessionFileInput.addEventListener('change', async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        if (!confirm("Importing a session file will overwrite your current progress. Are you sure?")) {
+            e.target.value = null; return;
+        }
+        try {
+            const loadedState = await importSessionFromFile(file);
+            Object.assign(state, {
+                items: loadedState.items || [],
+                tiers: loadedState.tiers || [],
+                title: loadedState.title || 'Tier List',
+                editingItemId: null,
+                isSorting: false,
+            });
+            alert("Session imported successfully!");
+            if (state.items.length > 0 && state.items.some(item => item.score !== undefined)) {
+                showView(dom.viewResults);
+                renderResultsView();
+            } else {
+                showView(dom.viewInput);
+                renderStagingList();
+            }
+        } catch (error) {
+            console.error("Failed to import session:", error);
+            alert(`Error importing session: ${error.message}`);
+        } finally {
+            e.target.value = null;
+        }
+    });
+}
