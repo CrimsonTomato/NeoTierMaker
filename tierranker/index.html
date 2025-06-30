@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TierRanker</title>
+  <link rel="stylesheet" href="/style.css" />
+</head>
+
+<body>
+  <div id="root-container">
+    <div class="app-container" id="app-container">
+      <!-- LEFT SIDEBAR -->
+      <aside class="sidebar-left">
+        <h1>TierRanker</h1>
+        <hr>
+        <h4>Session</h4>
+        <button id="btn-export-session" class="btn btn-secondary">Export to File</button>
+        <button id="btn-import-session" class="btn btn-secondary">Import from File</button>
+      </aside>
+
+      <!-- CENTER STAGE -->
+      <main class="center-stage">
+        <div id="view-input" class="view active">
+          <div class="input-methods">
+            <div class="input-group">
+              <h4>Text Input</h4>
+              <div class="paste-area"><textarea id="text-input-area" placeholder="Item 1
+Item 2, Item 3"></textarea></div>
+              <div class="input-actions">
+                <button id="btn-add-from-text" class="btn btn-primary" style="flex-grow: 1;">Add to Staging</button>
+                <button id="btn-clear-staging" class="btn btn-secondary">Clear All</button>
+              </div>
+            </div>
+            <div class="input-group" id="image-drop-zone">
+              <h4>Image Input</h4>
+              <input type="file" id="image-input" multiple accept="image/*" hidden>
+              <button id="btn-upload-images" class="btn btn-secondary">Upload Images</button>
+              <p style="margin-top: 10px;">...or drag and drop images here.</p>
+            </div>
+          </div>
+          <button id="btn-start-sort" class="btn btn-primary" style="margin-top: 24px;">Start Sorting</button>
+        </div>
+
+        <div id="view-comparison" class="view">
+          <div class="comparison-header">
+            <h2>Which do you rank higher?</h2>
+            <div class="progress-container">
+              <p id="progress-text">Comparison 1 of ~50</p>
+              <div class="progress-bar">
+                <div id="progress-bar-inner" class="progress-bar-inner"></div>
+              </div>
+            </div>
+          </div>
+          <div class="comparison-container">
+            <div id="choice-a" class="comparison-card" data-choice="a">
+              <div class="card-image-container"><img src="" alt="Item A"></div>
+              <h3 class="card-text">Item A</h3>
+            </div>
+            <div id="choice-b" class="comparison-card" data-choice="b">
+              <div class="card-image-container"><img src="" alt="Item B"></div>
+              <h3 class="card-text">Item B</h3>
+            </div>
+          </div>
+          <div class="tie-button-container"><button id="choice-tie" class="btn btn-secondary" data-choice="tie">It's a
+              Tie</button></div>
+        </div>
+
+        <div id="view-results" class="view">
+          <div class="results-header">
+            <h2>Results & Tier Assignment</h2>
+            <div class="results-actions">
+              <button id="btn-copy-image" class="btn btn-secondary">Copy Image</button>
+              <button id="btn-export-image" class="btn btn-secondary">Export as Image</button>
+              <button id="btn-restart" class="btn btn-primary">Start Over</button>
+            </div>
+          </div>
+          <div class="results-container">
+            <div class="results-column" id="ranked-list-container">
+              <div class="tier-tag-palette">
+                <h4>Click a tier, then click a boundary line to assign it:</h4>
+                <div id="tier-tag-container"></div>
+              </div>
+              <div id="ranked-list-wrapper"></div>
+            </div>
+            <div class="results-column" id="tier-list-container">
+              <!-- === NEW: This is our dedicated export target === -->
+              <div id="tier-list-export-area">
+                <h4>Generated Tier List</h4>
+                <div id="tier-list-grid">
+                  <!-- JS populates the generated tier list -->
+                </div>
+              </div>
+
+              <div class="tier-list-controls">
+                <button id="btn-add-tier" class="btn btn-secondary">Add Tier</button>
+                <button id="btn-remove-tier" class="btn btn-secondary">Remove Last Tier</button>
+                <div class="size-controls">
+                  <span>Item Size:</span>
+                  <button id="btn-size-decrease" class="btn-adjust">-</button>
+                  <button id="btn-size-increase" class="btn-adjust">+</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+
+      <!-- RIGHT SIDEBAR -->
+      <aside class="sidebar-right">
+        <div id="panel-staging" class="panel active">
+          <div class="panel-header">
+            <h3>Items in Staging (<span id="item-count">0</span>)</h3>
+            <div class="view-controls">
+              <button id="view-list-btn" class="view-btn active" title="List View"><svg viewBox="0 0 24 24">
+                  <path
+                    d="M3,5A2,2 0 0,1 5,3H19A2,2 0 0,1 21,5V19A2,2 0 0,1 19,21H5A2,2 0 0,1 3,19V5M5,5V7H19V5H5M5,9V11H19V9H5M5,13V15H19V13H5M5,17V19H19V17H5Z" />
+                </svg></button>
+              <button id="view-grid-btn" class="view-btn" title="Grid View"><svg viewBox="0 0 24 24">
+                  <path d="M3,11H11V3H3M3,21H11V13H3M13,21H21V13H13M13,3V11H21V3" />
+                </svg></button>
+            </div>
+          </div>
+          <p>Prepare your items before sorting.</p>
+          <br />
+          <div id="staging-list" class="view-list"></div>
+        </div>
+      </aside>
+    </div>
+  </div>
+  <input type="color" id="tier-color-input" hidden />
+  <script type="module" src="/js/main.js"></script>
+  <div id="global-image-preview" class="image-preview-tooltip"></div>
+</body>
+
+</html>
