@@ -13,7 +13,7 @@ export default defineConfig(({ command }) => {
     // This is the key:
     // - For production builds, use the full GitHub Pages path.
     // - For local development, use a simple root path '/'.
-    base: isProduction ? '/NeoTierMaker/tierranker/' : '/',
+    base: isProduction ? '/NeoTierMaker/' : '/',
 
     build: {
       // Place the build output in a 'dist' folder at the project's root.
