@@ -87,7 +87,7 @@ Item 2, Item 3"></textarea></div>
             <div class="results-column" id="tier-list-container">
               <!-- === NEW: This is our dedicated export target === -->
               <div id="tier-list-export-area">
-                <h4>Generated Tier List</h4>
+                <h4 id="results-list-title">Generated Tier List</h4>
                 <div id="tier-list-grid">
                   <!-- JS populates the generated tier list -->
                 </div>
@@ -130,6 +130,7 @@ Item 2, Item 3"></textarea></div>
     </div>
   </div>
   <input type="color" id="tier-color-input" hidden />
+  <input type="file" id="session-file-input" hidden accept=".zip" />
   <script type="module" src="js/main.js"></script>
   <div id="global-image-preview" class="image-preview-tooltip"></div>
 </body>

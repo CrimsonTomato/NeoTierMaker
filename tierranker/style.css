@@ -268,3 +268,20 @@ body.is-exporting #tier-list-grid {
     -ms-overflow-style: none;  /* IE and Edge */
     scrollbar-width: none;  /* Firefox */
 }
+/* --- Editable Title --- */
+#results-list-title {
+    cursor: pointer;
+}
+#results-list-title:hover {
+    background-color: var(--bg-tertiary);
+}
+.title-edit-input {
+    width: 100%;
+    font-family: inherit;
+    font-size: inherit;
+    font-weight: inherit;
+    border: 2px solid var(--accent-primary);
+    border-radius: var(--radius);
+    padding: 4px 8px;
+    margin: -4px -8px; /* Counteract padding to maintain layout */
+}

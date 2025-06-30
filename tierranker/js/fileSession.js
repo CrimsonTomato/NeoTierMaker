@@ -1,5 +1,3 @@
-// Create new file: js/fileSession.js
-
 import JSZip from 'jszip';
 import { state } from './state.js';
 
@@ -30,19 +28,45 @@ export async function exportSessionToFile() {
     // Create a deep copy of the state to modify without affecting the live app
     const stateToSave = JSON.parse(JSON.stringify(state));
     
+    // --- FIX: Clear transient sorting state before saving. ---
+    // If a sort was in progress, we don't save its state. The user can restart 
+    // the sort after loading. This prevents saving large base64 strings from 
+    // the comparison object into the session file.
+    stateToSave.isSorting = false;
+    stateToSave.comparison = { a: null, b: null, callback: null };
+    stateToSave.progress = { current: 0, total: 0 };
+
+
     // Process items: extract images, replace data URL with a path
     for (const item of stateToSave.items) {
-        if (item.image) {
+        // Case 1: Item has an image that was loaded from a previous session.
+        // We reuse its original path to avoid creating duplicate files.
+        if (item.originalImagePath) {
+            // The image data is the current base64 string in `item.image`
+            const imageBlob = dataURLtoBlob(item.image);
+            const fileName = item.originalImagePath.replace('images/', '');
+            imagesFolder.file(fileName, imageBlob);
+
+            // For the JSON file, we restore the original path reference.
+            item.image = item.originalImagePath;
+
+        } 
+        // Case 2: Item has a NEW image (a data URL without an original path).
+        // This happens for images added during the current session.
+        else if (item.image && item.image.startsWith('data:image/')) {
             const fileExtension = item.image.startsWith('data:image/jpeg') ? 'jpg' : 'png';
             const fileName = `${item.id}.${fileExtension}`;
+            const imagePath = `images/${fileName}`;
             
-            // Add the image blob to the zip
             const imageBlob = dataURLtoBlob(item.image);
             imagesFolder.file(fileName, imageBlob);
             
-            // Replace the huge data URL with a simple path
-            item.image = `images/${fileName}`;
+            // Replace the huge data URL with a simple path reference.
+            item.image = imagePath;
         }
+
+        // Clean up the temporary property before serializing to JSON.
+        delete item.originalImagePath;
     }
 
     // Add the modified state as session.json
@@ -85,13 +109,20 @@ export async function importSessionFromFile(file) {
     // Re-hydrate images: load them from the zip and convert back to data URLs
     const imagePromises = loadedState.items.map(async (item) => {
         if (item.image && item.image.startsWith('images/')) {
-            const imageFile = contents.file(item.image);
+            const originalPath = item.image; // Keep track of the source path
+            const imageFile = contents.file(originalPath);
+
             if (imageFile) {
                 const base64 = await imageFile.async('base64');
-                const mimeType = item.image.endsWith('jpg') ? 'image/jpeg' : 'image/png';
+                const mimeType = originalPath.endsWith('jpg') || originalPath.endsWith('jpeg') ? 'image/jpeg' : 'image/png';
+                
+                // Set the displayable image to the rehydrated base64 data URL
                 item.image = `data:${mimeType};base64,${base64}`;
+                
+                // Store the original path on the item for the next save operation.
+                item.originalImagePath = originalPath;
             } else {
-                console.warn(`Image not found in zip: ${item.image}`);
+                console.warn(`Image not found in zip: ${originalPath}`);
                 item.image = null; // Image is missing, clear it
             }
         }

@@ -1,6 +1,6 @@
 import '../style.css';
 import { handleTextInput, handleFileInput } from './inputController.js';
-import { state, clearItems, removeItem, setEditingItemId, updateItemText, addTier, removeLastTier, updateTierLabel, updateTierThreshold } from './state.js';
+import { state, clearItems, removeItem, setEditingItemId, updateItemText, addTier, removeLastTier, updateTierLabel, updateTierThreshold, updateTitle } from './state.js';
 import { renderStagingList } from './ui.js';
 import { createSorter } from './sorter.js';
 import Sortable from 'sortablejs';
@@ -25,7 +25,7 @@ const globalPreviewEl = document.getElementById('global-image-preview');
 const viewComparison = document.getElementById('view-comparison');
 const choiceAEl = document.getElementById('choice-a');
 const choiceBEl = document.getElementById('choice-b');
-const choiceTieEl = document.getElementById('choice-tie');
+// const choiceTieEl = document.getElementById('choice-tie');
 const progressTextEl = document.getElementById('progress-text');
 const progressBarInnerEl = document.getElementById('progress-bar-inner');
 const viewResults = document.getElementById('view-results');
@@ -43,6 +43,7 @@ const btnCopyImage = document.getElementById('btn-copy-image');
 const btnExportSession = document.getElementById('btn-export-session'); // New
 const btnImportSession = document.getElementById('btn-import-session'); // New
 const sessionFileInput = document.getElementById('session-file-input'); // New
+const resultsListTitle = document.getElementById('results-list-title');
 
 // --- CONSTANTS ---
 const SESSION_KEY = 'tierRankerSession';
@@ -219,6 +220,9 @@ function updateTierColor(tierId, newHexColor) {
 }
 
 function renderResultsView() {
+    // --- FIX: Set the title from the state ---
+    resultsListTitle.textContent = state.title;
+
     // Render tier selection palette
     tierTagContainer.innerHTML = '';
     state.tiers.forEach(tier => {
@@ -555,9 +559,10 @@ sessionFileInput.addEventListener('change', async (e) => {
     try {
         const loadedState = await importSessionFromFile(file);
         
-        // Restore the loaded state into our main state object
+        // --- FIX: Restore the full persistent state from the file ---
         state.items = loadedState.items || [];
         state.tiers = loadedState.tiers || [];
+        state.title = loadedState.title || 'Tier List'; // Restore the title
         
         // Reset any transient state
         state.editingItemId = null;
@@ -567,8 +572,9 @@ sessionFileInput.addEventListener('change', async (e) => {
         
         // Determine which view to show based on loaded data
         if (state.items.length > 0) {
-            if (state.items[0].score !== undefined) {
-                assignItemsToTiers();
+            // Check if the data indicates a completed sort
+            if (state.items.some(item => item.score !== undefined)) {
+                // assignItemsToTiers(); // This might not be needed if tiers already have itemIds
                 showView(viewResults);
                 renderResultsView();
             } else {
@@ -588,4 +594,38 @@ sessionFileInput.addEventListener('change', async (e) => {
         // Clear the file input so the same file can be selected again
         e.target.value = null;
     }
+});
+
+// --- FIX: State-driven title editing ---
+resultsListTitle.addEventListener('click', () => {
+    // Prevent starting a new edit if one is already in progress
+    if (resultsListTitle.querySelector('input')) return;
+
+    const originalTitle = state.title;
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.className = 'title-edit-input';
+    input.value = originalTitle;
+
+    const saveChanges = () => {
+        const newTitle = input.value.trim();
+        updateTitle(newTitle || "Tier List"); // Update state
+        renderResultsView(); // Re-render to show updated state and remove input
+    };
+
+    input.addEventListener('blur', saveChanges);
+    input.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            saveChanges();
+        } else if (e.key === 'Escape') {
+            e.preventDefault();
+            renderResultsView(); // Cancel by re-rendering with original state
+        }
+    });
+
+    resultsListTitle.innerHTML = '';
+    resultsListTitle.appendChild(input);
+    input.focus();
+    input.select();
 });

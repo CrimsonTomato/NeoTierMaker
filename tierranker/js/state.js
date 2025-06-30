@@ -1,5 +1,6 @@
 export const state = {
     items: [],
+    title: 'Tier List', // The title for the generated results view
     editingItemId: null,
     
     // --- NEW SORTING STATE ---
@@ -39,7 +40,7 @@ export function removeItem(id) {
 }
 
 export function updateItemText(id, newText) {
-    const item = state.items.find(item => item.id === item.id);
+    const item = state.items.find(item => item.id === id); // FIX: Was item.id === item.id
     if (item) {
         item.text = newText;
     }
@@ -49,7 +50,11 @@ export function setEditingItemId(id) {
     state.editingItemId = id;
 }
 
-// --- TIER FUNCTIONS ---
+// --- TIER & TITLE FUNCTIONS ---
+export function updateTitle(newTitle) {
+    state.title = newTitle;
+}
+
 export function addTier() {
     // Add a new tier just above the last one
     const lastThreshold = state.tiers.length > 0 ? state.tiers[state.tiers.length - 1].threshold : 0;
