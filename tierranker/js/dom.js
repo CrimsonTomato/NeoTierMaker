@@ -53,3 +53,13 @@ export const seedingProgressBarInnerEl = document.getElementById('seeding-progre
 export const btnAbortSeeding = document.getElementById('btn-abort-seeding');
 
 export const comparisonModeRadios = document.querySelectorAll('input[name="comparison-mode"]');
+export const comparisonModeIconRadios = document.querySelectorAll('input[name="comparison-mode-icon"]');
+
+export const appContainer = document.getElementById('app-container');
+export const themeToggleButton = document.getElementById('theme-toggle-btn');
+export const toggleLeftSidebarButton = document.getElementById('btn-toggle-left-sidebar');
+export const toggleRightSidebarButton = document.getElementById('btn-toggle-right-sidebar');
+
+export const iconExportButton = document.getElementById('btn-icon-export');
+export const iconImportButton = document.getElementById('btn-icon-import');
+export const iconThemeButton = document.getElementById('btn-icon-theme');

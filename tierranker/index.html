@@ -13,28 +13,77 @@
     <div class="app-container" id="app-container">
       <!-- LEFT SIDEBAR -->
       <aside class="sidebar-left">
-        <h1>TierRanker</h1>
+        <div class="sidebar-header">
+          <h1 class="sidebar-full-content">TierRanker</h1>
+          <button id="btn-toggle-left-sidebar" class="sidebar-toggle-btn" title="Toggle Sidebar">
+            <svg viewBox="0 0 24 24">
+              <path fill="currentColor" d="M20,11V13H8L13.5,18.5L12.08,19.92L4.16,12L12.08,4.08L13.5,5.5L8,11H20Z" />
+            </svg>
+          </button>
+        </div>
         <hr>
-        <h4>Session</h4>
-        <button id="btn-export-session" class="btn btn-secondary">Export to File</button>
-        <button id="btn-import-session" class="btn btn-secondary">Import from File</button>
-        <hr>
-        <h4>Configuration</h4>
-        <div class="config-group">
-          <label>Comparison Mode:</label>
-          <div class="radio-group">
-            <input type="radio" id="mode-pairwise" name="comparison-mode" value="2" checked>
-            <label for="mode-pairwise">Pairwise (2)</label>
+        <div class="sidebar-content-wrapper">
+          <div class="sidebar-section sidebar-full-content">
+            <h4>Session</h4>
+            <button id="btn-export-session" class="btn btn-secondary">Export to File</button>
+            <button id="btn-import-session" class="btn btn-secondary">Import from File</button>
           </div>
-          <div class="radio-group">
-            <input type="radio" id="mode-triwise" name="comparison-mode" value="3">
-            <label for="mode-triwise">Tri-wise (3)</label>
+          <hr class="sidebar-full-content">
+          <div class="sidebar-section sidebar-full-content">
+            <h4>Configuration</h4>
+            <div class="config-group">
+              <label>Theme:</label>
+              <button id="theme-toggle-btn" class="btn btn-secondary" style="margin-top: 4px;">Toggle Dark Mode</button>
+            </div>
+            <div class="config-group">
+              <label>Comparison Mode:</label>
+              <div class="segmented-control">
+                <input type="radio" id="mode-pairwise" name="comparison-mode" value="2" checked>
+                <label for="mode-pairwise" class="segmented-control-option">Pairwise</label>
+                <input type="radio" id="mode-triwise" name="comparison-mode" value="3">
+                <label for="mode-triwise" class="segmented-control-option">Tri-wise</label>
+              </div>
+            </div>
           </div>
         </div>
+
+        <div class="sidebar-icon-bar">
+          <button id="btn-icon-export" class="sidebar-icon-btn" title="Export to File">
+            <svg viewBox="0 0 24 24">
+              <path fill="currentColor" d="M5,20H19V18H5M19,9H15V3H9V9H5L12,16L19,9Z" />
+            </svg>
+          </button>
+          <button id="btn-icon-import" class="sidebar-icon-btn" title="Import from File">
+            <svg viewBox="0 0 24 24">
+              <path fill="currentColor" d="M9,16V10H5L12,3L19,10H15V16H9M5,20V18H19V20H5Z" />
+            </svg>
+          </button>
+          <button id="btn-icon-theme" class="sidebar-icon-btn" title="Toggle Dark Mode">
+            <svg viewBox="0 0 24 24">
+              <path fill="currentColor"
+                d="M12,18C11.11,18 10.26,17.8 9.5,17.45C11.56,16.84 13,14.94 13,12.5C13,10.06 11.56,8.16 9.5,7.55C10.26,7.2 11.11,7 12,7C15.31,7 18,9.69 18,13C18,16.31 15.31,19 12,19M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z" />
+            </svg>
+          </button>
+          <hr style="width: 80%; margin: 8px 0;">
+          <div class="radio-group-icon">
+            <input type="radio" id="mode-pairwise-icon" name="comparison-mode-icon" value="2" checked>
+            <label for="mode-pairwise-icon" class="sidebar-icon-btn text-icon" title="Pairwise (A/B)">
+              <div>A/B</div>
+            </label>
+          </div>
+          <div class="radio-group-icon">
+            <input type="radio" id="mode-triwise-icon" name="comparison-mode-icon" value="3">
+            <label for="mode-triwise-icon" class="sidebar-icon-btn text-icon" title="Tri-wise (1/2/3)">
+              <div>I/II/III</div>
+            </label>
+          </div>
+        </div>
+
       </aside>
 
       <!-- CENTER STAGE -->
       <main class="center-stage">
+        <!-- All center stage views remain the same -->
         <div id="view-input" class="view active">
           <div class="input-methods">
             <div class="input-group">
@@ -57,7 +106,6 @@ Item 2, Item 3"></textarea></div>
           </div>
           <button id="btn-start-sort" class="btn btn-primary" style="margin-top: 24px;">Begin Sort Process</button>
         </div>
-
         <div id="view-seeding" class="view">
           <div class="comparison-header">
             <h2>First Pass: How would you rate this item?</h2>
@@ -80,8 +128,6 @@ Item 2, Item 3"></textarea></div>
           <div id="seed-tier-buttons" class="seed-tier-container">
           </div>
         </div>
-
-
         <div id="view-comparison" class="view">
           <div class="comparison-header">
             <h2 id="comparison-title">Which do you rank higher?</h2>
@@ -112,7 +158,6 @@ Item 2, Item 3"></textarea></div>
           <div id="comparison-area">
           </div>
         </div>
-
         <div id="view-results" class="view">
           <div class="results-header">
             <h2>Results & Tier Assignment</h2>
@@ -123,7 +168,6 @@ Item 2, Item 3"></textarea></div>
           <div id="sort-stats-container"></div>
           <p class="instructions">Your items have been sorted. Right-click a tier label to rename it, or left-click to
             change its color. Enable "Edit Tiers" to manually adjust tier boundaries.</p>
-
           <div class="results-container">
             <div class="results-column" id="ranked-list-container">
               <div class="results-column-header">
@@ -135,7 +179,7 @@ Item 2, Item 3"></textarea></div>
               </div>
               <div class="tier-tag-palette">
                 <div class="tier-palette-header">
-                  <h4>Click a tier, then click a boundary line to assign it:</h4>
+                  <p class="instructions">Click a tier, then click a boundary line to assign:</p>
                   <button id="btn-toggle-tier-edit" class="btn btn-secondary">Edit Tiers</button>
                 </div>
                 <div id="tier-tag-container"></div>
@@ -168,23 +212,27 @@ Item 2, Item 3"></textarea></div>
         </div>
       </main>
 
-      <!-- RIGHT SIDEBAR -->
+      <!-- RIGHT SIDEBAR (In-layout) -->
       <aside class="sidebar-right">
-        <div id="panel-staging" class="panel active">
-          <div class="panel-header">
-            <h3>Items in Staging (<span id="item-count">0</span>)</h3>
-            <div class="view-controls">
-              <button id="view-list-btn" class="view-btn active" title="List View"><svg viewBox="0 0 24 24">
-                  <path
-                    d="M3,5A2,2 0 0,1 5,3H19A2,2 0 0,1 21,5V19A2,2 0 0,1 19,21H5A2,2 0 0,1 3,19V5M5,5V7H19V5H5M5,9V11H19V9H5M5,13V15H19V13H5M5,17V19H19V17H5Z" />
-                </svg></button>
-              <button id="view-grid-btn" class="view-btn" title="Grid View"><svg viewBox="0 0 24 24">
-                  <path d="M3,11H11V3H3M3,21H11V13H3M13,21H21V13H13M13,3V11H21V3" />
-                </svg></button>
-            </div>
+        <div class="sidebar-header">
+          <h3 class="sidebar-full-content">Staging List (<span id="item-count">0</span>)</h3>
+          <button id="btn-toggle-right-sidebar" class="sidebar-toggle-btn" title="Toggle Staging List">
+            <svg viewBox="0 0 24 24">
+              <path fill="currentColor" d="M4,13V11H16L10.5,5.5L11.92,4.08L19.84,12L11.92,19.92L10.5,18.5L16,13H4Z" />
+            </svg>
+          </button>
+        </div>
+        <div class="sidebar-content-wrapper">
+          <div class="view-controls" style="align-self: flex-start; margin-bottom: 8px;">
+            <button id="view-list-btn" class="view-btn active" title="List View"><svg viewBox="0 0 24 24">
+                <path
+                  d="M3,5A2,2 0 0,1 5,3H19A2,2 0 0,1 21,5V19A2,2 0 0,1 19,21H5A2,2 0 0,1 3,19V5M5,5V7H19V5H5M5,9V11H19V9H5M5,13V15H19V13H5M5,17V19H19V17H5Z" />
+              </svg></button>
+            <button id="view-grid-btn" class="view-btn" title="Grid View"><svg viewBox="0 0 24 24">
+                <path d="M3,11H11V3H3M3,21H11V13H3M13,21H21V13H13M13,3V11H21V3" />
+              </svg></button>
           </div>
           <p>Prepare your items before sorting.</p>
-          <br />
           <div id="staging-list" class="view-list"></div>
         </div>
       </aside>

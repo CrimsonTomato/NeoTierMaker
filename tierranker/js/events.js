@@ -10,6 +10,47 @@ import { showView } from './view.js';
 import Sortable from 'sortablejs';
 
 export function initializeEventListeners() {
+    // --- Theme and Sidebar Toggles ---
+    const toggleTheme = () => {
+        const isDarkMode = document.documentElement.classList.toggle('dark-mode');
+        localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
+    };
+    dom.themeToggleButton.addEventListener('click', toggleTheme);
+    dom.iconThemeButton.addEventListener('click', toggleTheme);
+
+    dom.toggleLeftSidebarButton.addEventListener('click', () => {
+        dom.appContainer.classList.toggle('left-sidebar-collapsed');
+    });
+
+    dom.toggleRightSidebarButton.addEventListener('click', () => {
+        dom.appContainer.classList.toggle('right-sidebar-collapsed');
+    });
+
+    // --- Icon-only button listeners ---
+    dom.iconExportButton.addEventListener('click', () => dom.btnExportSession.click());
+    dom.iconImportButton.addEventListener('click', () => dom.btnImportSession.click());
+
+    // Sync main radio buttons to icon radio buttons
+    dom.comparisonModeRadios.forEach(radio => {
+        radio.addEventListener('change', (e) => {
+            const value = e.target.value;
+            setComparisonMode(value);
+            const iconRadio = document.getElementById(`mode-${value === '2' ? 'pairwise' : 'triwise'}-icon`);
+            if(iconRadio) iconRadio.checked = true;
+        });
+    });
+
+    // Sync icon radio buttons to main radio buttons
+    dom.comparisonModeIconRadios.forEach(radio => {
+        radio.addEventListener('change', (e) => {
+            const value = e.target.value;
+            setComparisonMode(value);
+            const mainRadio = document.getElementById(`mode-${value === '2' ? 'pairwise' : 'triwise'}`);
+            if(mainRadio) mainRadio.checked = true;
+        });
+    });
+
+
     // --- Input View Events ---
     dom.addFromTextBtn.addEventListener('click', async () => {
         await handleTextInput(dom.textInputArea.value);
@@ -115,10 +156,6 @@ export function initializeEventListeners() {
     };
     dom.btnAbortSeeding.addEventListener('click', handleAbort);
     dom.btnAbortComparison.addEventListener('click', handleAbort);
-
-    dom.comparisonModeRadios.forEach(radio => {
-        radio.addEventListener('change', (e) => setComparisonMode(e.target.value));
-    });
 
     dom.seedTierButtonsEl.addEventListener('click', (e) => {
         const value = e.target.closest('[data-value]')?.dataset.value;
@@ -239,7 +276,6 @@ export function initializeEventListeners() {
     dom.btnSizeIncrease.addEventListener('click', handleSizeIncrease);
     dom.btnSizeDecrease.addEventListener('click', handleSizeDecrease);
 
-    // --- Off-screen Wrapper Creation Logic (Updated) ---
     const createOffscreenCloneForCapture = (originalElement, isBarChart = false) => {
         const exportWrapper = document.createElement('div');
         const bgColor = getComputedStyle(document.documentElement).getPropertyValue('--bg-secondary').trim();
@@ -251,20 +287,17 @@ export function initializeEventListeners() {
         exportWrapper.style.backgroundColor = bgColor;
 
         if (!isBarChart) {
-            exportWrapper.style.display = 'flex';
-            exportWrapper.style.flexDirection = 'column';
-            exportWrapper.style.height = 'fit-content';
+             exportWrapper.style.display = 'flex';
+             exportWrapper.style.flexDirection = 'column';
+             exportWrapper.style.height = 'fit-content';
         }
 
         const clone = originalElement.cloneNode(true);
-
-        // --- NEW: Remove only specific UI elements from the clone ---
+        
         if (isBarChart) {
-            // For the bar chart, remove its action buttons and tier editing palette
             clone.querySelector('.results-column-header .results-column-actions')?.remove();
             clone.querySelector('.tier-tag-palette')?.remove();
 
-            // Also fix the gradient text for the screenshot
             const gradientLabelsInClone = clone.querySelectorAll('.bar-label-gradient');
             gradientLabelsInClone.forEach(label => {
                 const solidColor = label.dataset.solidColorForExport;
@@ -276,7 +309,6 @@ export function initializeEventListeners() {
                 }
             });
         } else {
-            // For the tier list, just remove its action buttons
             clone.querySelector('.results-column-header .results-column-actions')?.remove();
         }
 
@@ -285,7 +317,6 @@ export function initializeEventListeners() {
         return exportWrapper;
     };
 
-    // --- Tier List Export/Copy ---
     dom.btnExportImage.addEventListener('click', async () => {
         const originalElement = document.getElementById('tier-list-export-area');
         const originalText = dom.btnExportImage.textContent;
@@ -340,7 +371,6 @@ export function initializeEventListeners() {
         }
     });
 
-    // --- Bar Chart Export/Copy ---
     dom.btnExportBarChart.addEventListener('click', async () => {
         const originalElement = dom.rankedListContainer;
         const originalText = dom.btnExportBarChart.textContent;
@@ -395,7 +425,6 @@ export function initializeEventListeners() {
         }
     });
 
-    // --- Session Management ---
     dom.btnExportSession.addEventListener('click', async () => {
         if (state.items.length === 0) { alert("There is nothing to export."); return; }
         const originalText = dom.btnExportSession.textContent;
