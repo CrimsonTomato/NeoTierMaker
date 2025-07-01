@@ -9,6 +9,7 @@ import Sortable from 'sortablejs';
 let currentlySeedingItem = null;
 const comparisonCache = new Map();
 let replayLogIndex = 0;
+let isSimulating = false;
 
 function handleKeyboardSorting(e) {
     if (!state.isSorting || !state.comparison.callback) return;
@@ -138,7 +139,7 @@ function resolveSkippedComparisons(partiallySortedItems) {
 }
 
 
-async function onSeedingComplete() {
+async function onSeedingComplete(isSimulation = false) {
     state.isSeeding = false;
     const itemGroups = state.items.reduce((groups, item) => {
         const seedValue = state.itemSeedValues[item.id] || 0;
@@ -150,74 +151,96 @@ async function onSeedingComplete() {
     const sortedGroups = [];
     const seedValues = Object.keys(itemGroups).map(Number).sort((a, b) => b - a);
 
-    const totalComparisons = seedValues.reduce((total, key) => {
-        const group = itemGroups[key];
-        const n = group.length;
-        if (n > 1) {
-            // Ternary sort is more efficient, adjust the estimate
-            if (state.comparisonMode === 3) {
-                total += Math.ceil(n * Math.log2(n) / Math.log2(3));
-            } else {
-                total += Math.ceil(n * Math.log2(n));
+    // No need to calculate progress for a simulation
+    if (!isSimulation) {
+        const totalComparisons = seedValues.reduce((total, key) => {
+            const group = itemGroups[key];
+            const n = group.length;
+            if (n > 1) {
+                if (state.comparisonMode === 3) {
+                    total += Math.ceil(n * Math.log2(n) / Math.log2(3));
+                } else {
+                    total += Math.ceil(n * Math.log2(n));
+                }
             }
-        }
-        return total;
-    }, 0);
-    state.progress = { current: state.decisionLog.length, total: totalComparisons };
+            return total;
+        }, 0);
+        state.progress = { current: state.decisionLog.length, total: totalComparisons };
+    }
+
 
     state.isSorting = true;
-    showView(dom.viewComparison);
-
-    dom.btnUndoComparison.style.visibility = 'hidden';
+    // MODIFIED: Don't show the view or buttons during simulation
+    if (!isSimulation) {
+        showView(dom.viewComparison);
+        dom.btnUndoComparison.style.visibility = 'hidden';
+    }
 
     const generateKey = (id1, id2) => [id1, id2].sort().join('-');
     const getIds = (items) => items.map(i => i.id).sort().join(',');
+
+    // --- NEW: Define the automated comparison callback for simulation ---
+    const simulationCompareCallback = (itemsToCompare, onResult) => {
+        if (itemsToCompare.length === 2) {
+            // For pairwise, randomly return 1 (A > B), -1 (B > A), or 0 (tie)
+            const result = Math.floor(Math.random() * 3) - 1;
+            onResult(result);
+        } else if (itemsToCompare.length === 3) {
+            // For tri-wise, shuffle the array to get a random ranking
+            const shuffled = [...itemsToCompare].sort(() => Math.random() - 0.5);
+            onResult(shuffled);
+        }
+    };
+
+    // --- Define the standard interactive comparison callback ---
+    const interactiveCompareCallback = (itemsToCompare, onResult) => {
+        // --- REPLAY LOGIC ---
+        if (replayLogIndex < state.decisionLog.length) {
+            const decision = state.decisionLog[replayLogIndex];
+            if (getIds(decision.items) === getIds(itemsToCompare)) {
+                replayLogIndex++;
+                onResult(decision.result);
+                return;
+            }
+        }
+
+        // --- LIVE COMPARISON LOGIC ---
+        if (itemsToCompare.length === 2) {
+            const [itemA, itemB] = itemsToCompare;
+            const key = generateKey(itemA.id, itemB.id);
+            if (comparisonCache.has(key)) {
+                let cachedResult = comparisonCache.get(key);
+                if (itemA.id > itemB.id) cachedResult = -cachedResult;
+                onResult(cachedResult);
+                return;
+            }
+        }
+
+        const onResultWithCacheAndLog = (result) => {
+            if (itemsToCompare.length === 2) {
+                const [itemA, itemB] = itemsToCompare;
+                const key = generateKey(itemA.id, itemB.id);
+                let resultToCache = result;
+                if (itemA.id > itemB.id) resultToCache = -result;
+                comparisonCache.set(key, resultToCache);
+            }
+            state.decisionLog.push({ items: itemsToCompare, result });
+            onResult(result);
+        };
+
+        state.progress.current++;
+        state.comparison = { items: itemsToCompare, callback: onResultWithCacheAndLog };
+        updateComparisonView();
+    };
+
 
     for (const seedValue of seedValues) {
         const group = itemGroups[seedValue];
         if (group.length > 1) {
             const sortedGroup = await new Promise((resolve) => {
                 createSorter(group, state.comparisonMode,
-                    (itemsToCompare, onResult) => {
-                        // --- REPLAY LOGIC ---
-                        if (replayLogIndex < state.decisionLog.length) {
-                            const decision = state.decisionLog[replayLogIndex];
-                            // Sanity check to ensure the sorter is asking for the same items we logged
-                            if (getIds(decision.items) === getIds(itemsToCompare)) {
-                                replayLogIndex++;
-                                onResult(decision.result);
-                                return;
-                            }
-                        }
-
-                        // --- LIVE COMPARISON LOGIC ---
-                        if (itemsToCompare.length === 2) {
-                            const [itemA, itemB] = itemsToCompare;
-                            const key = generateKey(itemA.id, itemB.id);
-                            if (comparisonCache.has(key)) {
-                                let cachedResult = comparisonCache.get(key);
-                                if (itemA.id > itemB.id) cachedResult = -cachedResult;
-                                onResult(cachedResult);
-                                return;
-                            }
-                        }
-
-                        const onResultWithCacheAndLog = (result) => {
-                            if (itemsToCompare.length === 2) {
-                                const [itemA, itemB] = itemsToCompare;
-                                const key = generateKey(itemA.id, itemB.id);
-                                let resultToCache = result;
-                                if (itemA.id > itemB.id) resultToCache = -result;
-                                comparisonCache.set(key, resultToCache);
-                            }
-                            state.decisionLog.push({ items: itemsToCompare, result });
-                            onResult(result);
-                        };
-
-                        state.progress.current++;
-                        state.comparison = { items: itemsToCompare, callback: onResultWithCacheAndLog };
-                        updateComparisonView();
-                    },
+                    // MODIFIED: Choose the callback based on whether we're simulating
+                    isSimulation ? simulationCompareCallback : interactiveCompareCallback,
                     (finalSortedGroup) => {
                         resolve(finalSortedGroup);
                     }
@@ -229,6 +252,7 @@ async function onSeedingComplete() {
         }
     }
 
+    // Skips are not possible in simulation, so this only runs for interactive sorts.
     if (state.skippedComparisons.length > 0) {
         state.progress.total += state.skippedComparisons.length;
         resolveSkippedComparisons(sortedGroups);
@@ -356,6 +380,7 @@ export function startSort() {
         alert("Please add at least two items to sort.");
         return;
     }
+    isSimulating = false; // Ensure simulation flag is off for normal sort
 
     if (state.comparisonMode === 'ask') {
         dom.modeChoiceModal.style.display = 'flex';
@@ -424,10 +449,54 @@ export function handleSkipSeeding() {
 }
 
 function _startSortInternal() {
-    // Fully reset state for a new sort process initiated by the user
     abortSort();
     state.sortStartTime = performance.now();
 
-    document.addEventListener('keydown', handleKeyboardSorting);
-    startSeeding();
+    if (isSimulating) {
+        // --- Simulation Path ---
+        // 1. Randomly "seed" all items
+        state.items.forEach(item => {
+            state.itemSeedValues[item.id] = Math.floor(Math.random() * state.seedTiers.length) + 1;
+        });
+        // 2. Run the non-interactive sort
+        onSeedingComplete(true); // Pass true to indicate simulation
+    } else {
+        // --- Interactive Path ---
+        document.addEventListener('keydown', handleKeyboardSorting);
+        startSeeding();
+    }
+}
+
+export async function handleSimulateSort() {
+    if (state.items.length < 2) {
+        alert("Please add at least two items to start a simulation.");
+        return;
+    }
+
+    isSimulating = true;
+
+    // The user needs to pick a mode for the simulation to run with.
+    // If they haven't picked one, we default to pairwise (2).
+    const modeForSimulation = (state.comparisonMode === 'ask') ? 2 : state.comparisonMode;
+    setComparisonMode(modeForSimulation);
+
+    // Show a loading indicator on the button
+    const originalText = dom.simulateSortBtn.textContent;
+    dom.simulateSortBtn.textContent = "Simulating...";
+    dom.simulateSortBtn.disabled = true;
+
+    // Use a short timeout to allow the UI to update before the sync-heavy sort starts
+    setTimeout(() => {
+        try {
+            _startSortInternal();
+        } catch (error) {
+            console.error("Simulation failed:", error);
+            alert("An error occurred during the simulation.");
+        } finally {
+            // Reset button state and flag
+            dom.simulateSortBtn.textContent = originalText;
+            dom.simulateSortBtn.disabled = false;
+            isSimulating = false;
+        }
+    }, 10);
 }

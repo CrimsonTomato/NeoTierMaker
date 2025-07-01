@@ -2,7 +2,7 @@ import * as dom from './dom.js';
 import { state, clearItems, removeItem, setEditingItemId, updateItemText, updateTierLabel, updateTitle, setComparisonMode, abortSort, toggleTierEditMode } from './state.js';
 import { handleTextInput, handleFileInput } from './inputController.js';
 import { renderStagingList, showPreview, hidePreview, setDragging } from './ui.js';
-import { startSort, handleSeedButtonClick, cleanupSortListeners, handleUndoComparison, handleSkipComparison, handleSkipSeeding } from './sortController.js';
+import { startSort, handleSeedButtonClick, cleanupSortListeners, handleUndoComparison, handleSkipComparison, handleSkipSeeding, handleSimulateSort } from './sortController.js';
 import { renderResultsView, handleTierTagClick, handleRankedListClick, handleAddTier, handleRemoveLastTier, updateTierColor, setEditingTierIdForColor, editingTierIdForColor, handleSizeIncrease, handleSizeDecrease } from './resultsController.js';
 import { exportElementAsImage, copyElementAsImage } from './export.js';
 import { exportSessionToFile, importSessionFromFile } from './fileSession.js';
@@ -131,6 +131,7 @@ export function initializeEventListeners() {
     });
 
     dom.startSortBtn.addEventListener('click', startSort);
+    dom.simulateSortBtn.addEventListener('click', handleSimulateSort);
 
     // --- Staging List Events ---
     dom.stagingListEl.addEventListener('click', (e) => {

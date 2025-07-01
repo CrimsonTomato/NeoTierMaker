@@ -8,6 +8,7 @@ export const uploadImagesBtn = document.getElementById('btn-upload-images');
 export const imageInput = document.getElementById('image-input');
 export const imageDropZone = document.getElementById('image-drop-zone');
 export const startSortBtn = document.getElementById('btn-start-sort');
+export const simulateSortBtn = document.getElementById('btn-simulate-sort');
 export const stagingListEl = document.getElementById('staging-list');
 export const viewListBtn = document.getElementById('view-list-btn');
 export const viewGridBtn = document.getElementById('view-grid-btn');
