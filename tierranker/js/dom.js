@@ -18,10 +18,14 @@ export const progressTextEl = document.getElementById('progress-text');
 export const progressBarInnerEl = document.getElementById('progress-bar-inner');
 export const comparisonAreaEl = document.getElementById('comparison-area');
 export const comparisonTitleEl = document.getElementById('comparison-title');
+export const comparisonInstructionsEl = document.getElementById('comparison-instructions');
 export const triLayoutControls = document.getElementById('tri-layout-controls');
 export const btnTriLayoutVertical = document.getElementById('btn-tri-layout-vertical');
 export const btnTriLayoutHorizontal = document.getElementById('btn-tri-layout-horizontal');
 export const btnAbortComparison = document.getElementById('btn-abort-comparison');
+
+export const btnUndoComparison = document.getElementById('btn-undo-comparison');
+export const btnSkipComparison = document.getElementById('btn-skip-comparison');
 
 export const viewResults = document.getElementById('view-results');
 export const tierTagContainer = document.getElementById('tier-tag-container');

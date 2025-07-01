@@ -2,7 +2,7 @@ import * as dom from './dom.js';
 import { state, clearItems, removeItem, setEditingItemId, updateItemText, updateTierLabel, updateTitle, setComparisonMode, abortSort, toggleTierEditMode } from './state.js';
 import { handleTextInput, handleFileInput } from './inputController.js';
 import { renderStagingList, showPreview, hidePreview, setDragging } from './ui.js';
-import { startSort, handleSeedButtonClick, cleanupSortListeners } from './sortController.js';
+import { startSort, handleSeedButtonClick, cleanupSortListeners, handleUndoComparison, handleSkipComparison } from './sortController.js';
 import { renderResultsView, handleTierTagClick, handleRankedListClick, handleAddTier, handleRemoveLastTier, updateTierColor, setEditingTierIdForColor, editingTierIdForColor, handleSizeIncrease, handleSizeDecrease } from './resultsController.js';
 import { exportElementAsImage, copyElementAsImage } from './export.js';
 import { exportSessionToFile, importSessionFromFile } from './fileSession.js';
@@ -194,6 +194,9 @@ export function initializeEventListeners() {
     };
     dom.btnAbortSeeding.addEventListener('click', handleAbort);
     dom.btnAbortComparison.addEventListener('click', handleAbort);
+
+    dom.btnUndoComparison.addEventListener('click', handleUndoComparison);
+    dom.btnSkipComparison.addEventListener('click', handleSkipComparison);
 
     dom.seedTierButtonsEl.addEventListener('click', (e) => {
         const value = e.target.closest('[data-value]')?.dataset.value;

@@ -114,17 +114,24 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    color: var(--text-secondary);
+    /* Set color on the button */
+    transition: background-color 0.2s, color 0.2s;
+    /* Add transition */
 }
 
 .view-btn svg {
     width: 20px;
     height: 20px;
-    fill: var(--text-secondary);
+    fill: currentColor;
+    /* SVG fill inherits the button's color */
 }
 
 .view-btn.active,
 .view-btn:hover {
     background-color: var(--bg-primary);
+    color: var(--text-primary);
+    /* On hover/active, change the button color */
 }
 
 .view-btn.active svg {

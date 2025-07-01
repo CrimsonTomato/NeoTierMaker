@@ -1,5 +1,5 @@
 import * as dom from './dom.js';
-import { state } from './state.js';
+import { state, abortSort } from './state.js';
 import { showView } from './view.js';
 import { createSorter } from './sorter.js';
 import { onSortDone } from './resultsController.js';
@@ -8,11 +8,26 @@ import Sortable from 'sortablejs';
 
 let currentlySeedingItem = null;
 const comparisonCache = new Map();
+let replayLogIndex = 0;
 
 function handleKeyboardSorting(e) {
-    if (!state.isSorting || state.comparisonMode !== 2 || !state.comparison.callback) {
+    if (!state.isSorting || !state.comparison.callback) return;
+
+    // Global shortcuts during sorting
+    if (e.key.toLowerCase() === 'u') {
+        e.preventDefault();
+        handleUndoComparison();
         return;
     }
+    if (e.key.toLowerCase() === 's' && !state.isResolvingSkips) {
+        e.preventDefault();
+        handleSkipComparison();
+        return;
+    }
+
+    // Pairwise-specific shortcuts
+    if (state.comparisonMode !== 2) return;
+
     const { callback } = state.comparison;
     let choiceMade = false;
     switch (e.key) {
@@ -60,6 +75,7 @@ function startSeeding() {
     state.itemSeedValues = {};
     state.seedingProgress = { current: 0, total: state.items.length };
     comparisonCache.clear();
+    replayLogIndex = 0; // Reset replay index for a fresh sort
 
     dom.seedTierButtonsEl.innerHTML = '';
     state.seedTiers.forEach(tier => {
@@ -81,6 +97,47 @@ export function handleSeedButtonClick(value) {
     displayNextSeedItem();
 }
 
+function finalizeSort(sortedItems) {
+    cleanupSortListeners();
+    onSortDone(sortedItems);
+}
+
+function resolveSkippedComparisons(partiallySortedItems) {
+    state.isSorting = true;
+    state.isResolvingSkips = true;
+
+    if (state.skippedComparisons.length === 0) {
+        finalizeSort(partiallySortedItems);
+        return;
+    }
+
+    const itemsToResolve = state.skippedComparisons[0];
+    state.progress.current++;
+
+    const onResolveChoice = (result) => {
+        // A tie (0) is not a valid choice during resolution.
+        // The user MUST rank the items.
+        if (result !== 0) {
+            const [itemA, itemB] = itemsToResolve;
+            const indexA = partiallySortedItems.findIndex(i => i.id === itemA.id);
+            const indexB = partiallySortedItems.findIndex(i => i.id === itemB.id);
+
+            const userWantsAGreater = result > 0;
+            const isAActuallyGreater = indexA < indexB; // Lower index means higher rank
+
+            if (userWantsAGreater !== isAActuallyGreater) {
+                [partiallySortedItems[indexA], partiallySortedItems[indexB]] = [partiallySortedItems[indexB], partiallySortedItems[indexA]];
+            }
+        }
+        state.skippedComparisons.shift();
+        resolveSkippedComparisons(partiallySortedItems);
+    };
+
+    state.comparison = { items: itemsToResolve, callback: onResolveChoice };
+    updateComparisonView();
+}
+
+
 async function onSeedingComplete() {
     state.isSeeding = false;
     const itemGroups = state.items.reduce((groups, item) => {
@@ -96,30 +153,49 @@ async function onSeedingComplete() {
     const totalComparisons = seedValues.reduce((total, key) => {
         const group = itemGroups[key];
         const n = group.length;
-        if (n > 1) {
-            total += Math.ceil(n * Math.log2(n));
+        if (n > 1) { 
+            // Ternary sort is more efficient, adjust the estimate
+            if (state.comparisonMode === 3) {
+                total += Math.ceil(n * Math.log2(n) / Math.log2(3));
+            } else {
+                total += Math.ceil(n * Math.log2(n));
+            }
         }
         return total;
     }, 0);
-    state.progress = { current: 0, total: totalComparisons };
+    // MODIFIED: Start the progress counter from the number of decisions already made.
+    state.progress = { current: state.decisionLog.length, total: totalComparisons };
 
     state.isSorting = true;
     showView(dom.viewComparison);
 
+    // MODIFIED: Hide Undo button initially. It will be shown after the first choice.
+    dom.btnUndoComparison.style.visibility = 'hidden';
+
     const generateKey = (id1, id2) => [id1, id2].sort().join('-');
+    const getIds = (items) => items.map(i => i.id).sort().join(',');
 
     for (const seedValue of seedValues) {
         const group = itemGroups[seedValue];
         if (group.length > 1) {
             const sortedGroup = await new Promise((resolve) => {
-                createSorter(
-                    group,
-                    state.comparisonMode,
+                createSorter(group, state.comparisonMode,
                     (itemsToCompare, onResult) => {
+                        // --- REPLAY LOGIC ---
+                        if (replayLogIndex < state.decisionLog.length) {
+                            const decision = state.decisionLog[replayLogIndex];
+                            // Sanity check to ensure the sorter is asking for the same items we logged
+                            if (getIds(decision.items) === getIds(itemsToCompare)) {
+                                replayLogIndex++;
+                                onResult(decision.result);
+                                return;
+                            }
+                        }
+
+                        // --- LIVE COMPARISON LOGIC ---
                         if (itemsToCompare.length === 2) {
                             const [itemA, itemB] = itemsToCompare;
                             const key = generateKey(itemA.id, itemB.id);
-
                             if (comparisonCache.has(key)) {
                                 let cachedResult = comparisonCache.get(key);
                                 if (itemA.id > itemB.id) cachedResult = -cachedResult;
@@ -128,7 +204,7 @@ async function onSeedingComplete() {
                             }
                         }
 
-                        const onResultWithCache = (result) => {
+                        const onResultWithCacheAndLog = (result) => {
                             if (itemsToCompare.length === 2) {
                                 const [itemA, itemB] = itemsToCompare;
                                 const key = generateKey(itemA.id, itemB.id);
@@ -136,11 +212,12 @@ async function onSeedingComplete() {
                                 if (itemA.id > itemB.id) resultToCache = -result;
                                 comparisonCache.set(key, resultToCache);
                             }
+                            state.decisionLog.push({ items: itemsToCompare, result });
                             onResult(result);
                         };
 
                         state.progress.current++;
-                        state.comparison = { items: itemsToCompare, callback: onResultWithCache };
+                        state.comparison = { items: itemsToCompare, callback: onResultWithCacheAndLog };
                         updateComparisonView();
                     },
                     (finalSortedGroup) => {
@@ -154,19 +231,44 @@ async function onSeedingComplete() {
         }
     }
 
-    cleanupSortListeners();
-    onSortDone(sortedGroups);
+    if (state.skippedComparisons.length > 0) {
+        state.progress.total += state.skippedComparisons.length;
+        resolveSkippedComparisons(sortedGroups);
+    } else {
+        finalizeSort(sortedGroups);
+    }
 }
+
 
 function updateComparisonView() {
     const { items, callback } = state.comparison;
     if (!items || items.length === 0) return;
 
+    // --- Control button visibility based on state ---
+    // MODIFIED: Show Undo button if there are decisions, otherwise keep hidden.
+    dom.btnUndoComparison.style.visibility = (state.decisionLog.length > 0 && !state.isResolvingSkips) ? 'visible' : 'hidden';
+    
+    // MODIFIED: Disable Skip button for tri-wise mode.
+    dom.btnSkipComparison.style.display = (state.isResolvingSkips || state.comparisonMode === 3) ? 'none' : 'inline-block';
+
+    // --- Update titles ---
+    if (state.isResolvingSkips) {
+        dom.comparisonTitleEl.textContent = `Resolving Skipped Comparison (${state.progress.current} of ${state.progress.total})`;
+    } else {
+        dom.comparisonTitleEl.textContent = state.comparisonMode === 3 ? `Drag to rank the items (1st is best), then confirm.` : "Which do you rank higher?";
+    }
+    
+    // MODIFIED: Update instructions based on comparison mode
+    if(state.comparisonMode === 3) {
+        dom.comparisonInstructionsEl.innerHTML = `Drag and drop the items to reflect your ranking. The highest ranked item should be at the top (or left). Click <b>Confirm Ranking</b> to proceed.`;
+    } else {
+        dom.comparisonInstructionsEl.innerHTML = `Click the item you rank higher. You can also use keyboard keys: <b>1/Left Arrow</b> for left, <b>2/Right Arrow</b> for right, and <b>Space/0</b> for a tie.`;
+    }
+
+    // --- Render comparison UI ---
     if (state.comparisonMode === 3) { // Tri-wise Mode
         dom.triLayoutControls.style.display = 'flex';
         const ranks = ['1st', '2nd', '3rd'];
-        dom.comparisonTitleEl.textContent = `Drag to rank the items (1st is best), then confirm.`;
-
         dom.comparisonAreaEl.innerHTML = `
             <div id="triwise-ranking-list">
                 ${items.map((item, index) => `
@@ -188,28 +290,30 @@ function updateComparisonView() {
 
         const rankingListEl = document.getElementById('triwise-ranking-list');
         const confirmBtn = document.getElementById('confirm-ranking-btn');
-
-        if (dom.btnTriLayoutHorizontal.classList.contains('active')) {
-            rankingListEl.classList.add('layout-horizontal');
-        }
-
+        if (dom.btnTriLayoutHorizontal.classList.contains('active')) rankingListEl.classList.add('layout-horizontal');
+        
         new Sortable(rankingListEl, {
             animation: 150,
             ghostClass: 'sortable-ghost',
             dragClass: 'sortable-drag',
-            onEnd: () => {
-                const rankLabels = rankingListEl.querySelectorAll('.triwise-rank-label');
-                rankLabels.forEach((label, index) => {
-                    label.textContent = ranks[index];
-                    label.classList.remove('rank-1', 'rank-2', 'rank-3');
-                    label.classList.add(`rank-${index + 1}`);
+            onEnd: function (evt) {
+                // Update the rank labels visually after dragging
+                const items = rankingListEl.querySelectorAll('.triwise-rank-item');
+                const ranks = ['1st', '2nd', '3rd'];
+                const rankClasses = ['rank-1', 'rank-2', 'rank-3'];
+                items.forEach((item, index) => {
+                    const label = item.querySelector('.triwise-rank-label');
+                    if (label) {
+                        label.textContent = ranks[index];
+                        label.classList.remove(...rankClasses);
+                        label.classList.add(`rank-${index + 1}`);
+                    }
                 });
             }
         });
 
         rankingListEl.addEventListener('mouseover', (e) => showPreview(e, '.triwise-image-wrapper'));
         rankingListEl.addEventListener('mouseout', () => hidePreview());
-
         confirmBtn.onclick = () => {
             hidePreview();
             const rankedItemElements = rankingListEl.querySelectorAll('.triwise-rank-item');
@@ -221,7 +325,6 @@ function updateComparisonView() {
 
     } else { // Pairwise Mode
         dom.triLayoutControls.style.display = 'none';
-        dom.comparisonTitleEl.textContent = "Which do you rank higher?";
         dom.comparisonAreaEl.innerHTML = `
             <div class="pairwise-container">
                 <div class="comparison-card" data-choice="a">
@@ -238,6 +341,7 @@ function updateComparisonView() {
         dom.comparisonAreaEl.onclick = (e) => {
             const choice = e.target.closest('[data-choice]')?.dataset.choice;
             if (!choice) return;
+            if (state.isResolvingSkips && choice === 'tie') return; // Disallow tie in resolution phase
             if (choice === 'a') callback(1);
             else if (choice === 'b') callback(-1);
             else if (choice === 'tie') callback(0);
@@ -248,13 +352,47 @@ function updateComparisonView() {
     dom.progressBarInnerEl.style.width = `${state.progress.total > 0 ? (state.progress.current / state.progress.total) * 100 : 0}%`;
 }
 
+
 export function startSort() {
     if (state.items.length < 2) {
         alert("Please add at least two items to sort.");
         return;
     }
+    // Fully reset state for a new sort process initiated by the user
+    abortSort();
     state.sortStartTime = performance.now();
 
     document.addEventListener('keydown', handleKeyboardSorting);
     startSeeding();
+}
+
+export function handleUndoComparison() {
+    if (!state.isSorting || state.isResolvingSkips || state.decisionLog.length === 0) return;
+
+    // MODIFIED: Clear the comparison cache to force the sorter to re-ask.
+    comparisonCache.clear();
+
+    state.decisionLog.pop();
+    cleanupSortListeners();
+
+    // Reset sort-in-progress state, but keep seeding results and logs
+    state.isSorting = false;
+    state.comparison = { items: [], callback: null };
+    state.progress = { current: 0, total: 0 };
+    replayLogIndex = 0; // Ensure replay starts from the beginning
+
+    // Re-attach listener and restart the sorting process from after seeding
+    document.addEventListener('keydown', handleKeyboardSorting);
+    onSeedingComplete();
+}
+
+export function handleSkipComparison() {
+    // MODIFIED: Added check for comparison mode
+    if (!state.isSorting || state.isResolvingSkips || state.comparisonMode === 3) return;
+
+    const { items, callback } = state.comparison;
+    if (items && callback) {
+        state.skippedComparisons.push(items);
+        callback(0); // Treat as a tie to allow the sort to continue
+    }
 }

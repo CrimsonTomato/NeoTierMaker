@@ -5,10 +5,19 @@ export const state = {
 
     comparisonMode: 2,
 
+    // --- SORTING STATE ---
     isSorting: false,
     comparison: { items: [], callback: null },
     progress: { current: 0, total: 0 },
+    sortStartTime: 0,
+    sortStats: { comparisons: 0, time: 0 },
 
+    // --- UNDO/SKIP STATE ---
+    decisionLog: [],
+    skippedComparisons: [],
+    isResolvingSkips: false,
+
+    // --- SEEDING STATE ---
     isSeeding: false,
     seedingProgress: { current: 0, total: 0 },
     seedTiers: [
@@ -19,9 +28,6 @@ export const state = {
         { label: 'Bottom Tier', value: 1, color: '#7fbfff' },
     ],
     itemSeedValues: {},
-
-    sortStartTime: 0,
-    sortStats: { comparisons: 0, time: 0 },
 
     // --- TIER LIST STATE ---
     tierEditMode: false,
@@ -44,6 +50,10 @@ export function abortSort() {
     state.itemSeedValues = {};
     state.sortStats = { comparisons: 0, time: 0 };
     state.sortStartTime = 0;
+    // --- Clear undo/skip state ---
+    state.decisionLog = [];
+    state.skippedComparisons = [];
+    state.isResolvingSkips = false;
 }
 
 export function toggleTierEditMode() {

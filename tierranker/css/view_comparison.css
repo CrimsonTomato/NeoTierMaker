@@ -17,6 +17,11 @@
     flex-grow: 1;
 }
 
+.comparison-actions {
+    display: flex;
+    gap: 8px;
+}
+
 .comparison-header .btn {
     width: auto;
     flex-shrink: 0;
@@ -123,21 +128,21 @@
     border-radius: 4px;
 }
 
+/* Gold */
 .triwise-rank-label.rank-1 {
     background-color: #ffd700;
 }
 
-/* Gold */
+/* Silver */
 .triwise-rank-label.rank-2 {
     background-color: #d1d5db;
 }
 
-/* Silver */
+/* Bronze */
 .triwise-rank-label.rank-3 {
     background-color: #d97706;
 }
 
-/* Bronze */
 
 .comparison-card-draggable {
     flex-grow: 1;
@@ -179,6 +184,38 @@
 
 .triwise-rank-item.sortable-ghost>* {
     visibility: hidden;
+}
+
+.triwise-rank-item.sortable-ghost>* {
+    visibility: hidden;
+}
+
+#triwise-ranking-list.layout-horizontal {
+    flex-direction: row;
+    align-items: flex-start;
+    justify-content: center;
+}
+
+#triwise-ranking-list.layout-horizontal .triwise-rank-item {
+    flex-direction: column;
+    width: 400px;
+    align-items: stretch;
+}
+
+#triwise-ranking-list.layout-horizontal .triwise-rank-label {
+    width: auto;
+    border-radius: 4px 4px 0 0;
+}
+
+#triwise-ranking-list.layout-horizontal .comparison-card-draggable {
+    flex-direction: column;
+    text-align: center;
+}
+
+#triwise-ranking-list.layout-horizontal .triwise-image-wrapper {
+    width: 200px;
+    height: auto;
+    margin: 0 auto;
 }
 
 /* --- Seeding View --- */

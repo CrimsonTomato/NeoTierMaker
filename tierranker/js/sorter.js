@@ -13,8 +13,8 @@ export function createSorter(items, mode, onCompare, onDone) {
         ternaryInsertionSort(arrCopy, onCompare, onDone)
             .catch(err => console.error("Error in Ternary Sort:", err));
     } else {
-        // Use the robust Quicksort for standard pairwise comparisons.
-        pairwiseQuicksort(arrCopy, onCompare, onDone)
+        // Use Merge Sort for pairwise comparisons.
+        pairwiseMergeSort(arrCopy, onCompare, onDone)
             .catch(err => console.error("Error in Pairwise Sort:", err));
     }
 }
@@ -22,8 +22,31 @@ export function createSorter(items, mode, onCompare, onDone) {
 // --- ALGORITHM 1: Ternary Insertion Sort (for 3-item comparison) ---
 
 async function ternaryInsertionSort(arr, onCompare, onDone) {
+    // Cache for tri-wise comparison results
+    const ternaryComparisonCache = new Map();
+
     // Helper to wrap the callback-based onCompare into a promise.
     function compareAsync(itemsToCompare) {
+        if (itemsToCompare.length === 3) {
+            // Generate a cache key from sorted item IDs
+            const key = itemsToCompare.map(item => item.id).sort().join('-');
+            if (ternaryComparisonCache.has(key)) {
+                // Return cached result, ensuring it matches the input order
+                const cachedResult = ternaryComparisonCache.get(key);
+                // Reorder cached result to match the input itemsToCompare order
+                const idToItem = new Map(itemsToCompare.map(item => [item.id, item]));
+                const reorderedResult = cachedResult.map(cachedItem => idToItem.get(cachedItem.id));
+                return Promise.resolve(reorderedResult);
+            }
+            // Perform comparison and cache the result
+            return new Promise(resolve => {
+                onCompare(itemsToCompare, result => {
+                    ternaryComparisonCache.set(key, result);
+                    resolve(result);
+                });
+            });
+        }
+        // For pairwise comparisons (e.g., in base case)
         return new Promise(resolve => onCompare(itemsToCompare, resolve));
     }
 
@@ -71,79 +94,62 @@ async function ternaryInsertionSort(arr, onCompare, onDone) {
     onDone(arr);
 }
 
+// --- ALGORITHM 2: Pairwise Merge Sort ---
 
-// --- ALGORITHM 2: Pairwise Quicksort (from previous step) ---
-
-async function pairwiseQuicksort(arr, onCompare, onDone) {
+async function pairwiseMergeSort(arr, onCompare, onDone) {
     // Helper to wrap the callback-based onCompare into a promise for async/await.
     function compareAsync(itemA, itemB) {
         return new Promise(resolve => onCompare([itemA, itemB], resolve));
     }
 
-    // Main recursive function for Quicksort
-    async function quickSort(arr, low, high) {
+    // Main recursive merge sort function
+    async function mergeSort(arr, low, high) {
         if (low >= high) {
-            return; // Base case: the partition has 0 or 1 elements.
+            return; // Base case: 0 or 1 element
         }
 
-        // --- 1. PIVOT SELECTION (Median-of-Three) ---
-        // FIX: The Median-of-Three logic is only safe for partitions of 3 or more items.
-        // For smaller partitions, we use a simpler (and safe) pivot selection.
-        let pivotIndex;
-        if (high - low + 1 < 3) {
-            pivotIndex = high; // Just use the last element as the pivot.
-        } else {
-            // This logic is now only run on partitions where low, mid, and high are distinct.
-            const mid = low + Math.floor((high - low) / 2);
-
-            const low_vs_mid = await compareAsync(arr[low], arr[mid]);
-            const mid_vs_high = await compareAsync(arr[mid], arr[high]);
-            const low_vs_high = await compareAsync(arr[low], arr[high]);
-
-            if (low_vs_mid >= 0) {
-                if (mid_vs_high >= 0) { pivotIndex = mid; }
-                else if (low_vs_high >= 0) { pivotIndex = high; }
-                else { pivotIndex = low; }
-            } else {
-                if (mid_vs_high <= 0) { pivotIndex = mid; }
-                else if (low_vs_high >= 0) { pivotIndex = low; }
-                else { pivotIndex = high; }
-            }
-        }
-
-        // Place the chosen pivot at the end of the partition for convenience.
-        [arr[pivotIndex], arr[high]] = [arr[high], arr[pivotIndex]];
-        const pivot = arr[high];
-
-        // --- 2. PARTITIONING (3-Way Dutch National Flag) ---
-        let i = low;
-        let lt = low;
-        let gt = high - 1;
-
-        while (i <= gt) {
-            const comparisonResult = await compareAsync(arr[i], pivot);
-
-            if (comparisonResult > 0) { // arr[i] > pivot
-                [arr[i], arr[lt]] = [arr[lt], arr[i]];
-                i++;
-                lt++;
-            } else if (comparisonResult < 0) { // arr[i] < pivot
-                [arr[i], arr[gt]] = [arr[gt], arr[i]];
-                gt--;
-            } else { // arr[i] == pivot
-                i++;
-            }
-        }
-
-        // The pivot was at 'high'; now we move it to its correct spot.
-        [arr[high], arr[gt + 1]] = [arr[gt + 1], arr[high]];
-
-        // --- 3. RECURSIVE CALLS ---
-        await quickSort(arr, low, lt - 1);
-        await quickSort(arr, gt + 2, high);
+        const mid = low + Math.floor((high - low) / 2);
+        await mergeSort(arr, low, mid); // Sort left half
+        await mergeSort(arr, mid + 1, high); // Sort right half
+        await merge(arr, low, mid, high); // Merge the sorted halves
     }
 
-    // --- Main execution ---
-    await quickSort(arr, 0, arr.length - 1);
+    // Merge two sorted subarrays: [low, mid] and [mid + 1, high]
+    async function merge(arr, low, mid, high) {
+        const left = arr.slice(low, mid + 1);
+        const right = arr.slice(mid + 1, high + 1);
+        let i = 0; // Index for left subarray
+        let j = 0; // Index for right subarray
+        let k = low; // Index for merged array
+
+        while (i < left.length && j < right.length) {
+            const result = await compareAsync(left[i], right[j]);
+            if (result >= 0) { // left[i] >= right[j] (stable sort)
+                arr[k] = left[i];
+                i++;
+            } else { // left[i] < right[j]
+                arr[k] = right[j];
+                j++;
+            }
+            k++;
+        }
+
+        // Copy remaining elements from left subarray, if any
+        while (i < left.length) {
+            arr[k] = left[i];
+            i++;
+            k++;
+        }
+
+        // Copy remaining elements from right subarray, if any
+        while (j < right.length) {
+            arr[k] = right[j];
+            j++;
+            k++;
+        }
+    }
+
+    // Main execution
+    await mergeSort(arr, 0, arr.length - 1);
     onDone(arr);
 }

@@ -139,7 +139,11 @@ Item 2, Item 3"></textarea></div>
         <div id="view-comparison" class="view">
           <div class="comparison-header">
             <h2 id="comparison-title">Which do you rank higher?</h2>
-            <button id="btn-abort-comparison" class="btn btn-secondary">Abort Sort</button>
+            <div class="comparison-actions">
+              <button id="btn-undo-comparison" class="btn btn-secondary" title="Undo Last Choice (U)">Undo</button>
+              <button id="btn-skip-comparison" class="btn btn-secondary" title="Decide Later (S)">Skip</button>
+              <button id="btn-abort-comparison" class="btn btn-secondary">Abort Sort</button>
+            </div>
             <div class="view-controls" id="tri-layout-controls" style="display: none;">
               <button id="btn-tri-layout-vertical" class="view-btn active" title="Vertical Item Layout">
                 <svg viewBox="0 0 24 24">
@@ -160,7 +164,8 @@ Item 2, Item 3"></textarea></div>
               </div>
             </div>
           </div>
-          <p class="instructions">Click the item you rank higher. For pairwise mode, you can use keyboard keys:
+          <p id="comparison-instructions" class="instructions">Click the item you rank higher. For pairwise mode, you
+            can use keyboard keys:
             <b>1/Left Arrow</b> for left, <b>2/Right Arrow</b> for right, and <b>Space/0</b> for a tie.
           </p>
           <div id="comparison-area">
