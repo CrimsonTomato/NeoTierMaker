@@ -2,7 +2,7 @@ import * as dom from './dom.js';
 import { state, clearItems, removeItem, setEditingItemId, updateItemText, updateTierLabel, updateTitle, setComparisonMode, abortSort, toggleTierEditMode } from './state.js';
 import { handleTextInput, handleFileInput } from './inputController.js';
 import { renderStagingList, showPreview, hidePreview, setDragging } from './ui.js';
-import { startSort, handleSeedButtonClick, cleanupSortListeners, handleUndoComparison, handleSkipComparison } from './sortController.js';
+import { startSort, handleSeedButtonClick, cleanupSortListeners, handleUndoComparison, handleSkipComparison, handleSkipSeeding } from './sortController.js';
 import { renderResultsView, handleTierTagClick, handleRankedListClick, handleAddTier, handleRemoveLastTier, updateTierColor, setEditingTierIdForColor, editingTierIdForColor, handleSizeIncrease, handleSizeDecrease } from './resultsController.js';
 import { exportElementAsImage, copyElementAsImage } from './export.js';
 import { exportSessionToFile, importSessionFromFile } from './fileSession.js';
@@ -68,12 +68,17 @@ export function initializeEventListeners() {
     dom.iconExportButton.addEventListener('click', () => dom.btnExportSession.click());
     dom.iconImportButton.addEventListener('click', () => dom.btnImportSession.click());
 
+    // Sync logic to handle three states
     // Sync main radio buttons to icon radio buttons
     dom.comparisonModeRadios.forEach(radio => {
         radio.addEventListener('change', (e) => {
             const value = e.target.value;
             setComparisonMode(value);
-            const iconRadio = document.getElementById(`mode-${value === '2' ? 'pairwise' : 'triwise'}-icon`);
+            let iconId;
+            if (value === '2') iconId = 'mode-pairwise-icon';
+            else if (value === '3') iconId = 'mode-triwise-icon';
+            else iconId = 'mode-ask-icon';
+            const iconRadio = document.getElementById(iconId);
             if (iconRadio) iconRadio.checked = true;
         });
     });
@@ -83,7 +88,11 @@ export function initializeEventListeners() {
         radio.addEventListener('change', (e) => {
             const value = e.target.value;
             setComparisonMode(value);
-            const mainRadio = document.getElementById(`mode-${value === '2' ? 'pairwise' : 'triwise'}`);
+            let mainId;
+            if (value === '2') mainId = 'mode-pairwise';
+            else if (value === '3') mainId = 'mode-triwise';
+            else mainId = 'mode-ask';
+            const mainRadio = document.getElementById(mainId);
             if (mainRadio) mainRadio.checked = true;
         });
     });
@@ -194,6 +203,8 @@ export function initializeEventListeners() {
     };
     dom.btnAbortSeeding.addEventListener('click', handleAbort);
     dom.btnAbortComparison.addEventListener('click', handleAbort);
+
+    dom.btnSkipSeeding.addEventListener('click', handleSkipSeeding);
 
     dom.btnUndoComparison.addEventListener('click', handleUndoComparison);
     dom.btnSkipComparison.addEventListener('click', handleSkipComparison);

@@ -14,6 +14,7 @@ export const viewGridBtn = document.getElementById('view-grid-btn');
 export const globalPreviewEl = document.getElementById('global-image-preview');
 
 export const viewComparison = document.getElementById('view-comparison');
+
 export const progressTextEl = document.getElementById('progress-text');
 export const progressBarInnerEl = document.getElementById('progress-bar-inner');
 export const comparisonAreaEl = document.getElementById('comparison-area');
@@ -55,9 +56,13 @@ export const seedTierButtonsEl = document.getElementById('seed-tier-buttons');
 export const seedingProgressTextEl = document.getElementById('seeding-progress-text');
 export const seedingProgressBarInnerEl = document.getElementById('seeding-progress-bar-inner');
 export const btnAbortSeeding = document.getElementById('btn-abort-seeding');
+export const btnSkipSeeding = document.getElementById('btn-skip-seeding');
 
 export const comparisonModeRadios = document.querySelectorAll('input[name="comparison-mode"]');
 export const comparisonModeIconRadios = document.querySelectorAll('input[name="comparison-mode-icon"]');
+export const modeChoiceModal = document.getElementById('mode-choice-modal');
+export const modalBtnPairwise = document.getElementById('modal-btn-pairwise');
+export const modalBtnTriwise = document.getElementById('modal-btn-triwise');
 
 export const appContainer = document.getElementById('app-container');
 export const themeToggleButton = document.getElementById('theme-toggle-btn');

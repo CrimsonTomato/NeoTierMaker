@@ -46,10 +46,13 @@
             <div class="config-group">
               <label>Comparison Mode:</label>
               <div class="segmented-control">
-                <input type="radio" id="mode-pairwise" name="comparison-mode" value="2" checked>
+                <input type="radio" id="mode-pairwise" name="comparison-mode" value="2">
                 <label for="mode-pairwise" class="segmented-control-option">Pairwise</label>
                 <input type="radio" id="mode-triwise" name="comparison-mode" value="3">
                 <label for="mode-triwise" class="segmented-control-option">Tri-wise</label>
+                <input type="radio" id="mode-ask" name="comparison-mode" value="ask" checked>
+                <label for="mode-ask" class="segmented-control-option"
+                  title="Ask which mode to use before each sort">Ask (?)</label>
               </div>
             </div>
           </div>
@@ -74,7 +77,7 @@
           </button>
           <hr style="width: 80%; margin: 8px 0;">
           <div class="radio-group-icon">
-            <input type="radio" id="mode-pairwise-icon" name="comparison-mode-icon" value="2" checked>
+            <input type="radio" id="mode-pairwise-icon" name="comparison-mode-icon" value="2">
             <label for="mode-pairwise-icon" class="sidebar-icon-btn text-icon" title="Pairwise (A/B)">
               <div>A/B</div>
             </label>
@@ -85,13 +88,19 @@
               <div>I/II/III</div>
             </label>
           </div>
+          <div class="radio-group-icon">
+            <input type="radio" id="mode-ask-icon" name="comparison-mode-icon" value="ask" checked>
+            <label for="mode-ask-icon" class="sidebar-icon-btn text-icon"
+              title="Ask which mode to use before each sort">
+              <div>?</div>
+            </label>
+          </div>
         </div>
 
       </aside>
 
       <!-- CENTER STAGE -->
       <main class="center-stage">
-        <!-- All center stage views remain the same -->
         <div id="view-input" class="view active">
           <div class="input-methods">
             <div class="input-group">
@@ -117,7 +126,10 @@ Item 2, Item 3"></textarea></div>
         <div id="view-seeding" class="view">
           <div class="comparison-header">
             <h2>First Pass: How would you rate this item?</h2>
-            <button id="btn-abort-seeding" class="btn btn-secondary">Abort Sort</button>
+            <div class="comparison-actions">
+              <button id="btn-skip-seeding" class="btn btn-secondary">Skip Seeding</button>
+              <button id="btn-abort-seeding" class="btn btn-secondary">Abort Sort</button>
+            </div>
             <div class="progress-container">
               <p id="seeding-progress-text">Item 1 of 100</p>
               <div class="progress-bar">
@@ -262,6 +274,18 @@ Item 2, Item 3"></textarea></div>
   <input type="file" id="session-file-input" hidden accept=".zip" />
   <script type="module" src="js/main.js"></script>
   <div id="global-image-preview" class="image-preview-tooltip"></div>
+
+  <!-- Modal for comparison mode choice -->
+  <div id="mode-choice-modal" class="modal-overlay" style="display: none;">
+    <div class="modal-content">
+      <h3>Choose Comparison Mode</h3>
+      <p>Select which comparison method you want to use for this sorting session.</p>
+      <div class="modal-actions">
+        <button id="modal-btn-pairwise" class="btn btn-primary">Pairwise (A vs B)</button>
+        <button id="modal-btn-triwise" class="btn btn-secondary">Tri-wise (Rank 1, 2, 3)</button>
+      </div>
+    </div>
+  </div>
 </body>
 
 </html>

@@ -1,5 +1,5 @@
 import * as dom from './dom.js';
-import { state, abortSort } from './state.js';
+import { state, abortSort, setComparisonMode } from './state.js';
 import { showView } from './view.js';
 import { createSorter } from './sorter.js';
 import { onSortDone } from './resultsController.js';
@@ -153,7 +153,7 @@ async function onSeedingComplete() {
     const totalComparisons = seedValues.reduce((total, key) => {
         const group = itemGroups[key];
         const n = group.length;
-        if (n > 1) { 
+        if (n > 1) {
             // Ternary sort is more efficient, adjust the estimate
             if (state.comparisonMode === 3) {
                 total += Math.ceil(n * Math.log2(n) / Math.log2(3));
@@ -163,13 +163,11 @@ async function onSeedingComplete() {
         }
         return total;
     }, 0);
-    // MODIFIED: Start the progress counter from the number of decisions already made.
     state.progress = { current: state.decisionLog.length, total: totalComparisons };
 
     state.isSorting = true;
     showView(dom.viewComparison);
 
-    // MODIFIED: Hide Undo button initially. It will be shown after the first choice.
     dom.btnUndoComparison.style.visibility = 'hidden';
 
     const generateKey = (id1, id2) => [id1, id2].sort().join('-');
@@ -247,7 +245,7 @@ function updateComparisonView() {
     // --- Control button visibility based on state ---
     // MODIFIED: Show Undo button if there are decisions, otherwise keep hidden.
     dom.btnUndoComparison.style.visibility = (state.decisionLog.length > 0 && !state.isResolvingSkips) ? 'visible' : 'hidden';
-    
+
     // MODIFIED: Disable Skip button for tri-wise mode.
     dom.btnSkipComparison.style.display = (state.isResolvingSkips || state.comparisonMode === 3) ? 'none' : 'inline-block';
 
@@ -257,9 +255,9 @@ function updateComparisonView() {
     } else {
         dom.comparisonTitleEl.textContent = state.comparisonMode === 3 ? `Drag to rank the items (1st is best), then confirm.` : "Which do you rank higher?";
     }
-    
+
     // MODIFIED: Update instructions based on comparison mode
-    if(state.comparisonMode === 3) {
+    if (state.comparisonMode === 3) {
         dom.comparisonInstructionsEl.innerHTML = `Drag and drop the items to reflect your ranking. The highest ranked item should be at the top (or left). Click <b>Confirm Ranking</b> to proceed.`;
     } else {
         dom.comparisonInstructionsEl.innerHTML = `Click the item you rank higher. You can also use keyboard keys: <b>1/Left Arrow</b> for left, <b>2/Right Arrow</b> for right, and <b>Space/0</b> for a tie.`;
@@ -291,7 +289,7 @@ function updateComparisonView() {
         const rankingListEl = document.getElementById('triwise-ranking-list');
         const confirmBtn = document.getElementById('confirm-ranking-btn');
         if (dom.btnTriLayoutHorizontal.classList.contains('active')) rankingListEl.classList.add('layout-horizontal');
-        
+
         new Sortable(rankingListEl, {
             animation: 150,
             ghostClass: 'sortable-ghost',
@@ -358,12 +356,25 @@ export function startSort() {
         alert("Please add at least two items to sort.");
         return;
     }
-    // Fully reset state for a new sort process initiated by the user
-    abortSort();
-    state.sortStartTime = performance.now();
 
-    document.addEventListener('keydown', handleKeyboardSorting);
-    startSeeding();
+    if (state.comparisonMode === 'ask') {
+        dom.modeChoiceModal.style.display = 'flex';
+
+        const makeChoice = (mode) => {
+            setComparisonMode(mode);
+            dom.modeChoiceModal.style.display = 'none';
+            _startSortInternal();
+            // Clean up listeners to prevent multiple triggers
+            dom.modalBtnPairwise.onclick = null;
+            dom.modalBtnTriwise.onclick = null;
+        };
+
+        dom.modalBtnPairwise.onclick = () => makeChoice(2);
+        dom.modalBtnTriwise.onclick = () => makeChoice(3);
+
+    } else {
+        _startSortInternal();
+    }
 }
 
 export function handleUndoComparison() {
@@ -395,4 +406,28 @@ export function handleSkipComparison() {
         state.skippedComparisons.push(items);
         callback(0); // Treat as a tie to allow the sort to continue
     }
+}
+
+export function handleSkipSeeding() {
+    if (!state.isSeeding) return;
+
+    // Assign a default middle-tier seed value to all un-seeded items.
+    const defaultSeedValue = state.seedTiers.find(t => t.label.toLowerCase().includes('mid'))?.value || 3;
+    state.items.forEach(item => {
+        if (state.itemSeedValues[item.id] === undefined) {
+            state.itemSeedValues[item.id] = defaultSeedValue;
+        }
+    });
+
+    // Proceed directly to the main sort.
+    onSeedingComplete();
+}
+
+function _startSortInternal() {
+    // Fully reset state for a new sort process initiated by the user
+    abortSort();
+    state.sortStartTime = performance.now();
+
+    document.addEventListener('keydown', handleKeyboardSorting);
+    startSeeding();
 }

@@ -3,7 +3,8 @@ export const state = {
     title: 'Tier List',
     editingItemId: null,
 
-    comparisonMode: 2,
+    // MODIFIED: 'ask' is the new default. Can be 'ask', 2, or 3.
+    comparisonMode: 'ask',
 
     // --- SORTING STATE ---
     isSorting: false,
@@ -129,5 +130,11 @@ export function setItemSeedValue(itemId, seedValue) {
 }
 
 export function setComparisonMode(mode) {
-    state.comparisonMode = parseInt(mode, 10);
+    // The value from the radio button is a string "2", "3", or "ask".
+    // We handle the numeric conversion if needed, otherwise store 'ask'.
+    if (mode === 'ask') {
+        state.comparisonMode = 'ask';
+    } else {
+        state.comparisonMode = parseInt(mode, 10);
+    }
 }
