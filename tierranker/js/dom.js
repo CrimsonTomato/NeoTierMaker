@@ -37,6 +37,7 @@ export const tierListGridEl = document.getElementById('tier-list-grid');
 export const btnAddTier = document.getElementById('btn-add-tier');
 export const btnRemoveTier = document.getElementById('btn-remove-tier');
 export const btnRestart = document.getElementById('btn-restart');
+export const btnBackToStaging = document.getElementById('btn-back-to-staging');
 export const tierColorInput = document.getElementById('tier-color-input');
 export const btnExportImage = document.getElementById('btn-export-image');
 export const btnCopyImage = document.getElementById('btn-copy-image');

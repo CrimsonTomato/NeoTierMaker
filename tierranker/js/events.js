@@ -1,5 +1,5 @@
 import * as dom from './dom.js';
-import { state, clearItems, removeItem, setEditingItemId, updateItemText, updateTierLabel, updateTitle, setComparisonMode, abortSort, toggleTierEditMode } from './state.js';
+import { state, clearItems, removeItem, setEditingItemId, updateItemText, updateTierLabel, updateTitle, setComparisonMode, abortSort, toggleTierEditMode, discardSortResults } from './state.js';
 import { handleTextInput, handleFileInput } from './inputController.js';
 import { renderStagingList, showPreview, hidePreview, setDragging } from './ui.js';
 import { startSort, handleSeedButtonClick, cleanupSortListeners, handleUndoComparison, handleSkipComparison, handleSkipSeeding, handleSimulateSort } from './sortController.js';
@@ -247,6 +247,13 @@ export function initializeEventListeners() {
     dom.btnToggleTierEdit.addEventListener('click', () => {
         toggleTierEditMode();
         renderResultsView();
+    });
+
+    dom.btnBackToStaging.addEventListener('click', () => {
+        if (confirm("Are you sure? This will discard the current sort results and return you to the staging list.")) {
+            discardSortResults();
+            showView(dom.viewInput);
+        }
     });
 
     dom.btnRestart.addEventListener('click', () => {

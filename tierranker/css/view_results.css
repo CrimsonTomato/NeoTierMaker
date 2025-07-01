@@ -10,6 +10,11 @@
     margin-bottom: 16px;
 }
 
+.results-actions {
+    display: flex;
+    gap: 8px;
+}
+
 .results-actions .btn {
     width: auto;
 }

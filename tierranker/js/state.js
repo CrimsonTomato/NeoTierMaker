@@ -138,3 +138,23 @@ export function setComparisonMode(mode) {
         state.comparisonMode = parseInt(mode, 10);
     }
 }
+
+/**
+ * Discards all sorting results (scores, stats, tier assignments)
+ * but keeps the core item list and tier definitions.
+ */
+export function discardSortResults() {
+    // Reset all the in-progress and completed sort state.
+    abortSort();
+
+    // Clear scores and tier assignments from individual items.
+    state.items.forEach(item => {
+        delete item.score;
+        delete item.tierId;
+    });
+
+    // Clear the list of items within each tier.
+    state.tiers.forEach(tier => {
+        tier.itemIds = [];
+    });
+}
