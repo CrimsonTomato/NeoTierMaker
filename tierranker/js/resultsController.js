@@ -14,7 +14,6 @@ function calculateScores() {
     const n = state.items.length;
     if (n === 0) return;
     state.items.forEach((item, index) => {
-        // The score is based on the final sorted position (0 is best).
         item.score = n > 1 ? 100 - (index * (100 / (n - 1))) : 100;
     });
 }
@@ -22,13 +21,11 @@ function calculateScores() {
 function setInitialTierThresholds() {
     const numTiers = state.tiers.length;
     if (numTiers < 1) return;
-    // Ensure tiers are sorted by current threshold before recalculating
     state.tiers.sort((a, b) => b.threshold - a.threshold);
     const step = 100 / numTiers;
     state.tiers.forEach((tier, index) => {
         tier.threshold = 100 - (index + 1) * step;
     });
-    // Ensure the last tier goes all the way to 0.
     if (numTiers > 0) state.tiers[state.tiers.length - 1].threshold = 0;
 }
 
@@ -36,12 +33,11 @@ export function assignItemsToTiers() {
     state.tiers.sort((a, b) => b.threshold - a.threshold);
     state.tiers.forEach(tier => tier.itemIds = []);
     state.items.forEach(item => {
-        // Find the highest-threshold tier this item qualifies for.
         for (const tier of state.tiers) {
             if (item.score >= tier.threshold) {
                 item.tierId = tier.id;
                 tier.itemIds.push(item.id);
-                return; // Assign to the first one found and stop.
+                return;
             }
         }
     });
@@ -50,18 +46,13 @@ export function assignItemsToTiers() {
 export function updateTierColor(tierId, newHexColor) {
     const tier = state.tiers.find(t => t.id === tierId);
     if (!tier) return;
-    // Calculate contrast color before updating state
     const r = parseInt(newHexColor.slice(1, 3), 16);
     const g = parseInt(newHexColor.slice(3, 5), 16);
     const b = parseInt(newHexColor.slice(5, 7), 16);
     const textColor = isColorDark([r, g, b]) ? '#FFFFFF' : '#000000';
 
-    // Update state (This part doesn't exist yet, so we'll add it)
-    const tierInState = state.tiers.find(t => t.id === tierId);
-    if (tierInState) {
-        tierInState.color = newHexColor;
-        tierInState.textColor = textColor;
-    }
+    tier.color = newHexColor;
+    tier.textColor = textColor;
 
     renderResultsView();
 }
@@ -69,6 +60,14 @@ export function updateTierColor(tierId, newHexColor) {
 
 export function renderResultsView() {
     dom.resultsListTitle.textContent = state.title;
+
+    const { comparisons, time } = state.sortStats;
+    if (comparisons > 0) {
+        const timeInSeconds = (time / 1000).toFixed(2);
+        dom.sortStatsContainer.innerHTML = `Sort completed in <b>${timeInSeconds} seconds</b> with <b>${comparisons} comparisons</b>.`;
+    } else {
+        dom.sortStatsContainer.innerHTML = '';
+    }
 
     dom.tierTagContainer.innerHTML = '';
     state.tiers.forEach(tier => {
@@ -83,26 +82,22 @@ export function renderResultsView() {
     });
 
     dom.rankedListWrapper.innerHTML = '';
-    // Create a combined list of items and tier boundaries to render in order
     const renderQueue = [
         ...state.items.map(i => ({ ...i, type: 'item' })),
         ...state.tiers.map(t => ({ type: 'tier', score: t.threshold, tier: t, id: t.id }))
     ];
-    // Sort by score (desc), with items appearing just before boundaries of the same score
     renderQueue.sort((a, b) => (a.score !== b.score) ? b.score - a.score : (a.type === 'item' ? -1 : 1));
 
-    let lastItemScore = 101; // Used for calculating boundary positions
+    let lastItemScore = 101;
     renderQueue.forEach(entity => {
         if (entity.type === 'item') {
             const itemEl = document.createElement('div');
             itemEl.className = 'ranked-item';
             const itemTier = state.tiers.find(t => t.id === entity.tierId);
             if (itemTier) {
-                // Faded background color for the row
                 const rgb = itemTier.color.match(/\w\w/g).map(hex => parseInt(hex, 16));
                 itemEl.style.backgroundColor = `rgba(${rgb[0]}, ${rgb[1]}, ${rgb[2]}, 0.1)`;
 
-                // Gradient text for the score bar label
                 const gradientStyle = `
                     background-image: linear-gradient(to right, ${itemTier.textColor} ${entity.score}%, var(--text-primary) ${entity.score}%);
                     -webkit-background-clip: text;
@@ -123,7 +118,6 @@ export function renderResultsView() {
         } else if (entity.type === 'tier') {
             const boundaryEl = document.createElement('div');
             boundaryEl.className = 'tier-boundary';
-            // The boundary's clickable value is halfway between the item above and itself
             boundaryEl.dataset.threshold = (lastItemScore + entity.score) / 2;
 
             const tagEl = document.createElement('div');
@@ -165,13 +159,14 @@ export function renderResultsView() {
     });
 }
 
-/**
- * The main entry point function for when a sort completes.
- * @param {Array<object>} sortedItems The final, sorted array of items.
- */
 export function onSortDone(sortedItems) {
+    const endTime = performance.now();
     state.isSorting = false;
-    state.items = sortedItems; // The master list is now the sorted list
+    state.items = sortedItems;
+
+    state.sortStats.comparisons = state.progress.current;
+    state.sortStats.time = endTime - state.sortStartTime;
+
     calculateScores();
     setInitialTierThresholds();
     assignItemsToTiers();

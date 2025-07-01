@@ -21,6 +21,7 @@ export const comparisonTitleEl = document.getElementById('comparison-title');
 export const triLayoutControls = document.getElementById('tri-layout-controls');
 export const btnTriLayoutVertical = document.getElementById('btn-tri-layout-vertical');
 export const btnTriLayoutHorizontal = document.getElementById('btn-tri-layout-horizontal');
+export const btnAbortComparison = document.getElementById('btn-abort-comparison');
 
 export const viewResults = document.getElementById('view-results');
 export const tierTagContainer = document.getElementById('tier-tag-container');
@@ -38,11 +39,13 @@ export const btnExportSession = document.getElementById('btn-export-session');
 export const btnImportSession = document.getElementById('btn-import-session');
 export const sessionFileInput = document.getElementById('session-file-input');
 export const resultsListTitle = document.getElementById('results-list-title');
+export const sortStatsContainer = document.getElementById('sort-stats-container');
 
 export const viewSeeding = document.getElementById('view-seeding');
 export const seedingCardEl = document.getElementById('seeding-card');
 export const seedTierButtonsEl = document.getElementById('seed-tier-buttons');
 export const seedingProgressTextEl = document.getElementById('seeding-progress-text');
 export const seedingProgressBarInnerEl = document.getElementById('seeding-progress-bar-inner');
+export const btnAbortSeeding = document.getElementById('btn-abort-seeding');
 
 export const comparisonModeRadios = document.querySelectorAll('input[name="comparison-mode"]');

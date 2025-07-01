@@ -32,7 +32,6 @@ body {
     height: 100vh;
 }
 
-/* === CHANGE 1: Added flex layout to the left sidebar to create gaps between buttons === */
 .sidebar-left {
     background-color: var(--bg-secondary);
     padding: 16px;
@@ -101,7 +100,6 @@ body {
     background-color: var(--bg-primary);
 }
 
-/* === CHANGE 2: Added a rule for .input-actions to create a gap between the Add/Clear buttons === */
 .input-actions {
     display: flex;
     gap: 10px;
@@ -125,6 +123,16 @@ p {
     line-height: 1.5;
     margin-bottom: 16px;
     font-size: 0.9rem;
+}
+
+/* NEW .instructions class */
+.instructions {
+    background-color: var(--bg-secondary);
+    border-left: 3px solid var(--accent-primary);
+    padding: 8px 12px;
+    margin-bottom: 16px;
+    border-radius: 0 4px 4px 0;
+    font-size: 0.85rem;
 }
 
 textarea {
@@ -176,9 +184,7 @@ textarea {
 }
 
 
-/* === STAGING LIST STYLES (The restored/correct part) === */
-
-/* --- Staging List View Toggler --- */
+/* === STAGING LIST STYLES === */
 .view-controls {
     display: flex;
     gap: 4px;
@@ -372,10 +378,7 @@ textarea {
     background-color: rgba(255, 255, 255, 0.9);
 }
 
-
-/* === GLOBAL STYLES (Used by multiple views) === */
-
-/* --- SortableJS Styles --- */
+/* === GLOBAL STYLES === */
 .sortable-drag {
     cursor: grabbing;
 }
@@ -423,13 +426,19 @@ textarea {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 24px;
+    margin-bottom: 16px;
     flex-wrap: wrap;
     gap: 16px;
 }
 
 .comparison-header h2 {
+    margin-bottom: 0;
     flex-grow: 1;
+}
+
+.comparison-header .btn {
+    width: auto;
+    flex-shrink: 0;
 }
 
 .progress-container {
@@ -452,7 +461,6 @@ textarea {
     transition: width 0.3s ease;
 }
 
-/* .comparison-container is now .pairwise-container */
 .comparison-card {
     background-color: var(--bg-secondary);
     border-radius: var(--radius);
@@ -496,8 +504,25 @@ textarea {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 24px;
+    margin-bottom: 16px;
 }
+
+/* NEW: Sort Stats Container */
+#sort-stats-container {
+    background-color: var(--bg-secondary);
+    padding: 8px 12px;
+    border-radius: var(--radius);
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    margin-bottom: 16px;
+    text-align: center;
+}
+
+#sort-stats-container:empty {
+    display: none;
+}
+
+/* Hide if empty */
 
 .results-actions {
     display: flex;
@@ -508,7 +533,7 @@ textarea {
     display: grid;
     grid-template-columns: 450px 1fr;
     gap: 24px;
-    height: calc(100vh - 150px);
+    height: calc(100vh - 220px);
 }
 
 .results-column {
@@ -632,7 +657,6 @@ body.assign-mode #ranked-list-wrapper {
     white-space: nowrap;
     overflow: hidden;
     color: transparent;
-    /* Hide original color */
     grid-column: 1 / 2;
     pointer-events: none;
 }
@@ -876,12 +900,11 @@ body.is-exporting #tier-list-grid {
     margin-top: 4px;
 }
 
-/* === DYNAMIC COMPARISON VIEW STYLES (REPLACED) === */
+/* === DYNAMIC COMPARISON VIEW STYLES === */
 #comparison-area {
     display: flex;
     flex-direction: column;
     align-items: center;
-    /* Center the list horizontally */
     gap: 24px;
 }
 
@@ -922,28 +945,27 @@ body.is-exporting #tier-list-grid {
     font-size: 1.5rem;
     font-weight: bold;
     color: #212529;
-    /* Dark text for better contrast on bright colors */
     text-shadow: 0 1px 1px rgba(255, 255, 255, 0.4);
     border-radius: 4px;
     transition: background-color 0.2s ease-in-out;
 }
 
-/* -- New Rank Colors -- */
+/* Gold */
 .triwise-rank-label.rank-1 {
     background-color: #ffd700;
 }
 
-/* Gold */
+/* Silver */
 .triwise-rank-label.rank-2 {
     background-color: #d1d5db;
 }
 
-/* Silver */
+/* Vibrant Bronze/Copper */
 .triwise-rank-label.rank-3 {
     background-color: #d97706;
 }
 
-/* Vibrant Bronze/Copper */
+
 
 .comparison-card-draggable {
     flex-grow: 1;
@@ -969,7 +991,6 @@ body.is-exporting #tier-list-grid {
     overflow: hidden;
     background-color: var(--bg-tertiary);
     position: relative;
-    /* For the preview functionality */
 }
 
 .triwise-image {
@@ -999,7 +1020,6 @@ body.is-exporting #tier-list-grid {
     z-index: 10;
 }
 
-/* === NEW: Horizontal Item Layout Overrides === */
 #triwise-ranking-list.layout-horizontal .comparison-card-draggable {
     flex-direction: column;
     text-align: center;
@@ -1010,10 +1030,8 @@ body.is-exporting #tier-list-grid {
 #triwise-ranking-list.layout-horizontal .triwise-image-wrapper {
     width: 100%;
     height: 120px;
-    /* More height for image */
 }
 
 #triwise-ranking-list.layout-horizontal .card-text {
     width: 100%;
-    /* Ensure text can wrap if needed */
 }

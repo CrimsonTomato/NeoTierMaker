@@ -9,6 +9,35 @@ import Sortable from 'sortablejs';
 let currentlySeedingItem = null;
 const comparisonCache = new Map();
 
+function handleKeyboardSorting(e) {
+    if (!state.isSorting || state.comparisonMode !== 2 || !state.comparison.callback) {
+        return;
+    }
+    const { callback } = state.comparison;
+    let choiceMade = false;
+    switch (e.key) {
+        case 'ArrowLeft': case '1':
+            callback(1);
+            choiceMade = true;
+            break;
+        case 'ArrowRight': case '2':
+            callback(-1);
+            choiceMade = true;
+            break;
+        case ' ': case '0':
+            callback(0);
+            choiceMade = true;
+            break;
+    }
+    if (choiceMade) {
+        e.preventDefault();
+    }
+}
+
+export function cleanupSortListeners() {
+    document.removeEventListener('keydown', handleKeyboardSorting);
+}
+
 function displayNextSeedItem() {
     currentlySeedingItem = state.items.find(item => state.itemSeedValues[item.id] === undefined);
 
@@ -30,7 +59,7 @@ function startSeeding() {
     state.isSeeding = true;
     state.itemSeedValues = {};
     state.seedingProgress = { current: 0, total: state.items.length };
-    comparisonCache.clear(); // Clear cache for new sort
+    comparisonCache.clear();
 
     dom.seedTierButtonsEl.innerHTML = '';
     state.seedTiers.forEach(tier => {
@@ -54,8 +83,6 @@ export function handleSeedButtonClick(value) {
 
 async function onSeedingComplete() {
     state.isSeeding = false;
-
-    // Group items by their seed value
     const itemGroups = state.items.reduce((groups, item) => {
         const seedValue = state.itemSeedValues[item.id] || 0;
         if (!groups[seedValue]) groups[seedValue] = [];
@@ -63,16 +90,14 @@ async function onSeedingComplete() {
         return groups;
     }, {});
 
-    // Sort groups by seed value (descending)
     const sortedGroups = [];
     const seedValues = Object.keys(itemGroups).map(Number).sort((a, b) => b - a);
 
-    // Calculate total estimated comparisons for the progress bar
     const totalComparisons = seedValues.reduce((total, key) => {
         const group = itemGroups[key];
         const n = group.length;
         if (n > 1) {
-            total += Math.ceil(n * Math.log2(n)); // A good estimate for comparison sorts
+            total += Math.ceil(n * Math.log2(n));
         }
         return total;
     }, 0);
@@ -81,7 +106,6 @@ async function onSeedingComplete() {
     state.isSorting = true;
     showView(dom.viewComparison);
 
-    // This cache prevents redundant comparisons like A-B and B-A.
     const generateKey = (id1, id2) => [id1, id2].sort().join('-');
 
     for (const seedValue of seedValues) {
@@ -91,7 +115,6 @@ async function onSeedingComplete() {
                 createSorter(
                     group,
                     state.comparisonMode,
-                    // "Decorated" onCompare function with caching
                     (itemsToCompare, onResult) => {
                         if (itemsToCompare.length === 2) {
                             const [itemA, itemB] = itemsToCompare;
@@ -131,6 +154,7 @@ async function onSeedingComplete() {
         }
     }
 
+    cleanupSortListeners();
     onSortDone(sortedGroups);
 }
 
@@ -224,13 +248,13 @@ function updateComparisonView() {
     dom.progressBarInnerEl.style.width = `${state.progress.total > 0 ? (state.progress.current / state.progress.total) * 100 : 0}%`;
 }
 
-/**
- * Public-facing function to start the entire sorting process.
- */
 export function startSort() {
     if (state.items.length < 2) {
         alert("Please add at least two items to sort.");
         return;
     }
+    state.sortStartTime = performance.now();
+
+    document.addEventListener('keydown', handleKeyboardSorting);
     startSeeding();
 }

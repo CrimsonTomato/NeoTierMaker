@@ -1,8 +1,8 @@
 import * as dom from './dom.js';
-import { state, clearItems, removeItem, setEditingItemId, updateItemText, updateTierLabel, updateTitle, setComparisonMode } from './state.js';
+import { state, clearItems, removeItem, setEditingItemId, updateItemText, updateTierLabel, updateTitle, setComparisonMode, abortSort } from './state.js';
 import { handleTextInput, handleFileInput } from './inputController.js';
 import { renderStagingList, showPreview, hidePreview, setDragging } from './ui.js';
-import { startSort, handleSeedButtonClick } from './sortController.js';
+import { startSort, handleSeedButtonClick, cleanupSortListeners } from './sortController.js';
 import { renderResultsView, handleTierTagClick, handleRankedListClick, handleAddTier, handleRemoveLastTier, updateTierColor, setEditingTierIdForColor, editingTierIdForColor, handleSizeIncrease, handleSizeDecrease } from './resultsController.js';
 import { exportElementAsImage, copyElementAsImage } from './export.js';
 import { exportSessionToFile, importSessionFromFile } from './fileSession.js';
@@ -105,7 +105,17 @@ export function initializeEventListeners() {
         renderStagingList();
     });
 
-    // --- Config and Seeding Events ---
+    // --- Sorting, Seeding, and Abort Events ---
+    const handleAbort = () => {
+        if (confirm("Are you sure you want to abort the sort and return to the item list?")) {
+            abortSort();
+            cleanupSortListeners();
+            showView(dom.viewInput);
+        }
+    };
+    dom.btnAbortSeeding.addEventListener('click', handleAbort);
+    dom.btnAbortComparison.addEventListener('click', handleAbort);
+
     dom.comparisonModeRadios.forEach(radio => {
         radio.addEventListener('change', (e) => setComparisonMode(e.target.value));
     });
@@ -187,10 +197,7 @@ export function initializeEventListeners() {
         editInput.select();
     });
 
-    // --- FIX: The corrected event listener ---
     dom.tierColorInput.addEventListener('input', (e) => {
-        // `editingTierIdForColor` is a live binding to the variable in resultsController.
-        // No async/await or dynamic import is needed.
         if (editingTierIdForColor) {
             updateTierColor(editingTierIdForColor, e.target.value);
         }
@@ -227,26 +234,6 @@ export function initializeEventListeners() {
     dom.btnSizeIncrease.addEventListener('click', handleSizeIncrease);
     dom.btnSizeDecrease.addEventListener('click', handleSizeDecrease);
 
-    const setupExportButton = (button, handler, elementId, fileName) => {
-        button.addEventListener('click', async () => {
-            const elementToCapture = document.getElementById(elementId);
-            const originalText = button.textContent;
-            button.textContent = 'Generating...';
-            button.disabled = true;
-            document.body.classList.add('is-exporting');
-
-            setTimeout(async () => {
-                try {
-                    await handler(elementToCapture, fileName);
-                } finally {
-                    document.body.classList.remove('is-exporting');
-                    button.textContent = originalText;
-                    button.disabled = false;
-                }
-            }, 100);
-        });
-    };
-
     dom.btnCopyImage.addEventListener('click', async () => {
         const elementToCapture = document.getElementById('tier-list-export-area');
         const originalButtonText = dom.btnCopyImage.textContent;
@@ -270,7 +257,23 @@ export function initializeEventListeners() {
         }, 100);
     });
 
-    setupExportButton(dom.btnExportImage, exportElementAsImage, 'tier-list-export-area', 'my-tier-list.png');
+    dom.btnExportImage.addEventListener('click', async () => {
+        const elementToCapture = document.getElementById('tier-list-export-area');
+        const originalText = dom.btnExportImage.textContent;
+        dom.btnExportImage.textContent = 'Generating...';
+        dom.btnExportImage.disabled = true;
+        document.body.classList.add('is-exporting');
+
+        setTimeout(async () => {
+            try {
+                await exportElementAsImage(elementToCapture, 'my-tier-list.png');
+            } finally {
+                document.body.classList.remove('is-exporting');
+                dom.btnExportImage.textContent = originalText;
+                dom.btnExportImage.disabled = false;
+            }
+        }, 100);
+    });
 
     dom.btnExportSession.addEventListener('click', async () => {
         if (state.items.length === 0) { alert("There is nothing to export."); return; }
