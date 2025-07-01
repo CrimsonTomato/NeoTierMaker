@@ -12,6 +12,7 @@
     "vite": "^7.0.0"
   },
   "dependencies": {
+    "chart.js": "^4.5.0",
     "fast-average-color": "^9.5.0",
     "html2canvas": "^1.4.1",
     "jszip": "^3.10.1",

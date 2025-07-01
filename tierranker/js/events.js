@@ -8,6 +8,8 @@ import { exportElementAsImage, copyElementAsImage } from './export.js';
 import { exportSessionToFile, importSessionFromFile } from './fileSession.js';
 import { showView } from './view.js';
 import Sortable from 'sortablejs';
+// --- MODIFICATION: Import new functions ---
+import { renderRankHistoryChart, destroyHistoryChart, toggleHistoryFilter, resetHistoryFilter } from './historyChart.js';
 
 export function initializeEventListeners() {
     // --- Theme and Sidebar Toggles ---
@@ -15,6 +17,12 @@ export function initializeEventListeners() {
         document.body.classList.add('no-transitions');
         const isDarkMode = document.documentElement.classList.toggle('dark-mode');
         localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
+
+        const drawer = document.getElementById('rank-history-drawer');
+        if (drawer.classList.contains('visible')) {
+            renderRankHistoryChart();
+        }
+
         setTimeout(() => {
             document.body.classList.remove('no-transitions');
         }, 100);
@@ -43,14 +51,11 @@ export function initializeEventListeners() {
         document.body.classList.add('is-resizing');
 
         const handleMouseMove = (moveEvent) => {
-            // Calculate new width based on mouse position from the right edge of the viewport
             let newWidth = window.innerWidth - moveEvent.clientX;
 
-            // Clamp the width between min and max values
             if (newWidth < MIN_SIDEBAR_WIDTH) newWidth = MIN_SIDEBAR_WIDTH;
             if (newWidth > MAX_SIDEBAR_WIDTH) newWidth = MAX_SIDEBAR_WIDTH;
 
-            // Set the CSS custom property to apply the new width
             document.documentElement.style.setProperty('--sidebar-right-width-wide', `${newWidth}px`);
         };
 
@@ -69,7 +74,6 @@ export function initializeEventListeners() {
     dom.iconImportButton.addEventListener('click', () => dom.btnImportSession.click());
 
     // Sync logic to handle three states
-    // Sync main radio buttons to icon radio buttons
     dom.comparisonModeRadios.forEach(radio => {
         radio.addEventListener('change', (e) => {
             const value = e.target.value;
@@ -83,7 +87,6 @@ export function initializeEventListeners() {
         });
     });
 
-    // Sync icon radio buttons to main radio buttons
     dom.comparisonModeIconRadios.forEach(radio => {
         radio.addEventListener('change', (e) => {
             const value = e.target.value;
@@ -206,7 +209,6 @@ export function initializeEventListeners() {
     dom.btnAbortComparison.addEventListener('click', handleAbort);
 
     dom.btnSkipSeeding.addEventListener('click', handleSkipSeeding);
-
     dom.btnUndoComparison.addEventListener('click', handleUndoComparison);
     dom.btnSkipComparison.addEventListener('click', handleSkipComparison);
 
@@ -240,7 +242,6 @@ export function initializeEventListeners() {
     });
 
     dom.rankedListWrapper.addEventListener('click', handleRankedListClick);
-
     dom.btnAddTier.addEventListener('click', handleAddTier);
     dom.btnRemoveTier.addEventListener('click', handleRemoveLastTier);
 
@@ -276,7 +277,6 @@ export function initializeEventListeners() {
 
         const tierId = tierLabel.dataset.tierId;
         const originalText = state.tiers.find(t => t.id === tierId).label;
-
         const editInput = document.createElement('textarea');
         editInput.className = 'tier-label-edit';
         editInput.value = originalText;
@@ -331,6 +331,36 @@ export function initializeEventListeners() {
         input.focus();
         input.select();
     });
+
+    // --- Rank History Drawer ---
+    dom.btnToggleHistory.addEventListener('click', () => {
+        const drawer = document.getElementById('rank-history-drawer');
+        const buttonText = dom.btnToggleHistory.querySelector('span');
+        drawer.classList.toggle('visible');
+
+        if (drawer.classList.contains('visible')) {
+            buttonText.textContent = 'Hide Rank History';
+
+            const LEGEND_DISPLAY_THRESHOLD = 25;
+            const itemCount = state.items.length;
+            if (itemCount > LEGEND_DISPLAY_THRESHOLD) {
+                drawer.style.height = '60vh';
+            } else {
+                drawer.style.height = '400px';
+            }
+
+            setTimeout(renderRankHistoryChart, 50);
+        } else {
+            buttonText.textContent = 'Show Rank History';
+            drawer.style.height = '';
+            // --- MODIFICATION: Reset the filter state when closing the drawer ---
+            resetHistoryFilter();
+            destroyHistoryChart();
+        }
+    });
+
+    // --- ADDED: Click listener for the new filter button ---
+    dom.btnToggleHistoryFilter.addEventListener('click', toggleHistoryFilter);
 
     // --- Export and Session Events ---
     dom.btnSizeIncrease.addEventListener('click', handleSizeIncrease);
@@ -519,11 +549,9 @@ export function initializeEventListeners() {
                 isSorting: false,
             });
 
-            // FIX: Always render the staging list after an import to ensure it's in sync.
             renderStagingList();
             alert("Session imported successfully!");
 
-            // Now, decide which view to show.
             if (state.items.length > 0 && state.items.some(item => item.score !== undefined)) {
                 showView(dom.viewResults);
                 renderResultsView();

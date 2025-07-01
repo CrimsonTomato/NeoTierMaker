@@ -2,6 +2,7 @@ import * as dom from './dom.js';
 import { state, updateTierThreshold, addTier, removeLastTier, toggleTierEditMode } from './state.js';
 import { showView } from './view.js';
 import { isColorDark } from './color.js';
+import { renderRankHistoryChart } from './historyChart.js';
 
 let selectedTierToAssign = null;
 export let editingTierIdForColor = null;
@@ -55,6 +56,11 @@ export function updateTierColor(tierId, newHexColor) {
     tier.textColor = textColor;
 
     renderResultsView();
+    // Also re-render the chart to update its line colors if it's visible
+    const drawer = document.getElementById('rank-history-drawer');
+    if (drawer.classList.contains('visible')) {
+        renderRankHistoryChart();
+    }
 }
 
 
@@ -199,6 +205,15 @@ export function onSortDone(sortedItems) {
     assignItemsToTiers();
     showView(dom.viewResults);
     renderResultsView();
+
+    // Show the drawer container if data exists, but don't render the chart yet.
+    // The user will trigger the render by clicking the button.
+    const drawerEl = document.getElementById('rank-history-drawer');
+    if (state.rankHistory && state.rankHistory.length >= 2) {
+        drawerEl.style.display = 'flex';
+    } else {
+        drawerEl.style.display = 'none';
+    }
 }
 
 export function handleTierTagClick(tierId) {

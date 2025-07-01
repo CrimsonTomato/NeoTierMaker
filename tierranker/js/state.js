@@ -1,3 +1,5 @@
+import { destroyHistoryChart } from './historyChart.js';
+
 export const state = {
     items: [],
     title: 'Tier List',
@@ -12,6 +14,7 @@ export const state = {
     progress: { current: 0, total: 0 },
     sortStartTime: 0,
     sortStats: { comparisons: 0, time: 0 },
+    rankHistory: [],
 
     // --- UNDO/SKIP STATE ---
     decisionLog: [],
@@ -51,10 +54,12 @@ export function abortSort() {
     state.itemSeedValues = {};
     state.sortStats = { comparisons: 0, time: 0 };
     state.sortStartTime = 0;
-    // --- Clear undo/skip state ---
+    // --- Clear undo/skip/history state ---
     state.decisionLog = [];
     state.skippedComparisons = [];
     state.isResolvingSkips = false;
+    state.rankHistory = [];
+    destroyHistoryChart();
 }
 
 export function toggleTierEditMode() {

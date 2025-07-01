@@ -142,7 +142,12 @@ function resolveSkippedComparisons(partiallySortedItems) {
 async function onSeedingComplete(isSimulation = false) {
     state.isSeeding = false;
     const itemGroups = state.items.reduce((groups, item) => {
-        const seedValue = state.itemSeedValues[item.id] || 0;
+        let seedValue = state.itemSeedValues[item.id];
+        // Handle items skipped during seeding (they get a default middle value)
+        if (seedValue === undefined) {
+            const defaultSeedValue = state.seedTiers.find(t => t.label.toLowerCase().includes('mid'))?.value || 3;
+            seedValue = defaultSeedValue;
+        }
         if (!groups[seedValue]) groups[seedValue] = [];
         groups[seedValue].push(item);
         return groups;
@@ -179,8 +184,44 @@ async function onSeedingComplete(isSimulation = false) {
     const generateKey = (id1, id2) => [id1, id2].sort().join('-');
     const getIds = (items) => items.map(i => i.id).sort().join(',');
 
+    // NEW: Map to hold the current sorted state of each group. Initialize with original groups.
+    const liveSortedGroups = new Map();
+    seedValues.forEach(val => liveSortedGroups.set(val, [...(itemGroups[val] || [])]));
+
+    // --- MODIFICATION: Create a dedicated counter for simulation mode ---
+    let simulationComparisonCount = 0;
+
+    const onProgressCallback = (partiallySortedGroup, context) => {
+        // --- MODIFICATION: REMOVED the `if (isSimulation) return;` check ---
+
+        // Update the map with the latest sorted version of the current group
+        liveSortedGroups.set(context.seedValue, partiallySortedGroup);
+
+        // Construct the full, global list by concatenating all groups in order
+        let globalSnapshot = [];
+        seedValues.forEach(val => {
+            const groupItems = liveSortedGroups.get(val) || [];
+            globalSnapshot.push(...groupItems);
+        });
+
+        // Now we have a full list with a global ranking. Record it.
+        const ranks = globalSnapshot.map((item, index) => ({
+            id: item.id,
+            rank: index + 1, // 1-based rank
+        }));
+
+        state.rankHistory.push({
+            // --- MODIFICATION: Use the correct counter based on mode ---
+            comparisonCount: isSimulation ? simulationComparisonCount : state.progress.current,
+            ranks: ranks,
+        });
+    };
+
+
     // --- NEW: Define the automated comparison callback for simulation ---
     const simulationCompareCallback = (itemsToCompare, onResult) => {
+        // --- MODIFICATION: Increment the simulation counter on each decision ---
+        simulationComparisonCount++;
         if (itemsToCompare.length === 2) {
             // For pairwise, randomly return 1 (A > B), -1 (B > A), or 0 (tie)
             const result = Math.floor(Math.random() * 3) - 1;
@@ -238,18 +279,28 @@ async function onSeedingComplete(isSimulation = false) {
         const group = itemGroups[seedValue];
         if (group.length > 1) {
             const sortedGroup = await new Promise((resolve) => {
-                createSorter(group, state.comparisonMode,
-                    // MODIFIED: Choose the callback based on whether we're simulating
+                createSorter(
+                    group,
+                    state.comparisonMode,
                     isSimulation ? simulationCompareCallback : interactiveCompareCallback,
                     (finalSortedGroup) => {
+                        // Also update the map with the final sorted group before resolving
+                        liveSortedGroups.set(seedValue, finalSortedGroup);
                         resolve(finalSortedGroup);
-                    }
+                    },
+                    onProgressCallback,
+                    { seedValue } // Pass context for the callback
                 );
             });
             sortedGroups.push(...sortedGroup);
         } else if (group.length === 1) {
             sortedGroups.push(group[0]);
         }
+    }
+
+    // --- MODIFICATION: Set the final comparison count for the simulation stats ---
+    if (isSimulation) {
+        state.sortStats.comparisons = simulationComparisonCount;
     }
 
     // Skips are not possible in simulation, so this only runs for interactive sorts.
@@ -416,6 +467,7 @@ export function handleUndoComparison() {
     state.comparison = { items: [], callback: null };
     state.progress = { current: 0, total: 0 };
     replayLogIndex = 0; // Ensure replay starts from the beginning
+    state.rankHistory = []; // Also clear rank history on undo
 
     // Re-attach listener and restart the sorting process from after seeding
     document.addEventListener('keydown', handleKeyboardSorting);

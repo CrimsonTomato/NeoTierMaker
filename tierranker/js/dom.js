@@ -51,6 +51,8 @@ export const sortStatsContainer = document.getElementById('sort-stats-container'
 export const btnExportBarChart = document.getElementById('btn-export-barchart');
 export const btnCopyBarChart = document.getElementById('btn-copy-barchart');
 export const btnToggleTierEdit = document.getElementById('btn-toggle-tier-edit');
+export const btnToggleHistory = document.getElementById('btn-toggle-history');
+export const btnToggleHistoryFilter = document.getElementById('btn-toggle-history-filter');
 
 export const viewSeeding = document.getElementById('view-seeding');
 export const seedingCardEl = document.getElementById('seeding-card');

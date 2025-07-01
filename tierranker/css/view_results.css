@@ -37,7 +37,8 @@
     display: grid;
     grid-template-columns: 450px 1fr;
     gap: 24px;
-    height: calc(100vh - 220px);
+    /* Let the container grow naturally based on content */
+    /* height: calc(100vh - 220px); -- REMOVED */
 }
 
 .results-column {
@@ -46,6 +47,7 @@
     padding: 16px;
     display: flex;
     flex-direction: column;
+    min-height: 500px; /* Give a minimum height */
 }
 
 #ranked-list-container {

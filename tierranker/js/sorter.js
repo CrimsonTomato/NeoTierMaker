@@ -4,24 +4,26 @@
  * @param {number} mode The comparison mode (2 for pairwise, 3 for tri-wise).
  * @param {function} onCompare The comparison callback. It receives an array of items and a result callback.
  * @param {function} onDone The final callback.
+ * @param {function} [onProgress] Optional callback for intermediate progress.
+ * @param {object} [progressContext] Optional context object to pass to the onProgress callback.
  */
-export function createSorter(items, mode, onCompare, onDone) {
+export function createSorter(items, mode, onCompare, onDone, onProgress, progressContext) {
     const arrCopy = [...items];
 
     if (mode === 3) {
         // Use the new, more efficient Ternary Insertion Sort for 3-item comparisons.
-        ternaryInsertionSort(arrCopy, onCompare, onDone)
+        ternaryInsertionSort(arrCopy, onCompare, onDone, onProgress, progressContext)
             .catch(err => console.error("Error in Ternary Sort:", err));
     } else {
         // Use Merge Sort for pairwise comparisons.
-        pairwiseMergeSort(arrCopy, onCompare, onDone)
+        pairwiseMergeSort(arrCopy, onCompare, onDone, onProgress, progressContext)
             .catch(err => console.error("Error in Pairwise Sort:", err));
     }
 }
 
 // --- ALGORITHM 1: Ternary Insertion Sort (for 3-item comparison) ---
 
-async function ternaryInsertionSort(arr, onCompare, onDone) {
+async function ternaryInsertionSort(arr, onCompare, onDone, onProgress, progressContext) {
     // Cache for tri-wise comparison results
     const ternaryComparisonCache = new Map();
 
@@ -89,6 +91,7 @@ async function ternaryInsertionSort(arr, onCompare, onDone) {
         // Remove item from its current position and insert it at the correct one.
         arr.splice(i, 1);
         arr.splice(insertIndex, 0, itemToInsert);
+        if (onProgress) onProgress(arr, progressContext);
     }
 
     onDone(arr);
@@ -96,7 +99,7 @@ async function ternaryInsertionSort(arr, onCompare, onDone) {
 
 // --- ALGORITHM 2: Pairwise Merge Sort ---
 
-async function pairwiseMergeSort(arr, onCompare, onDone) {
+async function pairwiseMergeSort(arr, onCompare, onDone, onProgress, progressContext) {
     // Helper to wrap the callback-based onCompare into a promise for async/await.
     function compareAsync(itemA, itemB) {
         return new Promise(resolve => onCompare([itemA, itemB], resolve));
@@ -112,6 +115,7 @@ async function pairwiseMergeSort(arr, onCompare, onDone) {
         await mergeSort(arr, low, mid); // Sort left half
         await mergeSort(arr, mid + 1, high); // Sort right half
         await merge(arr, low, mid, high); // Merge the sorted halves
+        if (onProgress) onProgress(arr, progressContext); // Report progress after each merge
     }
 
     // Merge two sorted subarrays: [low, mid] and [mid + 1, high]

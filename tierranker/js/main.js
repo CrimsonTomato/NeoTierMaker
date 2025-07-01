@@ -1,6 +1,7 @@
 import '../style.css';
 import { initializeEventListeners } from './events.js';
 import { renderStagingList } from './ui.js';
+import 'chart.js/auto'; // Import Chart.js
 
 // --- INITIALIZATION ---
 

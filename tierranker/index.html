@@ -124,7 +124,7 @@ Item 2, Item 3"></textarea></div>
           <div class="input-actions" style="margin-top: 24px;">
             <button id="btn-start-sort" class="btn btn-primary" style="flex-grow: 2;">Begin Sort Process</button>
             <button id="btn-simulate-sort" class="btn btn-secondary" style="flex-grow: 1;">Simulate Sort</button>
-        </div>
+          </div>
         </div>
         <div id="view-seeding" class="view">
           <div class="comparison-header">
@@ -196,7 +196,7 @@ Item 2, Item 3"></textarea></div>
           </div>
           <div id="sort-stats-container"></div>
           <p class="instructions">Your items have been sorted. Right-click a tier label to rename it, or left-click to
-            change its color. Enable "Edit Tiers" to manually adjust tier boundaries.</p>
+            change its color. Enable "Edit Tiers" to manually adjust tier boundaries. Click on "Tier List" to change the title.</p>
           <div class="results-container">
             <div class="results-column" id="ranked-list-container">
               <div class="results-column-header">
@@ -240,6 +240,21 @@ Item 2, Item 3"></textarea></div>
                 </div>
               </div>
 
+            </div>
+            <div id="rank-history-drawer">
+              <button id="btn-toggle-history" class="history-toggle-btn">
+                <span>Show Rank History</span>
+                <svg viewBox="0 0 24 24">
+                  <path d="M7.41,8.58L12,13.17L16.59,8.58L18,10L12,16L6,10L7.41,8.58Z" />
+                </svg>
+              </button>
+              <div id="rank-history-content">
+                <canvas id="rank-history-chart"></canvas>
+                <!-- ADDED BUTTON -->
+                <button id="btn-toggle-history-filter" class="btn btn-secondary history-filter-btn">
+                  Show Top 5 Only
+                </button>
+              </div>
             </div>
           </div>
         </div>

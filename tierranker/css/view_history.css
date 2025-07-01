@@ -1,0 +1,87 @@
+/*
+  Styles for the rank history "drawer" component in the results view.
+*/
+
+#rank-history-drawer {
+    grid-column: 1 / -1;
+    /* Span all columns in the results-container grid */
+    background-color: var(--bg-secondary);
+    border-radius: var(--radius) var(--radius) 0 0;
+    margin-top: 24px;
+    display: none;
+    /* Hidden by default, shown by JS if data exists */
+    flex-direction: column;
+    overflow: hidden;
+    /* Use an inline style for expanded height, so just transition it */
+    transition: height 0.4s ease-in-out;
+}
+
+#rank-history-drawer.visible {
+    /* Height is set dynamically by JS */
+}
+
+.history-toggle-btn {
+    width: 100%;
+    padding: 12px;
+    background-color: var(--bg-tertiary);
+    border: none;
+    border-bottom: 1px solid var(--border-color);
+    color: var(--text-primary);
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+}
+
+.history-toggle-btn:hover {
+    filter: brightness(0.95);
+}
+
+.history-toggle-btn svg {
+    width: 20px;
+    height: 20px;
+    fill: currentColor;
+    transition: transform 0.4s ease-in-out;
+}
+
+#rank-history-drawer.visible .history-toggle-btn svg {
+    transform: rotate(180deg);
+}
+
+#rank-history-content {
+    flex-grow: 1;
+    padding: 16px;
+    position: relative;
+    overflow: hidden;
+    /* Prevent canvas from overflowing during animation */
+}
+
+#rank-history-chart {
+    position: absolute;
+    top: 16px;
+    left: 16px;
+    right: 16px;
+    bottom: 16px;
+    width: calc(100% - 32px) !important;
+    height: calc(100% - 32px) !important;
+}
+
+/* --- ADDED STYLES FOR NEW BUTTON --- */
+.history-filter-btn {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    z-index: 10;
+    /* Above the canvas */
+    width: auto;
+    padding: 6px 12px;
+    font-size: 0.9rem;
+}
+
+.history-filter-btn.active {
+    background-color: var(--accent-primary);
+    color: white;
+}
