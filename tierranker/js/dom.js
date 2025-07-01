@@ -26,6 +26,7 @@ export const btnAbortComparison = document.getElementById('btn-abort-comparison'
 export const viewResults = document.getElementById('view-results');
 export const tierTagContainer = document.getElementById('tier-tag-container');
 export const rankedListWrapper = document.getElementById('ranked-list-wrapper');
+export const rankedListContainer = document.getElementById('ranked-list-container');
 export const tierListGridEl = document.getElementById('tier-list-grid');
 export const btnAddTier = document.getElementById('btn-add-tier');
 export const btnRemoveTier = document.getElementById('btn-remove-tier');
@@ -40,6 +41,9 @@ export const btnImportSession = document.getElementById('btn-import-session');
 export const sessionFileInput = document.getElementById('session-file-input');
 export const resultsListTitle = document.getElementById('results-list-title');
 export const sortStatsContainer = document.getElementById('sort-stats-container');
+export const btnExportBarChart = document.getElementById('btn-export-barchart');
+export const btnCopyBarChart = document.getElementById('btn-copy-barchart');
+export const btnToggleTierEdit = document.getElementById('btn-toggle-tier-edit');
 
 export const viewSeeding = document.getElementById('view-seeding');
 export const seedingCardEl = document.getElementById('seeding-card');

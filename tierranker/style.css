@@ -125,7 +125,6 @@ p {
     font-size: 0.9rem;
 }
 
-/* NEW .instructions class */
 .instructions {
     background-color: var(--bg-secondary);
     border-left: 3px solid var(--accent-primary);
@@ -507,7 +506,15 @@ textarea {
     margin-bottom: 16px;
 }
 
-/* NEW: Sort Stats Container */
+.results-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.results-actions .btn {
+    width: auto;
+}
+
 #sort-stats-container {
     background-color: var(--bg-secondary);
     padding: 8px 12px;
@@ -520,13 +527,6 @@ textarea {
 
 #sort-stats-container:empty {
     display: none;
-}
-
-/* Hide if empty */
-
-.results-actions {
-    display: flex;
-    gap: 10px;
 }
 
 .results-container {
@@ -559,10 +559,55 @@ textarea {
     padding-bottom: 16px;
 }
 
+/* NEW STYLES for relocated buttons */
+.results-column-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    flex-shrink: 0;
+}
+
+.results-column-header h4 {
+    margin: 0;
+}
+
+.results-column-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.results-column-actions .btn {
+    width: auto;
+    padding: 6px 12px;
+    font-size: 0.9rem;
+    white-space: nowrap;
+}
+
 
 /* --- Tier Tag Palette --- */
 .tier-tag-palette {
     flex-shrink: 0;
+}
+
+.tier-palette-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 8px;
+}
+
+.tier-palette-header .btn {
+    width: auto;
+    flex-shrink: 0;
+    padding: 6px 12px;
+    font-size: 0.9rem;
+}
+
+.tier-palette-header .btn.active {
+    background-color: var(--accent-primary);
+    color: white;
 }
 
 #tier-tag-container {
@@ -698,6 +743,37 @@ body.assign-mode .tier-boundary:hover .tier-boundary-line {
     margin: 0 2px;
 }
 
+/* Editable Tier Boundaries */
+.tier-boundary-editable {
+    display: none;
+    position: relative;
+    height: 12px;
+    cursor: pointer;
+}
+
+body.tier-edit-mode .tier-boundary-editable {
+    display: block;
+}
+
+.tier-boundary-line-editable {
+    width: 100%;
+    height: 2px;
+    background-color: transparent;
+    border-top: 2px dashed var(--border-color);
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    transition: all 0.2s ease;
+}
+
+body.assign-mode .tier-boundary-editable:hover .tier-boundary-line-editable {
+    height: 4px;
+    border-top-style: solid;
+    border-top-color: var(--accent-primary);
+    transform: translateY(-50%) scaleY(1.5);
+}
+
+
 /* --- Automated Tier List (Right side) --- */
 #tier-list-container h4 {
     flex-shrink: 0;
@@ -719,6 +795,8 @@ body.assign-mode .tier-boundary:hover .tier-boundary-line {
     flex-direction: column;
     --tier-item-size: 64px;
     padding-right: 8px;
+    margin-top: 12px;
+    /* Space from header */
 }
 
 .tier-row {
@@ -778,6 +856,20 @@ body.assign-mode .tier-boundary:hover .tier-boundary-line {
 }
 
 /* === EXPORT STYLES === */
+body.is-exporting .results-container {
+    overflow: hidden;
+}
+
+body.is-exporting #ranked-list-wrapper {
+    overflow-y: scroll !important;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+body.is-exporting #ranked-list-wrapper::-webkit-scrollbar {
+    display: none;
+}
+
 body.is-exporting #tier-list-grid::-webkit-scrollbar {
     display: none;
 }
@@ -964,8 +1056,6 @@ body.is-exporting #tier-list-grid {
 .triwise-rank-label.rank-3 {
     background-color: #d97706;
 }
-
-
 
 .comparison-card-draggable {
     flex-grow: 1;

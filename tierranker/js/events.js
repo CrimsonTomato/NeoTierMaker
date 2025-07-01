@@ -1,5 +1,5 @@
 import * as dom from './dom.js';
-import { state, clearItems, removeItem, setEditingItemId, updateItemText, updateTierLabel, updateTitle, setComparisonMode, abortSort } from './state.js';
+import { state, clearItems, removeItem, setEditingItemId, updateItemText, updateTierLabel, updateTitle, setComparisonMode, abortSort, toggleTierEditMode } from './state.js';
 import { handleTextInput, handleFileInput } from './inputController.js';
 import { renderStagingList, showPreview, hidePreview, setDragging } from './ui.js';
 import { startSort, handleSeedButtonClick, cleanupSortListeners } from './sortController.js';
@@ -28,7 +28,7 @@ export function initializeEventListeners() {
         if (e.target.files.length > 0) {
             await handleFileInput(e.target.files);
         }
-        e.target.value = null; // Reset for next selection
+        e.target.value = null;
     });
 
     dom.imageDropZone.addEventListener('dragenter', (e) => { e.preventDefault(); dom.imageDropZone.classList.add('drag-over'); });
@@ -154,6 +154,11 @@ export function initializeEventListeners() {
     dom.btnAddTier.addEventListener('click', handleAddTier);
     dom.btnRemoveTier.addEventListener('click', handleRemoveLastTier);
 
+    dom.btnToggleTierEdit.addEventListener('click', () => {
+        toggleTierEditMode();
+        renderResultsView();
+    });
+
     dom.btnRestart.addEventListener('click', () => {
         if (confirm("Are you sure you want to start over? This will clear all items and reset the page.")) {
             window.location.reload();
@@ -234,47 +239,163 @@ export function initializeEventListeners() {
     dom.btnSizeIncrease.addEventListener('click', handleSizeIncrease);
     dom.btnSizeDecrease.addEventListener('click', handleSizeDecrease);
 
-    dom.btnCopyImage.addEventListener('click', async () => {
-        const elementToCapture = document.getElementById('tier-list-export-area');
-        const originalButtonText = dom.btnCopyImage.textContent;
-        dom.btnCopyImage.textContent = 'Copying...';
-        dom.btnCopyImage.disabled = true;
-        document.body.classList.add('is-exporting');
+    // --- Off-screen Wrapper Creation Logic (Updated) ---
+    const createOffscreenCloneForCapture = (originalElement, isBarChart = false) => {
+        const exportWrapper = document.createElement('div');
+        const bgColor = getComputedStyle(document.documentElement).getPropertyValue('--bg-secondary').trim();
+        exportWrapper.style.position = 'absolute';
+        exportWrapper.style.left = '-9999px';
+        exportWrapper.style.top = '-9999px';
+        exportWrapper.style.width = `${originalElement.offsetWidth}px`;
+        exportWrapper.style.padding = getComputedStyle(originalElement).padding;
+        exportWrapper.style.backgroundColor = bgColor;
 
-        setTimeout(async () => {
-            try {
-                const success = await copyElementAsImage(elementToCapture);
-                if (success) {
-                    dom.btnCopyImage.textContent = 'Copied!';
-                    setTimeout(() => dom.btnCopyImage.textContent = originalButtonText, 2000);
-                } else {
-                    dom.btnCopyImage.textContent = originalButtonText;
+        if (!isBarChart) {
+            exportWrapper.style.display = 'flex';
+            exportWrapper.style.flexDirection = 'column';
+            exportWrapper.style.height = 'fit-content';
+        }
+
+        const clone = originalElement.cloneNode(true);
+
+        // --- NEW: Remove only specific UI elements from the clone ---
+        if (isBarChart) {
+            // For the bar chart, remove its action buttons and tier editing palette
+            clone.querySelector('.results-column-header .results-column-actions')?.remove();
+            clone.querySelector('.tier-tag-palette')?.remove();
+
+            // Also fix the gradient text for the screenshot
+            const gradientLabelsInClone = clone.querySelectorAll('.bar-label-gradient');
+            gradientLabelsInClone.forEach(label => {
+                const solidColor = label.dataset.solidColorForExport;
+                if (solidColor) {
+                    label.style.backgroundImage = 'none';
+                    label.style.webkitBackgroundClip = 'initial';
+                    label.style.backgroundClip = 'initial';
+                    label.style.color = solidColor;
                 }
-            } finally {
-                document.body.classList.remove('is-exporting');
-                dom.btnCopyImage.disabled = false;
-            }
-        }, 100);
-    });
+            });
+        } else {
+            // For the tier list, just remove its action buttons
+            clone.querySelector('.results-column-header .results-column-actions')?.remove();
+        }
 
+        exportWrapper.appendChild(clone);
+        document.body.appendChild(exportWrapper);
+        return exportWrapper;
+    };
+
+    // --- Tier List Export/Copy ---
     dom.btnExportImage.addEventListener('click', async () => {
-        const elementToCapture = document.getElementById('tier-list-export-area');
+        const originalElement = document.getElementById('tier-list-export-area');
         const originalText = dom.btnExportImage.textContent;
         dom.btnExportImage.textContent = 'Generating...';
         dom.btnExportImage.disabled = true;
-        document.body.classList.add('is-exporting');
 
-        setTimeout(async () => {
-            try {
-                await exportElementAsImage(elementToCapture, 'my-tier-list.png');
-            } finally {
-                document.body.classList.remove('is-exporting');
-                dom.btnExportImage.textContent = originalText;
-                dom.btnExportImage.disabled = false;
-            }
-        }, 100);
+        const exportWrapper = createOffscreenCloneForCapture(originalElement, false);
+
+        try {
+            await exportElementAsImage(exportWrapper, 'my-tier-list.png', {
+                scrollX: 0,
+                scrollY: 0,
+                backgroundColor: exportWrapper.style.backgroundColor,
+            });
+        } catch (error) {
+            console.error("Tier list export failed:", error);
+            alert("Could not export the tier list.");
+        } finally {
+            document.body.removeChild(exportWrapper);
+            dom.btnExportImage.textContent = originalText;
+            dom.btnExportImage.disabled = false;
+        }
     });
 
+    dom.btnCopyImage.addEventListener('click', async () => {
+        const originalElement = document.getElementById('tier-list-export-area');
+        const originalText = dom.btnCopyImage.textContent;
+        dom.btnCopyImage.textContent = 'Copying...';
+        dom.btnCopyImage.disabled = true;
+
+        const exportWrapper = createOffscreenCloneForCapture(originalElement, false);
+
+        try {
+            const success = await copyElementAsImage(exportWrapper, {
+                scrollX: 0,
+                scrollY: 0,
+                backgroundColor: exportWrapper.style.backgroundColor,
+            });
+            if (success) {
+                dom.btnCopyImage.textContent = 'Copied!';
+                setTimeout(() => dom.btnCopyImage.textContent = originalText, 2000);
+            } else {
+                dom.btnCopyImage.textContent = originalText;
+            }
+        } catch (error) {
+            console.error("Tier list copy failed:", error);
+            alert("Could not copy the tier list.");
+            dom.btnCopyImage.textContent = originalText;
+        } finally {
+            document.body.removeChild(exportWrapper);
+            dom.btnCopyImage.disabled = false;
+        }
+    });
+
+    // --- Bar Chart Export/Copy ---
+    dom.btnExportBarChart.addEventListener('click', async () => {
+        const originalElement = dom.rankedListContainer;
+        const originalText = dom.btnExportBarChart.textContent;
+        dom.btnExportBarChart.textContent = 'Generating...';
+        dom.btnExportBarChart.disabled = true;
+
+        const exportWrapper = createOffscreenCloneForCapture(originalElement, true);
+
+        try {
+            await exportElementAsImage(exportWrapper, 'my-ranked-list.png', {
+                scrollX: 0,
+                scrollY: 0,
+                backgroundColor: exportWrapper.style.backgroundColor,
+            });
+        } catch (error) {
+            console.error("Bar chart export failed:", error);
+            alert("Could not export the bar chart.");
+        } finally {
+            document.body.removeChild(exportWrapper);
+            dom.btnExportBarChart.textContent = originalText;
+            dom.btnExportBarChart.disabled = false;
+        }
+    });
+
+    dom.btnCopyBarChart.addEventListener('click', async () => {
+        const originalElement = dom.rankedListContainer;
+        const originalText = dom.btnCopyBarChart.textContent;
+        dom.btnCopyBarChart.textContent = 'Copying...';
+        dom.btnCopyBarChart.disabled = true;
+
+        const exportWrapper = createOffscreenCloneForCapture(originalElement, true);
+
+        try {
+            const success = await copyElementAsImage(exportWrapper, {
+                scrollX: 0,
+                scrollY: 0,
+                backgroundColor: exportWrapper.style.backgroundColor,
+            });
+            if (success) {
+                dom.btnCopyBarChart.textContent = 'Copied!';
+                setTimeout(() => dom.btnCopyBarChart.textContent = originalText, 2000);
+            } else {
+                dom.btnCopyBarChart.textContent = originalText;
+            }
+        } catch (error) {
+            console.error("Bar chart copy failed:", error);
+            alert("Could not copy the bar chart.");
+            dom.btnCopyBarChart.textContent = originalText;
+        } finally {
+            document.body.removeChild(exportWrapper);
+            dom.btnCopyBarChart.disabled = false;
+        }
+    });
+
+    // --- Session Management ---
     dom.btnExportSession.addEventListener('click', async () => {
         if (state.items.length === 0) { alert("There is nothing to export."); return; }
         const originalText = dom.btnExportSession.textContent;

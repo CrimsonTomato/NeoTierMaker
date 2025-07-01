@@ -1,5 +1,5 @@
 import * as dom from './dom.js';
-import { state, updateTierThreshold, addTier, removeLastTier } from './state.js';
+import { state, updateTierThreshold, addTier, removeLastTier, toggleTierEditMode } from './state.js';
 import { showView } from './view.js';
 import { isColorDark } from './color.js';
 
@@ -69,6 +69,11 @@ export function renderResultsView() {
         dom.sortStatsContainer.innerHTML = '';
     }
 
+    // --- NEW: Manage Edit Mode state ---
+    dom.btnToggleTierEdit.classList.toggle('active', state.tierEditMode);
+    document.body.classList.toggle('tier-edit-mode', state.tierEditMode);
+
+
     dom.tierTagContainer.innerHTML = '';
     state.tiers.forEach(tier => {
         const tagEl = document.createElement('div');
@@ -88,8 +93,11 @@ export function renderResultsView() {
     ];
     renderQueue.sort((a, b) => (a.score !== b.score) ? b.score - a.score : (a.type === 'item' ? -1 : 1));
 
+    // Resolve the CSS variable to a concrete value so html2canvas can parse it.
+    const textPrimaryColor = getComputedStyle(document.documentElement).getPropertyValue('--text-primary').trim();
+
     let lastItemScore = 101;
-    renderQueue.forEach(entity => {
+    renderQueue.forEach((entity, index) => {
         if (entity.type === 'item') {
             const itemEl = document.createElement('div');
             itemEl.className = 'ranked-item';
@@ -98,8 +106,8 @@ export function renderResultsView() {
                 const rgb = itemTier.color.match(/\w\w/g).map(hex => parseInt(hex, 16));
                 itemEl.style.backgroundColor = `rgba(${rgb[0]}, ${rgb[1]}, ${rgb[2]}, 0.1)`;
 
-                const gradientStyle = `
-                    background-image: linear-gradient(to right, ${itemTier.textColor} ${entity.score}%, var(--text-primary) ${entity.score}%);
+                const gradientStyle = ` 
+                    background-image: linear-gradient(to right, ${itemTier.textColor} ${entity.score}%, ${textPrimaryColor} ${entity.score}%);
                     -webkit-background-clip: text;
                     background-clip: text;
                 `;
@@ -108,13 +116,33 @@ export function renderResultsView() {
                     <img class="ranked-item-img" src="${entity.image || 'https://via.placeholder.com/30'}" alt="${entity.text}">
                     <div class="ranked-item-info">
                         <div class="ranked-item-bar" style="background-color: ${itemTier.color}; width: ${entity.score || 0}%" title="${entity.text}"></div>
-                        <span class="bar-label-gradient" style="${gradientStyle}">${entity.text}</span>
+                        <span class="bar-label-gradient" style="${gradientStyle}" data-solid-color-for-export="${itemTier.textColor}">${entity.text}</span>
                         <div class="ranked-item-score">${(entity.score || 0).toFixed(1)}%</div>
                     </div>
                 `;
                 dom.rankedListWrapper.appendChild(itemEl);
             }
             lastItemScore = entity.score;
+
+            // --- Render editable boundaries between items ---
+            if (state.tierEditMode) {
+                const nextItemIndex = renderQueue.findIndex((nextEntity, nextIndex) => nextIndex > index && nextEntity.type === 'item');
+                if (nextItemIndex !== -1) {
+                    const nextItem = renderQueue[nextItemIndex];
+                    const boundaryScore = (entity.score + nextItem.score) / 2;
+
+                    const editableBoundaryEl = document.createElement('div');
+                    editableBoundaryEl.className = 'tier-boundary-editable';
+                    editableBoundaryEl.dataset.editableThreshold = boundaryScore;
+
+                    const lineEl = document.createElement('div');
+                    lineEl.className = 'tier-boundary-line-editable';
+
+                    editableBoundaryEl.appendChild(lineEl);
+                    dom.rankedListWrapper.appendChild(editableBoundaryEl);
+                }
+            }
+
         } else if (entity.type === 'tier') {
             const boundaryEl = document.createElement('div');
             boundaryEl.className = 'tier-boundary';
@@ -174,8 +202,6 @@ export function onSortDone(sortedItems) {
     renderResultsView();
 }
 
-// --- Direct User Action Handlers ---
-
 export function handleTierTagClick(tierId) {
     if (!tierId) return;
     selectedTierToAssign = (selectedTierToAssign === tierId) ? null : tierId;
@@ -186,10 +212,20 @@ export function handleTierTagClick(tierId) {
 export function handleRankedListClick(e) {
     const assignedTag = e.target.closest('.assigned-tag');
     if (assignedTag) {
-        const tierId = assignedTag.dataset.tierId;
-        handleTierTagClick(tierId);
+        handleTierTagClick(assignedTag.dataset.tierId);
         return;
     }
+
+    const editableBoundary = e.target.closest('[data-editable-threshold]');
+    if (selectedTierToAssign && editableBoundary) {
+        updateTierThreshold(selectedTierToAssign, parseFloat(editableBoundary.dataset.editableThreshold));
+        selectedTierToAssign = null;
+        document.body.classList.remove('assign-mode');
+        assignItemsToTiers();
+        renderResultsView();
+        return;
+    }
+
     const boundary = e.target.closest('.tier-boundary');
     if (selectedTierToAssign && boundary) {
         updateTierThreshold(selectedTierToAssign, parseFloat(boundary.dataset.threshold));

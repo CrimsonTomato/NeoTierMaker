@@ -23,6 +23,8 @@ export const state = {
     sortStartTime: 0,
     sortStats: { comparisons: 0, time: 0 },
 
+    // --- TIER LIST STATE ---
+    tierEditMode: false,
     tiers: [
         { id: crypto.randomUUID(), label: 'S', color: '#ff7f7f', textColor: '#000000', threshold: 90 },
         { id: crypto.randomUUID(), label: 'A', color: '#ffbf7f', textColor: '#000000', threshold: 75 },
@@ -41,7 +43,11 @@ export function abortSort() {
     state.seedingProgress = { current: 0, total: 0 };
     state.itemSeedValues = {};
     state.sortStats = { comparisons: 0, time: 0 };
-    state.sortStartTime = 0; // Reset start time on abort
+    state.sortStartTime = 0;
+}
+
+export function toggleTierEditMode() {
+    state.tierEditMode = !state.tierEditMode;
 }
 
 export function addItem(item) {
