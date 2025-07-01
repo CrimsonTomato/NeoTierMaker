@@ -172,7 +172,8 @@ body.assign-mode .tier-boundary-editable {
 .bar-container {
     position: relative;
     grid-column: 1 / 2;
-    height: 30px; /* Give the container a fixed height to align to */
+    height: 30px;
+    /* Give the container a fixed height to align to */
 }
 
 .ranked-item-bar {
@@ -349,18 +350,27 @@ body.assign-mode .tier-boundary-editable:hover .tier-boundary-line-editable {
 /* --- Tier List Controls --- */
 .tier-list-controls {
     flex-shrink: 0;
-    margin-bottom: 16px; /* Updated: Spacing for top position */
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
+    margin-bottom: 16px;
+    display: grid;
+    /* MODIFIED */
+    grid-template-columns: 1fr auto;
+    /* MODIFIED */
+    gap: 16px;
+    /* MODIFIED */
     align-items: center;
+}
+
+.tier-buttons-group {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
 }
 
 .size-controls {
     display: flex;
     align-items: center;
     gap: 4px;
-    margin-left: auto;
+    /* margin-left: auto; -- REMOVED */
 }
 
 .size-controls span {

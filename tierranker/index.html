@@ -6,6 +6,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>TierRanker</title>
   <link rel="stylesheet" href="style.css" />
+  <script>
+    (function () {
+      const savedTheme = localStorage.getItem('theme');
+      if (savedTheme === 'dark') {
+        document.documentElement.classList.add('dark-mode');
+      }
+    })();
+  </script>
 </head>
 
 <body>
@@ -188,8 +196,10 @@ Item 2, Item 3"></textarea></div>
             </div>
             <div class="results-column" id="tier-list-container">
               <div class="tier-list-controls">
-                <button id="btn-add-tier" class="btn btn-secondary">Add Tier</button>
-                <button id="btn-remove-tier" class="btn btn-secondary">Remove Last Tier</button>
+                <div class="tier-buttons-group">
+                  <button id="btn-add-tier" class="btn btn-secondary">Add Tier</button>
+                  <button id="btn-remove-tier" class="btn btn-secondary">Remove Last Tier</button>
+                </div>
                 <div class="size-controls">
                   <span>Item Size:</span>
                   <button id="btn-size-decrease" class="btn-adjust">-</button>
@@ -213,6 +223,9 @@ Item 2, Item 3"></textarea></div>
           </div>
         </div>
       </main>
+
+      <!-- Resizer handle -->
+      <div id="sidebar-resizer" class="sidebar-resizer"></div>
 
       <!-- RIGHT SIDEBAR (In-layout) -->
       <aside class="sidebar-right">

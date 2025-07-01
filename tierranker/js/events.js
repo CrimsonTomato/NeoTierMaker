@@ -12,8 +12,12 @@ import Sortable from 'sortablejs';
 export function initializeEventListeners() {
     // --- Theme and Sidebar Toggles ---
     const toggleTheme = () => {
+        document.body.classList.add('no-transitions');
         const isDarkMode = document.documentElement.classList.toggle('dark-mode');
         localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
+        setTimeout(() => {
+            document.body.classList.remove('no-transitions');
+        }, 100);
     };
     dom.themeToggleButton.addEventListener('click', toggleTheme);
     dom.iconThemeButton.addEventListener('click', toggleTheme);
@@ -26,6 +30,40 @@ export function initializeEventListeners() {
         dom.appContainer.classList.toggle('right-sidebar-collapsed');
     });
 
+    // --- Sidebar Resizer Logic ---
+    const MIN_SIDEBAR_WIDTH = 240;
+    const MAX_SIDEBAR_WIDTH = 600;
+
+    dom.sidebarResizer.addEventListener('mousedown', (e) => {
+        e.preventDefault();
+        if (dom.appContainer.classList.contains('right-sidebar-collapsed')) {
+            return;
+        }
+
+        document.body.classList.add('is-resizing');
+
+        const handleMouseMove = (moveEvent) => {
+            // Calculate new width based on mouse position from the right edge of the viewport
+            let newWidth = window.innerWidth - moveEvent.clientX;
+
+            // Clamp the width between min and max values
+            if (newWidth < MIN_SIDEBAR_WIDTH) newWidth = MIN_SIDEBAR_WIDTH;
+            if (newWidth > MAX_SIDEBAR_WIDTH) newWidth = MAX_SIDEBAR_WIDTH;
+
+            // Set the CSS custom property to apply the new width
+            document.documentElement.style.setProperty('--sidebar-right-width-wide', `${newWidth}px`);
+        };
+
+        const handleMouseUp = () => {
+            document.body.classList.remove('is-resizing');
+            window.removeEventListener('mousemove', handleMouseMove);
+            window.removeEventListener('mouseup', handleMouseUp);
+        };
+
+        window.addEventListener('mousemove', handleMouseMove);
+        window.addEventListener('mouseup', handleMouseUp);
+    });
+
     // --- Icon-only button listeners ---
     dom.iconExportButton.addEventListener('click', () => dom.btnExportSession.click());
     dom.iconImportButton.addEventListener('click', () => dom.btnImportSession.click());
@@ -36,7 +74,7 @@ export function initializeEventListeners() {
             const value = e.target.value;
             setComparisonMode(value);
             const iconRadio = document.getElementById(`mode-${value === '2' ? 'pairwise' : 'triwise'}-icon`);
-            if(iconRadio) iconRadio.checked = true;
+            if (iconRadio) iconRadio.checked = true;
         });
     });
 
@@ -46,7 +84,7 @@ export function initializeEventListeners() {
             const value = e.target.value;
             setComparisonMode(value);
             const mainRadio = document.getElementById(`mode-${value === '2' ? 'pairwise' : 'triwise'}`);
-            if(mainRadio) mainRadio.checked = true;
+            if (mainRadio) mainRadio.checked = true;
         });
     });
 
@@ -287,13 +325,13 @@ export function initializeEventListeners() {
         exportWrapper.style.backgroundColor = bgColor;
 
         if (!isBarChart) {
-             exportWrapper.style.display = 'flex';
-             exportWrapper.style.flexDirection = 'column';
-             exportWrapper.style.height = 'fit-content';
+            exportWrapper.style.display = 'flex';
+            exportWrapper.style.flexDirection = 'column';
+            exportWrapper.style.height = 'fit-content';
         }
 
         const clone = originalElement.cloneNode(true);
-        
+
         if (isBarChart) {
             clone.querySelector('.results-column-header .results-column-actions')?.remove();
             clone.querySelector('.tier-tag-palette')?.remove();

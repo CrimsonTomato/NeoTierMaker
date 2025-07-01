@@ -39,3 +39,11 @@ body.is-exporting #tier-list-grid::-webkit-scrollbar,
 body.is-exporting #tier-list-container::-webkit-scrollbar {
     display: none;
 }
+
+.no-transitions * {
+    transition: none !important;
+}
+
+body.is-resizing * {
+    pointer-events: none;
+}

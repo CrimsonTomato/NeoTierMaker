@@ -59,6 +59,7 @@ export const appContainer = document.getElementById('app-container');
 export const themeToggleButton = document.getElementById('theme-toggle-btn');
 export const toggleLeftSidebarButton = document.getElementById('btn-toggle-left-sidebar');
 export const toggleRightSidebarButton = document.getElementById('btn-toggle-right-sidebar');
+export const sidebarResizer = document.getElementById('sidebar-resizer');
 
 export const iconExportButton = document.getElementById('btn-icon-export');
 export const iconImportButton = document.getElementById('btn-icon-import');
