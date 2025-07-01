@@ -1,0 +1,114 @@
+/*
+  Defines the main application layout, including the app container grid,
+  sidebars, and rules for when they are collapsed.
+*/
+
+.app-container {
+    display: grid;
+    grid-template-columns: var(--sidebar-left-width-wide) 1fr var(--sidebar-right-width-wide);
+    height: 100vh;
+    transition: grid-template-columns 0.3s ease-in-out;
+}
+
+.app-container.left-sidebar-collapsed {
+    grid-template-columns: var(--sidebar-left-width-collapsed) 1fr var(--sidebar-right-width-wide);
+}
+
+.app-container.right-sidebar-collapsed {
+    grid-template-columns: var(--sidebar-left-width-wide) 1fr var(--sidebar-right-width-collapsed);
+}
+
+.app-container.left-sidebar-collapsed.right-sidebar-collapsed {
+    grid-template-columns: var(--sidebar-left-width-collapsed) 1fr var(--sidebar-right-width-collapsed);
+}
+
+/* --- Sidebars --- */
+.sidebar-left,
+.sidebar-right {
+    background-color: var(--bg-secondary);
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.sidebar-left {
+    border-right: 1px solid var(--border-color);
+}
+
+.sidebar-right {
+    border-left: 1px solid var(--border-color);
+}
+
+.sidebar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-shrink: 0;
+    margin-bottom: 8px;
+}
+
+.sidebar-header h1,
+.sidebar-header h3 {
+    margin-bottom: 0;
+    flex-grow: 1;
+}
+
+.sidebar-section {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.sidebar-content-wrapper {
+    transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out;
+    overflow: hidden;
+}
+
+.sidebar-content-wrapper>hr.sidebar-full-content {
+    border: none;
+    border-top: 1px solid var(--border-color);
+    margin: 16px 0;
+}
+
+.app-container.left-sidebar-collapsed .sidebar-left .sidebar-content-wrapper,
+.app-container.right-sidebar-collapsed .sidebar-right .sidebar-content-wrapper {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.app-container.left-sidebar-collapsed .sidebar-left .sidebar-content-wrapper {
+    width: 0;
+    height: 0;
+    transform: translateX(-20px);
+}
+
+.app-container.left-sidebar-collapsed #btn-toggle-left-sidebar,
+.app-container.right-sidebar-collapsed #btn-toggle-right-sidebar {
+    transform: rotate(180deg);
+}
+
+.sidebar-icon-bar {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    margin-top: 16px;
+}
+
+.app-container.left-sidebar-collapsed .sidebar-icon-bar {
+    display: flex;
+}
+
+/* --- Sidebar Collapsing Content Rules --- */
+.app-container.left-sidebar-collapsed .sidebar-left .sidebar-full-content,
+.app-container.right-sidebar-collapsed .sidebar-right .sidebar-full-content {
+    display: none;
+}
+
+/* --- Center Stage --- */
+.center-stage {
+    padding: 24px;
+    overflow-y: auto;
+    position: relative;
+}

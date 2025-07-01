@@ -1,0 +1,387 @@
+/*
+  Styles for the final 'Results' view, including the ranked list,
+  tier list grid, and all associated controls.
+*/
+
+.results-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.results-actions .btn {
+    width: auto;
+}
+
+#sort-stats-container {
+    background-color: var(--bg-secondary);
+    padding: 8px 12px;
+    border-radius: var(--radius);
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    margin-bottom: 16px;
+    text-align: center;
+}
+
+#sort-stats-container:empty {
+    display: none;
+}
+
+.results-container {
+    display: grid;
+    grid-template-columns: 450px 1fr;
+    gap: 24px;
+    height: calc(100vh - 220px);
+}
+
+.results-column {
+    background-color: var(--bg-secondary);
+    border-radius: var(--radius);
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+}
+
+#ranked-list-container {
+    gap: 16px;
+}
+
+#tier-list-export-area {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    overflow: hidden;
+    background-color: var(--bg-secondary);
+    padding: 16px;
+    margin: -16px;
+}
+
+.results-column-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    flex-shrink: 0;
+}
+
+.results-column-header h4 {
+    margin: 0;
+}
+
+.results-column-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.results-column-actions .btn {
+    width: auto;
+    padding: 6px 12px;
+    font-size: 0.9rem;
+    white-space: nowrap;
+}
+
+/* --- Tier Tag Palette & Tier Assignment --- */
+.tier-tag-palette {
+    flex-shrink: 0;
+}
+
+.tier-palette-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 8px;
+}
+
+.tier-palette-header .btn {
+    padding: 6px 12px;
+    font-size: 0.9rem;
+}
+
+.tier-palette-header .btn.active {
+    background-color: var(--accent-primary);
+    color: white;
+}
+
+#tier-tag-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding-top: 8px;
+}
+
+.tier-tag {
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-weight: bold;
+    font-size: 0.9rem;
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    transition: transform 0.2s, box-shadow 0.2s;
+    text-align: center;
+}
+
+.tier-tag.selected {
+    transform: scale(1.1);
+    box-shadow: 0 0 0 3px var(--accent-primary), 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+/* --- Ranked List Bar Chart --- */
+#ranked-list-wrapper {
+    flex-grow: 1;
+    overflow-y: auto;
+    background-color: var(--bg-primary);
+    padding: 8px;
+    border-radius: var(--radius);
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+body.assign-mode #ranked-list-wrapper,
+body.assign-mode .tier-boundary-editable {
+    cursor: pointer;
+}
+
+.ranked-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px;
+    border-radius: 4px;
+}
+
+.ranked-item-img {
+    width: 30px;
+    height: 30px;
+    object-fit: contain;
+    background-color: var(--bg-tertiary);
+    border-radius: 4px;
+    flex-shrink: 0;
+}
+
+.ranked-item-info {
+    flex-grow: 1;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 8px;
+    position: relative;
+}
+
+.ranked-item-bar {
+    height: 30px;
+    border-radius: 4px;
+    position: absolute;
+    left: 0;
+    top: 0;
+    grid-column: 1 / 2;
+}
+
+.bar-label-gradient {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    padding: 0 10px;
+    font-weight: 500;
+    font-size: 0.9rem;
+    white-space: nowrap;
+    overflow: hidden;
+    color: transparent;
+    grid-column: 1 / 2;
+    pointer-events: none;
+}
+
+.ranked-item-score {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    grid-column: 2 / 3;
+}
+
+/* --- Tier Boundary Lines --- */
+.tier-boundary {
+    min-height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
+.tier-boundary-line {
+    width: 100%;
+    height: 2px;
+    background-color: var(--bg-tertiary);
+    border-radius: 1px;
+    transition: background-color 0.2s;
+}
+
+body.assign-mode .tier-boundary:hover .tier-boundary-line {
+    background-color: var(--accent-primary);
+    height: 4px;
+}
+
+.assigned-tag {
+    position: absolute;
+    z-index: 5;
+    cursor: pointer;
+}
+
+.tier-boundary-editable {
+    display: none;
+    position: relative;
+    height: 12px;
+}
+
+body.tier-edit-mode .tier-boundary-editable {
+    display: block;
+}
+
+.tier-boundary-line-editable {
+    width: 100%;
+    height: 2px;
+    background-color: transparent;
+    border-top: 2px dashed var(--border-color);
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    transition: all 0.2s ease;
+}
+
+body.assign-mode .tier-boundary-editable:hover .tier-boundary-line-editable {
+    height: 4px;
+    border-top-style: solid;
+    border-top-color: var(--accent-primary);
+}
+
+
+/* --- Generated Tier List Grid --- */
+#tier-list-grid {
+    flex-grow: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    --tier-item-size: 64px;
+    padding-right: 8px;
+    margin-top: 12px;
+}
+
+.tier-row {
+    display: flex;
+    min-height: 80px;
+    margin-bottom: 4px;
+}
+
+.tier-label {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 80px;
+    flex-shrink: 0;
+    font-weight: bold;
+    font-size: 1.5rem;
+    cursor: pointer;
+    text-align: center;
+    padding: 4px;
+}
+
+.tier-items {
+    background-color: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    flex-grow: 1;
+    padding: 8px;
+    display: flex;
+    flex-wrap: wrap;
+    align-content: flex-start;
+    gap: 8px;
+}
+
+.tier-item {
+    height: var(--tier-item-size, 64px);
+    width: auto;
+    max-width: 150px;
+    object-fit: contain;
+}
+
+/* --- Inline Editing --- */
+.tier-label-edit,
+.title-edit-input {
+    width: 100%;
+    font-family: inherit;
+    font-size: inherit;
+    font-weight: inherit;
+    border: 2px solid var(--accent-primary);
+    border-radius: var(--radius);
+    color: var(--text-primary);
+    background-color: var(--bg-primary);
+}
+
+.tier-label-edit {
+    height: 100%;
+    border-radius: 0;
+    font-size: 1.2rem;
+    text-align: center;
+    resize: none;
+    padding: 4px;
+}
+
+#results-list-title {
+    cursor: pointer;
+}
+
+#results-list-title:hover {
+    background-color: var(--bg-tertiary);
+}
+
+.title-edit-input {
+    padding: 4px 8px;
+    margin: -4px -8px;
+}
+
+/* --- Tier List Controls --- */
+.tier-list-controls {
+    flex-shrink: 0;
+    margin-top: auto;
+    padding-top: 16px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+}
+
+.size-controls {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-left: auto;
+}
+
+.size-controls span {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+
+.btn-adjust {
+    width: 28px;
+    height: 28px;
+    font-size: 1.2rem;
+    font-weight: bold;
+    border: 1px solid var(--border-color);
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+}
+
+.btn-adjust:hover {
+    background-color: var(--bg-tertiary);
+}

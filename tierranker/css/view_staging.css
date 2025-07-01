@@ -1,0 +1,147 @@
+/*
+  Styles for the 'Staging' list in the right sidebar,
+  covering both list and grid views.
+*/
+
+#staging-list {
+    flex-grow: 1;
+    overflow-y: auto;
+    padding: 4px;
+}
+
+#staging-list.view-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+#staging-list.view-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, 80px);
+    align-content: flex-start;
+    gap: 8px;
+}
+
+/* --- Staging Item Base Styles --- */
+.staging-item {
+    cursor: grab;
+    transition: background-color 0.2s;
+}
+
+.staging-item-actions button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: inherit;
+    padding: 4px;
+    opacity: 0.8;
+}
+
+.staging-item-actions button:hover {
+    opacity: 1;
+}
+
+.staging-item-edit-input {
+    width: 100%;
+    padding: 6px 8px;
+    font-size: 1rem;
+    font-weight: 500;
+    border: 1px solid var(--accent-primary);
+    border-radius: 4px;
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+}
+
+/* --- List View Specifics --- */
+.view-list .staging-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px;
+    border-radius: 6px;
+}
+
+.view-list .staging-item-text {
+    flex-grow: 1;
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.view-list .staging-item-thumbnail-wrapper {
+    position: relative;
+    flex-shrink: 0;
+}
+
+.view-list .staging-item-img {
+    width: 40px;
+    height: 40px;
+    border-radius: 4px;
+    object-fit: cover;
+    opacity: 0.7;
+}
+
+/* --- Grid View Specifics --- */
+.view-grid .staging-item {
+    width: 80px;
+    height: 80px;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    overflow: hidden;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+}
+
+.view-grid .staging-item-text {
+    z-index: 2;
+    padding: 8px;
+    text-align: center;
+    font-weight: 600;
+}
+
+.view-grid .staging-item.has-image .staging-item-text {
+    display: none;
+}
+
+.view-grid .staging-item-img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: 1;
+}
+
+.view-grid .staging-item-actions {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    z-index: 3;
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+.view-grid .staging-item:hover .staging-item-actions {
+    opacity: 1;
+}
+
+.view-grid .staging-item-actions [data-action="edit"] {
+    display: none;
+}
+
+.view-grid .staging-item-actions button {
+    background-color: rgba(255, 255, 255, 0.7);
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: black;
+    padding: 0;
+    font-size: 14px;
+}

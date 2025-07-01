@@ -1,0 +1,41 @@
+/*
+  Contains helper and utility classes, such as those for
+  visibility, external libraries (SortableJS), and body states.
+*/
+
+/* --- SortableJS --- */
+.sortable-drag {
+    cursor: grabbing;
+}
+
+.sortable-ghost {
+    opacity: 0.4;
+    background-color: var(--accent-secondary);
+}
+
+/* --- View Containers --- */
+.view {
+    display: none;
+}
+
+.view.active {
+    display: block;
+}
+
+/* --- Exporting Body Classes --- */
+body.is-exporting .results-container {
+    overflow: hidden;
+}
+
+body.is-exporting #ranked-list-wrapper,
+body.is-exporting #tier-list-grid {
+    overflow-y: scroll !important;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+body.is-exporting #ranked-list-wrapper::-webkit-scrollbar,
+body.is-exporting #tier-list-grid::-webkit-scrollbar,
+body.is-exporting #tier-list-container::-webkit-scrollbar {
+    display: none;
+}

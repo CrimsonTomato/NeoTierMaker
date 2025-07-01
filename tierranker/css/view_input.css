@@ -1,0 +1,27 @@
+/*
+  Styles specific to the initial 'Input' view.
+*/
+
+.input-methods {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+}
+
+.input-group {
+    background-color: var(--bg-secondary);
+    padding: 16px;
+    border-radius: var(--radius);
+    border: 2px dashed transparent;
+    transition: border-color 0.3s, background-color 0.3s;
+}
+
+.input-group.drag-over {
+    border-color: var(--accent-primary);
+    background-color: var(--bg-primary);
+}
+
+.input-actions {
+    display: flex;
+    gap: 10px;
+}

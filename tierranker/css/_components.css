@@ -1,0 +1,232 @@
+/*
+  Styles for reusable UI components like buttons, form controls,
+  tooltips, and configuration widgets.
+*/
+
+/* --- Buttons --- */
+.sidebar-toggle-btn {
+    width: 32px;
+    height: 32px;
+    background-color: transparent;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-secondary);
+    transition: background-color 0.2s, color 0.2s, transform 0.3s;
+    flex-shrink: 0;
+}
+
+.sidebar-toggle-btn:hover {
+    background-color: var(--bg-tertiary);
+    color: var(--text-primary);
+}
+
+.sidebar-toggle-btn svg {
+    width: 24px;
+    height: 24px;
+    fill: currentColor;
+}
+
+.sidebar-icon-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: transparent;
+    border: none;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background-color 0.2s, color 0.2s;
+}
+
+.sidebar-icon-btn.text-icon {
+    font-weight: bold;
+    font-size: 0.8rem;
+}
+
+.sidebar-icon-btn:hover {
+    background-color: var(--bg-tertiary);
+    color: var(--text-primary);
+}
+
+.sidebar-icon-btn svg {
+    width: 24px;
+    height: 24px;
+    fill: currentColor;
+}
+
+.btn {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    padding: 10px 15px;
+    border-radius: var(--radius);
+    border: none;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    text-align: left;
+    transition: background-color 0.2s;
+    justify-content: center;
+}
+
+.btn-primary {
+    background-color: var(--accent-primary);
+    color: white;
+}
+
+.btn-primary:hover {
+    background-color: var(--accent-primary-hover);
+}
+
+.btn-secondary {
+    background-color: var(--bg-tertiary);
+    color: var(--text-primary);
+}
+
+.btn-secondary:hover {
+    filter: brightness(0.95);
+}
+
+/* --- View Toggles --- */
+.view-controls {
+    display: flex;
+    gap: 4px;
+    background-color: var(--bg-tertiary);
+    border-radius: 6px;
+    padding: 4px;
+}
+
+.view-btn {
+    background: transparent;
+    border: none;
+    border-radius: 4px;
+    padding: 4px;
+    cursor: pointer;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.view-btn svg {
+    width: 20px;
+    height: 20px;
+    fill: var(--text-secondary);
+}
+
+.view-btn.active,
+.view-btn:hover {
+    background-color: var(--bg-primary);
+}
+
+.view-btn.active svg {
+    fill: var(--text-primary);
+}
+
+/* --- Form Controls & Config Widgets --- */
+.config-group {
+    font-size: 0.9rem;
+}
+
+.config-group label {
+    font-weight: 600;
+}
+
+.radio-group-icon,
+.segmented-control {
+    display: flex;
+    margin-top: 4px;
+}
+
+.radio-group-icon input[type="radio"],
+.segmented-control input[type="radio"] {
+    opacity: 0;
+    position: fixed;
+    width: 0;
+}
+
+.radio-group-icon label {
+    border: 2px solid transparent;
+}
+
+.radio-group-icon input[type="radio"]:checked+label {
+    background-color: var(--accent-primary);
+    color: white;
+}
+
+.radio-group-icon input[type="radio"]:focus-visible+label {
+    border-color: var(--accent-primary);
+}
+
+.segmented-control {
+    background-color: var(--bg-tertiary);
+    border-radius: var(--radius);
+    padding: 2px;
+    gap: 2px;
+}
+
+.segmented-control-option {
+    flex: 1;
+    text-align: center;
+    padding: 6px 0;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.2s, color 0.2s, box-shadow 0.2s;
+    user-select: none;
+}
+
+.segmented-control input[type="radio"]:checked+.segmented-control-option {
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    font-weight: 600;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05), 0 1px 4px rgba(0, 0, 0, 0.08);
+}
+
+.segmented-control input[type="radio"]:not(:checked)+.segmented-control-option:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+html.dark-mode .segmented-control input[type="radio"]:not(:checked)+.segmented-control-option:hover {
+    background-color: rgba(255, 255, 255, 0.08);
+}
+
+.segmented-control input[type="radio"]:focus-visible+.segmented-control-option {
+    outline: 2px solid var(--accent-primary);
+    outline-offset: 1px;
+}
+
+
+/* --- Global Image Preview Tooltip --- */
+#global-image-preview {
+    position: fixed;
+    z-index: 9999;
+    width: 200px;
+    height: 200px;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-color: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 0.2s, visibility 0.2s;
+}
+
+#global-image-preview.visible {
+    opacity: 1;
+    visibility: visible;
+}

@@ -1,0 +1,57 @@
+/*
+  Global styles for the entire document, including resets,
+  base typography, and default element styles.
+*/
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: system-ui, sans-serif;
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    overflow: hidden;
+}
+
+h1,
+h2,
+h3,
+h4 {
+    margin-bottom: 8px;
+}
+
+h4 {
+    margin-top: 0;
+}
+
+p {
+    color: var(--text-secondary);
+    line-height: 1.5;
+    margin-bottom: 16px;
+    font-size: 0.9rem;
+}
+
+.instructions {
+    background-color: var(--bg-secondary);
+    border-left: 3px solid var(--accent-primary);
+    padding: 8px 12px;
+    margin-bottom: 16px;
+    border-radius: 0 4px 4px 0;
+    font-size: 0.85rem;
+}
+
+textarea {
+    width: 100%;
+    height: 150px;
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius);
+    color: var(--text-primary);
+    padding: 10px;
+    font-size: 1rem;
+    resize: vertical;
+    margin-bottom: 16px;
+}
