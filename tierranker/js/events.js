@@ -458,13 +458,17 @@ export function initializeEventListeners() {
                 editingItemId: null,
                 isSorting: false,
             });
+
+            // FIX: Always render the staging list after an import to ensure it's in sync.
+            renderStagingList();
             alert("Session imported successfully!");
+
+            // Now, decide which view to show.
             if (state.items.length > 0 && state.items.some(item => item.score !== undefined)) {
                 showView(dom.viewResults);
                 renderResultsView();
             } else {
                 showView(dom.viewInput);
-                renderStagingList();
             }
         } catch (error) {
             console.error("Failed to import session:", error);

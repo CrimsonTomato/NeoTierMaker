@@ -29,7 +29,6 @@
     padding: 16px;
     display: flex;
     flex-direction: column;
-    overflow: hidden;
 }
 
 .sidebar-left {
@@ -38,6 +37,9 @@
 
 .sidebar-right {
     border-left: 1px solid var(--border-color);
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
 }
 
 .sidebar-header {
@@ -61,8 +63,13 @@
 }
 
 .sidebar-content-wrapper {
+    /* FIX: Make this a flex container that grows to fill available space */
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    min-height: 0;
+    /* This allows the container to shrink smaller than its content, enabling child scrolling. */
     transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out;
-    overflow: hidden;
 }
 
 .sidebar-content-wrapper>hr.sidebar-full-content {

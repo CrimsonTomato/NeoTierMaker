@@ -93,9 +93,6 @@ export function renderResultsView() {
     ];
     renderQueue.sort((a, b) => (a.score !== b.score) ? b.score - a.score : (a.type === 'item' ? -1 : 1));
 
-    // Resolve the CSS variable to a concrete value so html2canvas can parse it.
-    const textPrimaryColor = getComputedStyle(document.documentElement).getPropertyValue('--text-primary').trim();
-
     let lastItemScore = 101;
     renderQueue.forEach((entity, index) => {
         if (entity.type === 'item') {
@@ -107,7 +104,7 @@ export function renderResultsView() {
                 itemEl.style.backgroundColor = `rgba(${rgb[0]}, ${rgb[1]}, ${rgb[2]}, 0.1)`;
 
                 const gradientStyle = ` 
-                    background-image: linear-gradient(to right, ${itemTier.textColor} ${entity.score}%, ${textPrimaryColor} ${entity.score}%);
+                    background-image: linear-gradient(to right, ${itemTier.textColor} ${entity.score}%, var(--text-primary) ${entity.score}%);
                     -webkit-background-clip: text;
                     background-clip: text;
                 `;
@@ -115,8 +112,10 @@ export function renderResultsView() {
                 itemEl.innerHTML = `
                     <img class="ranked-item-img" src="${entity.image || 'https://via.placeholder.com/30'}" alt="${entity.text}">
                     <div class="ranked-item-info">
-                        <div class="ranked-item-bar" style="background-color: ${itemTier.color}; width: ${entity.score || 0}%" title="${entity.text}"></div>
-                        <span class="bar-label-gradient" style="${gradientStyle}" data-solid-color-for-export="${itemTier.textColor}">${entity.text}</span>
+                        <div class="bar-container">
+                            <div class="ranked-item-bar" style="background-color: ${itemTier.color}; width: ${entity.score || 0}%" title="${entity.text}"></div>
+                            <span class="bar-label-gradient" style="${gradientStyle}" data-solid-color-for-export="${itemTier.textColor}">${entity.text}</span>
+                        </div>
                         <div class="ranked-item-score">${(entity.score || 0).toFixed(1)}%</div>
                     </div>
                 `;
