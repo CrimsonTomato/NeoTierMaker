@@ -1,4 +1,4 @@
-import * as dom from './dom.js';
+import * as dom from './dom.js'; // NEW IMPORT
 import { state } from './state.js';
 import { Chart, registerables } from 'chart.js';
 
@@ -8,7 +8,6 @@ let historyChartInstance = null;
 const drawerEl = document.getElementById('rank-history-drawer');
 const canvasEl = document.getElementById('rank-history-chart');
 
-// --- ADDED: State for the filter ---
 let showOnlyTop5 = false;
 
 /**
@@ -25,7 +24,6 @@ export function toggleHistoryFilter() {
 export function resetHistoryFilter() {
     showOnlyTop5 = false;
 }
-// --- END ADDED ---
 
 /**
  * Destroys the active chart instance to free up resources.
@@ -75,13 +73,11 @@ export function renderRankHistoryChart() {
     const ctx = canvasEl.getContext('2d');
     const labels = state.rankHistory.map(snapshot => snapshot.comparisonCount);
 
-    // --- MODIFICATION: Apply filter before creating datasets ---
     const itemsToDisplay = showOnlyTop5
         ? state.items.filter(item => top5ItemIds.has(item.id))
         : state.items;
 
     const datasets = itemsToDisplay.map(item => {
-        // --- END MODIFICATION ---
         const itemColor = itemColorMap.get(item.id) || neutralColor;
         const data = state.rankHistory.map(snapshot => {
             const rankInfo = snapshot.ranks.find(r => r.id === item.id);
@@ -170,12 +166,42 @@ export function renderRankHistoryChart() {
         },
     });
 
-    // --- ADDED: Update the button's appearance based on the filter state ---
     if (dom.btnToggleHistoryFilter) {
         dom.btnToggleHistoryFilter.classList.toggle('active', showOnlyTop5);
         dom.btnToggleHistoryFilter.textContent = showOnlyTop5
             ? 'Show All'
             : 'Show Top 5 Only';
     }
-    // --- END ADDED ---
+}
+
+/**
+ * Initializes event listeners specific to the rank history chart drawer.
+ */
+export function initializeHistoryChartEvents() {
+    dom.btnToggleHistory.addEventListener('click', () => {
+        const drawer = document.getElementById('rank-history-drawer');
+        const buttonText = dom.btnToggleHistory.querySelector('span');
+        drawer.classList.toggle('visible');
+
+        if (drawer.classList.contains('visible')) {
+            buttonText.textContent = 'Hide Rank History';
+
+            const LEGEND_DISPLAY_THRESHOLD = 25;
+            const itemCount = state.items.length;
+            if (itemCount > LEGEND_DISPLAY_THRESHOLD) {
+                drawer.style.height = '60vh';
+            } else {
+                drawer.style.height = '400px';
+            }
+
+            setTimeout(renderRankHistoryChart, 50);
+        } else {
+            buttonText.textContent = 'Show Rank History';
+            drawer.style.height = '';
+            resetHistoryFilter();
+            destroyHistoryChart();
+        }
+    });
+
+    dom.btnToggleHistoryFilter.addEventListener('click', toggleHistoryFilter);
 }

@@ -1,8 +1,5 @@
-// In js/inputController.js - This needs significant updates
-
 import { state, addItem } from './state.js';
 import { renderStagingList } from './ui.js';
-// Import the new color functions
 import { colorInfoFromString, colorInfoFromImage } from './color.js';
 
 export async function handleTextInput(text) {
