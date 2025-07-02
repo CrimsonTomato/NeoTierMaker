@@ -203,4 +203,8 @@ export function discardSortResults() {
     state.tiers.forEach(tier => {
         tier.itemIds = [];
     });
+
+    // Reset comparison mode to 'ask' so the modal shows again
+    // when the user starts a new sort.
+    state.comparisonMode = 'ask';
 }
