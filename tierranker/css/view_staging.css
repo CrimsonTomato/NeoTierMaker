@@ -129,7 +129,7 @@
     opacity: 1;
 }
 
-.view-grid .staging-item-actions [data-action="edit"] {
+.view-grid .staging-item-actions [data-action='edit'] {
     display: none;
 }
 

@@ -125,13 +125,17 @@
     font-size: 0.9rem;
     cursor: pointer;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-    transition: transform 0.2s, box-shadow 0.2s;
+    transition:
+        transform 0.2s,
+        box-shadow 0.2s;
     text-align: center;
 }
 
 .tier-tag.selected {
     transform: scale(1.1);
-    box-shadow: 0 0 0 3px var(--accent-primary), 0 4px 8px rgba(0, 0, 0, 0.3);
+    box-shadow:
+        0 0 0 3px var(--accent-primary),
+        0 4px 8px rgba(0, 0, 0, 0.3);
 }
 
 /* --- Ranked List Bar Chart --- */
@@ -269,7 +273,6 @@ body.assign-mode .tier-boundary-editable:hover .tier-boundary-line-editable {
     border-top-style: solid;
     border-top-color: var(--accent-primary);
 }
-
 
 /* --- Generated Tier List Grid --- */
 #tier-list-grid {

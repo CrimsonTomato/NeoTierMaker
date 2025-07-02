@@ -32,15 +32,18 @@ function handleKeyboardSorting(e) {
     const { callback } = state.comparison;
     let choiceMade = false;
     switch (e.key) {
-        case 'ArrowLeft': case '1':
+        case 'ArrowLeft':
+        case '1':
             callback(1);
             choiceMade = true;
             break;
-        case 'ArrowRight': case '2':
+        case 'ArrowRight':
+        case '2':
             callback(-1);
             choiceMade = true;
             break;
-        case ' ': case '0':
+        case ' ':
+        case '0':
             callback(0);
             choiceMade = true;
             break;
@@ -55,13 +58,18 @@ export function cleanupSortListeners() {
 }
 
 function displayNextSeedItem() {
-    currentlySeedingItem = state.items.find(item => state.itemSeedValues[item.id] === undefined);
+    currentlySeedingItem = state.items.find(
+        item => state.itemSeedValues[item.id] === undefined,
+    );
 
     if (currentlySeedingItem) {
         state.seedingProgress.current++;
-        dom.seedingCardEl.querySelector('.card-text').textContent = currentlySeedingItem.text;
+        dom.seedingCardEl.querySelector('.card-text').textContent =
+            currentlySeedingItem.text;
         const img = dom.seedingCardEl.querySelector('img');
-        img.src = currentlySeedingItem.image || 'https://via.placeholder.com/200/f0f2f5/050505?text=TXT';
+        img.src =
+            currentlySeedingItem.image ||
+            'https://via.placeholder.com/200/f0f2f5/050505?text=TXT';
         img.alt = currentlySeedingItem.text;
 
         dom.seedingProgressTextEl.textContent = `Rating Item ${state.seedingProgress.current} of ${state.seedingProgress.total}`;
@@ -115,19 +123,26 @@ function resolveSkippedComparisons(partiallySortedItems) {
     const itemsToResolve = state.skippedComparisons[0];
     state.progress.current++;
 
-    const onResolveChoice = (result) => {
+    const onResolveChoice = result => {
         // A tie (0) is not a valid choice during resolution.
         // The user MUST rank the items.
         if (result !== 0) {
             const [itemA, itemB] = itemsToResolve;
-            const indexA = partiallySortedItems.findIndex(i => i.id === itemA.id);
-            const indexB = partiallySortedItems.findIndex(i => i.id === itemB.id);
+            const indexA = partiallySortedItems.findIndex(
+                i => i.id === itemA.id,
+            );
+            const indexB = partiallySortedItems.findIndex(
+                i => i.id === itemB.id,
+            );
 
             const userWantsAGreater = result > 0;
             const isAActuallyGreater = indexA < indexB; // Lower index means higher rank
 
             if (userWantsAGreater !== isAActuallyGreater) {
-                [partiallySortedItems[indexA], partiallySortedItems[indexB]] = [partiallySortedItems[indexB], partiallySortedItems[indexA]];
+                [partiallySortedItems[indexA], partiallySortedItems[indexB]] = [
+                    partiallySortedItems[indexB],
+                    partiallySortedItems[indexA],
+                ];
             }
         }
         state.skippedComparisons.shift();
@@ -138,14 +153,15 @@ function resolveSkippedComparisons(partiallySortedItems) {
     updateComparisonView();
 }
 
-
 async function onSeedingComplete(isSimulation = false) {
     state.isSeeding = false;
     const itemGroups = state.items.reduce((groups, item) => {
         let seedValue = state.itemSeedValues[item.id];
         // Handle items skipped during seeding (they get a default middle value)
         if (seedValue === undefined) {
-            const defaultSeedValue = state.seedTiers.find(t => t.label.toLowerCase().includes('mid'))?.value || 3;
+            const defaultSeedValue =
+                state.seedTiers.find(t => t.label.toLowerCase().includes('mid'))
+                    ?.value || 3;
             seedValue = defaultSeedValue;
         }
         if (!groups[seedValue]) groups[seedValue] = [];
@@ -154,7 +170,9 @@ async function onSeedingComplete(isSimulation = false) {
     }, {});
 
     const sortedGroups = [];
-    const seedValues = Object.keys(itemGroups).map(Number).sort((a, b) => b - a);
+    const seedValues = Object.keys(itemGroups)
+        .map(Number)
+        .sort((a, b) => b - a);
 
     // No need to calculate progress for a simulation
     if (!isSimulation) {
@@ -163,16 +181,18 @@ async function onSeedingComplete(isSimulation = false) {
             const n = group.length;
             if (n > 1) {
                 if (state.comparisonMode === 3) {
-                    total += Math.ceil(n * Math.log2(n) / Math.log2(3));
+                    total += Math.ceil((n * Math.log2(n)) / Math.log2(3));
                 } else {
                     total += Math.ceil(n * Math.log2(n));
                 }
             }
             return total;
         }, 0);
-        state.progress = { current: state.decisionLog.length, total: totalComparisons };
+        state.progress = {
+            current: state.decisionLog.length,
+            total: totalComparisons,
+        };
     }
-
 
     state.isSorting = true;
     // MODIFIED: Don't show the view or buttons during simulation
@@ -182,11 +202,17 @@ async function onSeedingComplete(isSimulation = false) {
     }
 
     const generateKey = (id1, id2) => [id1, id2].sort().join('-');
-    const getIds = (items) => items.map(i => i.id).sort().join(',');
+    const getIds = items =>
+        items
+            .map(i => i.id)
+            .sort()
+            .join(',');
 
     // NEW: Map to hold the current sorted state of each group. Initialize with original groups.
     const liveSortedGroups = new Map();
-    seedValues.forEach(val => liveSortedGroups.set(val, [...(itemGroups[val] || [])]));
+    seedValues.forEach(val =>
+        liveSortedGroups.set(val, [...(itemGroups[val] || [])]),
+    );
 
     // --- MODIFICATION: Create a dedicated counter for simulation mode ---
     let simulationComparisonCount = 0;
@@ -212,11 +238,12 @@ async function onSeedingComplete(isSimulation = false) {
 
         state.rankHistory.push({
             // --- MODIFICATION: Use the correct counter based on mode ---
-            comparisonCount: isSimulation ? simulationComparisonCount : state.progress.current,
+            comparisonCount: isSimulation
+                ? simulationComparisonCount
+                : state.progress.current,
             ranks: ranks,
         });
     };
-
 
     // --- NEW: Define the automated comparison callback for simulation ---
     const simulationCompareCallback = (itemsToCompare, onResult) => {
@@ -228,7 +255,9 @@ async function onSeedingComplete(isSimulation = false) {
             onResult(result);
         } else if (itemsToCompare.length === 3) {
             // For tri-wise, shuffle the array to get a random ranking
-            const shuffled = [...itemsToCompare].sort(() => Math.random() - 0.5);
+            const shuffled = [...itemsToCompare].sort(
+                () => Math.random() - 0.5,
+            );
             onResult(shuffled);
         }
     };
@@ -257,7 +286,7 @@ async function onSeedingComplete(isSimulation = false) {
             }
         }
 
-        const onResultWithCacheAndLog = (result) => {
+        const onResultWithCacheAndLog = result => {
             if (itemsToCompare.length === 2) {
                 const [itemA, itemB] = itemsToCompare;
                 const key = generateKey(itemA.id, itemB.id);
@@ -270,26 +299,30 @@ async function onSeedingComplete(isSimulation = false) {
         };
 
         state.progress.current++;
-        state.comparison = { items: itemsToCompare, callback: onResultWithCacheAndLog };
+        state.comparison = {
+            items: itemsToCompare,
+            callback: onResultWithCacheAndLog,
+        };
         updateComparisonView();
     };
-
 
     for (const seedValue of seedValues) {
         const group = itemGroups[seedValue];
         if (group.length > 1) {
-            const sortedGroup = await new Promise((resolve) => {
+            const sortedGroup = await new Promise(resolve => {
                 createSorter(
                     group,
                     state.comparisonMode,
-                    isSimulation ? simulationCompareCallback : interactiveCompareCallback,
-                    (finalSortedGroup) => {
+                    isSimulation
+                        ? simulationCompareCallback
+                        : interactiveCompareCallback,
+                    finalSortedGroup => {
                         // Also update the map with the final sorted group before resolving
                         liveSortedGroups.set(seedValue, finalSortedGroup);
                         resolve(finalSortedGroup);
                     },
                     onProgressCallback,
-                    { seedValue } // Pass context for the callback
+                    { seedValue }, // Pass context for the callback
                 );
             });
             sortedGroups.push(...sortedGroup);
@@ -312,23 +345,31 @@ async function onSeedingComplete(isSimulation = false) {
     }
 }
 
-
 function updateComparisonView() {
     const { items, callback } = state.comparison;
     if (!items || items.length === 0) return;
 
     // --- Control button visibility based on state ---
     // MODIFIED: Show Undo button if there are decisions, otherwise keep hidden.
-    dom.btnUndoComparison.style.visibility = (state.decisionLog.length > 0 && !state.isResolvingSkips) ? 'visible' : 'hidden';
+    dom.btnUndoComparison.style.visibility =
+        state.decisionLog.length > 0 && !state.isResolvingSkips
+            ? 'visible'
+            : 'hidden';
 
     // MODIFIED: Disable Skip button for tri-wise mode.
-    dom.btnSkipComparison.style.display = (state.isResolvingSkips || state.comparisonMode === 3) ? 'none' : 'inline-block';
+    dom.btnSkipComparison.style.display =
+        state.isResolvingSkips || state.comparisonMode === 3
+            ? 'none'
+            : 'inline-block';
 
     // --- Update titles ---
     if (state.isResolvingSkips) {
         dom.comparisonTitleEl.textContent = `Resolving Skipped Comparison (${state.progress.current} of ${state.progress.total})`;
     } else {
-        dom.comparisonTitleEl.textContent = state.comparisonMode === 3 ? `Drag to rank the items (1st is best), then confirm.` : "Which do you rank higher?";
+        dom.comparisonTitleEl.textContent =
+            state.comparisonMode === 3
+                ? `Drag to rank the items (1st is best), then confirm.`
+                : 'Which do you rank higher?';
     }
 
     // MODIFIED: Update instructions based on comparison mode
@@ -339,12 +380,15 @@ function updateComparisonView() {
     }
 
     // --- Render comparison UI ---
-    if (state.comparisonMode === 3) { // Tri-wise Mode
+    if (state.comparisonMode === 3) {
+        // Tri-wise Mode
         dom.triLayoutControls.style.display = 'flex';
         const ranks = ['1st', '2nd', '3rd'];
         dom.comparisonAreaEl.innerHTML = `
             <div id="triwise-ranking-list">
-                ${items.map((item, index) => `
+                ${items
+                    .map(
+                        (item, index) => `
                     <div class="triwise-rank-item" data-id="${item.id}">
                         <div class="triwise-rank-label rank-${index + 1}">${ranks[index]}</div>
                         <div class="comparison-card-draggable">
@@ -354,7 +398,9 @@ function updateComparisonView() {
                              <h3 class="card-text">${item.text}</h3>
                         </div>
                     </div>
-                `).join('')}
+                `,
+                    )
+                    .join('')}
             </div>
             <div class="tie-button-container">
                 <button id="confirm-ranking-btn" class="btn btn-primary">Confirm Ranking</button>
@@ -363,7 +409,8 @@ function updateComparisonView() {
 
         const rankingListEl = document.getElementById('triwise-ranking-list');
         const confirmBtn = document.getElementById('confirm-ranking-btn');
-        if (dom.btnTriLayoutHorizontal.classList.contains('active')) rankingListEl.classList.add('layout-horizontal');
+        if (dom.btnTriLayoutHorizontal.classList.contains('active'))
+            rankingListEl.classList.add('layout-horizontal');
 
         new Sortable(rankingListEl, {
             animation: 150,
@@ -371,7 +418,8 @@ function updateComparisonView() {
             dragClass: 'sortable-drag',
             onEnd: function (evt) {
                 // Update the rank labels visually after dragging
-                const items = rankingListEl.querySelectorAll('.triwise-rank-item');
+                const items =
+                    rankingListEl.querySelectorAll('.triwise-rank-item');
                 const ranks = ['1st', '2nd', '3rd'];
                 const rankClasses = ['rank-1', 'rank-2', 'rank-3'];
                 items.forEach((item, index) => {
@@ -382,21 +430,28 @@ function updateComparisonView() {
                         label.classList.add(`rank-${index + 1}`);
                     }
                 });
-            }
+            },
         });
 
-        rankingListEl.addEventListener('mouseover', (e) => showPreview(e, '.triwise-image-wrapper'));
+        rankingListEl.addEventListener('mouseover', e =>
+            showPreview(e, '.triwise-image-wrapper'),
+        );
         rankingListEl.addEventListener('mouseout', () => hidePreview());
         confirmBtn.onclick = () => {
             hidePreview();
-            const rankedItemElements = rankingListEl.querySelectorAll('.triwise-rank-item');
-            const rankedIds = Array.from(rankedItemElements).map(el => el.dataset.id);
-            const rankedItems = rankedIds.map(id => items.find(item => item.id === id));
+            const rankedItemElements =
+                rankingListEl.querySelectorAll('.triwise-rank-item');
+            const rankedIds = Array.from(rankedItemElements).map(
+                el => el.dataset.id,
+            );
+            const rankedItems = rankedIds.map(id =>
+                items.find(item => item.id === id),
+            );
             callback(rankedItems);
         };
         dom.comparisonAreaEl.onclick = null;
-
-    } else { // Pairwise Mode
+    } else {
+        // Pairwise Mode
         dom.triLayoutControls.style.display = 'none';
         dom.comparisonAreaEl.innerHTML = `
             <div class="pairwise-container">
@@ -411,7 +466,7 @@ function updateComparisonView() {
             </div>
             <div class="tie-button-container"><button class="btn btn-secondary" data-choice="tie">It's a Tie</button></div>
         `;
-        dom.comparisonAreaEl.onclick = (e) => {
+        dom.comparisonAreaEl.onclick = e => {
             const choice = e.target.closest('[data-choice]')?.dataset.choice;
             if (!choice) return;
             if (state.isResolvingSkips && choice === 'tie') return; // Disallow tie in resolution phase
@@ -425,10 +480,9 @@ function updateComparisonView() {
     dom.progressBarInnerEl.style.width = `${state.progress.total > 0 ? (state.progress.current / state.progress.total) * 100 : 0}%`;
 }
 
-
 export function startSort() {
     if (state.items.length < 2) {
-        alert("Please add at least two items to sort.");
+        alert('Please add at least two items to sort.');
         return;
     }
     isSimulating = false; // Ensure simulation flag is off for normal sort
@@ -436,7 +490,7 @@ export function startSort() {
     if (state.comparisonMode === 'ask') {
         dom.modeChoiceModal.style.display = 'flex';
 
-        const makeChoice = (mode) => {
+        const makeChoice = mode => {
             setComparisonMode(mode);
             dom.modeChoiceModal.style.display = 'none';
             _startSortInternal();
@@ -447,14 +501,18 @@ export function startSort() {
 
         dom.modalBtnPairwise.onclick = () => makeChoice(2);
         dom.modalBtnTriwise.onclick = () => makeChoice(3);
-
     } else {
         _startSortInternal();
     }
 }
 
 export function handleUndoComparison() {
-    if (!state.isSorting || state.isResolvingSkips || state.decisionLog.length === 0) return;
+    if (
+        !state.isSorting ||
+        state.isResolvingSkips ||
+        state.decisionLog.length === 0
+    )
+        return;
 
     // MODIFIED: Clear the comparison cache to force the sorter to re-ask.
     comparisonCache.clear();
@@ -476,7 +534,12 @@ export function handleUndoComparison() {
 
 export function handleSkipComparison() {
     // MODIFIED: Added check for comparison mode
-    if (!state.isSorting || state.isResolvingSkips || state.comparisonMode === 3) return;
+    if (
+        !state.isSorting ||
+        state.isResolvingSkips ||
+        state.comparisonMode === 3
+    )
+        return;
 
     const { items, callback } = state.comparison;
     if (items && callback) {
@@ -489,7 +552,9 @@ export function handleSkipSeeding() {
     if (!state.isSeeding) return;
 
     // Assign a default middle-tier seed value to all un-seeded items.
-    const defaultSeedValue = state.seedTiers.find(t => t.label.toLowerCase().includes('mid'))?.value || 3;
+    const defaultSeedValue =
+        state.seedTiers.find(t => t.label.toLowerCase().includes('mid'))
+            ?.value || 3;
     state.items.forEach(item => {
         if (state.itemSeedValues[item.id] === undefined) {
             state.itemSeedValues[item.id] = defaultSeedValue;
@@ -508,7 +573,8 @@ function _startSortInternal() {
         // --- Simulation Path ---
         // 1. Randomly "seed" all items
         state.items.forEach(item => {
-            state.itemSeedValues[item.id] = Math.floor(Math.random() * state.seedTiers.length) + 1;
+            state.itemSeedValues[item.id] =
+                Math.floor(Math.random() * state.seedTiers.length) + 1;
         });
         // 2. Run the non-interactive sort
         onSeedingComplete(true); // Pass true to indicate simulation
@@ -521,7 +587,7 @@ function _startSortInternal() {
 
 export async function handleSimulateSort() {
     if (state.items.length < 2) {
-        alert("Please add at least two items to start a simulation.");
+        alert('Please add at least two items to start a simulation.');
         return;
     }
 
@@ -529,12 +595,13 @@ export async function handleSimulateSort() {
 
     // The user needs to pick a mode for the simulation to run with.
     // If they haven't picked one, we default to pairwise (2).
-    const modeForSimulation = (state.comparisonMode === 'ask') ? 2 : state.comparisonMode;
+    const modeForSimulation =
+        state.comparisonMode === 'ask' ? 2 : state.comparisonMode;
     setComparisonMode(modeForSimulation);
 
     // Show a loading indicator on the button
     const originalText = dom.simulateSortBtn.textContent;
-    dom.simulateSortBtn.textContent = "Simulating...";
+    dom.simulateSortBtn.textContent = 'Simulating...';
     dom.simulateSortBtn.disabled = true;
 
     // Use a short timeout to allow the UI to update before the sync-heavy sort starts
@@ -542,8 +609,8 @@ export async function handleSimulateSort() {
         try {
             _startSortInternal();
         } catch (error) {
-            console.error("Simulation failed:", error);
-            alert("An error occurred during the simulation.");
+            console.error('Simulation failed:', error);
+            alert('An error occurred during the simulation.');
         } finally {
             // Reset button state and flag
             dom.simulateSortBtn.textContent = originalText;

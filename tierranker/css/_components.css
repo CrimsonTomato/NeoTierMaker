@@ -15,7 +15,10 @@
     align-items: center;
     justify-content: center;
     color: var(--text-secondary);
-    transition: background-color 0.2s, color 0.2s, transform 0.3s;
+    transition:
+        background-color 0.2s,
+        color 0.2s,
+        transform 0.3s;
     flex-shrink: 0;
 }
 
@@ -41,7 +44,9 @@
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    transition: background-color 0.2s, color 0.2s;
+    transition:
+        background-color 0.2s,
+        color 0.2s;
 }
 
 .sidebar-icon-btn.text-icon {
@@ -116,7 +121,9 @@
     justify-content: center;
     color: var(--text-secondary);
     /* Set color on the button */
-    transition: background-color 0.2s, color 0.2s;
+    transition:
+        background-color 0.2s,
+        color 0.2s;
     /* Add transition */
 }
 
@@ -153,8 +160,8 @@
     margin-top: 4px;
 }
 
-.radio-group-icon input[type="radio"],
-.segmented-control input[type="radio"] {
+.radio-group-icon input[type='radio'],
+.segmented-control input[type='radio'] {
     opacity: 0;
     position: fixed;
     width: 0;
@@ -164,12 +171,12 @@
     border: 2px solid transparent;
 }
 
-.radio-group-icon input[type="radio"]:checked+label {
+.radio-group-icon input[type='radio']:checked + label {
     background-color: var(--accent-primary);
     color: white;
 }
 
-.radio-group-icon input[type="radio"]:focus-visible+label {
+.radio-group-icon input[type='radio']:focus-visible + label {
     border-color: var(--accent-primary);
 }
 
@@ -189,30 +196,41 @@
     color: var(--text-secondary);
     border-radius: 6px;
     cursor: pointer;
-    transition: background-color 0.2s, color 0.2s, box-shadow 0.2s;
+    transition:
+        background-color 0.2s,
+        color 0.2s,
+        box-shadow 0.2s;
     user-select: none;
 }
 
-.segmented-control input[type="radio"]:checked+.segmented-control-option {
+.segmented-control input[type='radio']:checked + .segmented-control-option {
     background-color: var(--bg-primary);
     color: var(--text-primary);
     font-weight: 600;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05), 0 1px 4px rgba(0, 0, 0, 0.08);
+    box-shadow:
+        0 1px 2px rgba(0, 0, 0, 0.05),
+        0 1px 4px rgba(0, 0, 0, 0.08);
 }
 
-.segmented-control input[type="radio"]:not(:checked)+.segmented-control-option:hover {
+.segmented-control
+    input[type='radio']:not(:checked)
+    + .segmented-control-option:hover {
     background-color: rgba(0, 0, 0, 0.05);
 }
 
-html.dark-mode .segmented-control input[type="radio"]:not(:checked)+.segmented-control-option:hover {
+html.dark-mode
+    .segmented-control
+    input[type='radio']:not(:checked)
+    + .segmented-control-option:hover {
     background-color: rgba(255, 255, 255, 0.08);
 }
 
-.segmented-control input[type="radio"]:focus-visible+.segmented-control-option {
+.segmented-control
+    input[type='radio']:focus-visible
+    + .segmented-control-option {
     outline: 2px solid var(--accent-primary);
     outline-offset: 1px;
 }
-
 
 /* --- Global Image Preview Tooltip --- */
 #global-image-preview {
@@ -230,7 +248,9 @@ html.dark-mode .segmented-control input[type="radio"]:not(:checked)+.segmented-c
     opacity: 0;
     visibility: hidden;
     pointer-events: none;
-    transition: opacity 0.2s, visibility 0.2s;
+    transition:
+        opacity 0.2s,
+        visibility 0.2s;
 }
 
 #global-image-preview.visible {

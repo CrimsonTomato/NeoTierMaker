@@ -36,11 +36,41 @@ export const state = {
     // --- TIER LIST STATE ---
     tierEditMode: false,
     tiers: [
-        { id: crypto.randomUUID(), label: 'S', color: '#ff7f7f', textColor: '#000000', threshold: 90 },
-        { id: crypto.randomUUID(), label: 'A', color: '#ffbf7f', textColor: '#000000', threshold: 75 },
-        { id: crypto.randomUUID(), label: 'B', color: '#ffff7f', textColor: '#000000', threshold: 60 },
-        { id: crypto.randomUUID(), label: 'C', color: '#7fff7f', textColor: '#000000', threshold: 45 },
-        { id: crypto.randomUUID(), label: 'D', color: '#7fbfff', textColor: '#000000', threshold: 0 },
+        {
+            id: crypto.randomUUID(),
+            label: 'S',
+            color: '#ff7f7f',
+            textColor: '#000000',
+            threshold: 90,
+        },
+        {
+            id: crypto.randomUUID(),
+            label: 'A',
+            color: '#ffbf7f',
+            textColor: '#000000',
+            threshold: 75,
+        },
+        {
+            id: crypto.randomUUID(),
+            label: 'B',
+            color: '#ffff7f',
+            textColor: '#000000',
+            threshold: 60,
+        },
+        {
+            id: crypto.randomUUID(),
+            label: 'C',
+            color: '#7fff7f',
+            textColor: '#000000',
+            threshold: 45,
+        },
+        {
+            id: crypto.randomUUID(),
+            label: 'D',
+            color: '#7fbfff',
+            textColor: '#000000',
+            threshold: 0,
+        },
     ],
     unrankedItemIds: [],
 };
@@ -94,9 +124,18 @@ export function updateTitle(newTitle) {
 }
 
 export function addTier() {
-    const lastThreshold = state.tiers.length > 0 ? state.tiers[state.tiers.length - 1].threshold : 0;
+    const lastThreshold =
+        state.tiers.length > 0
+            ? state.tiers[state.tiers.length - 1].threshold
+            : 0;
     const newThreshold = Math.max(0, lastThreshold - 15);
-    state.tiers.push({ id: crypto.randomUUID(), label: 'New', color: '#cccccc', textColor: '#000000', threshold: newThreshold });
+    state.tiers.push({
+        id: crypto.randomUUID(),
+        label: 'New',
+        color: '#cccccc',
+        textColor: '#000000',
+        threshold: newThreshold,
+    });
     state.tiers.sort((a, b) => b.threshold - a.threshold);
 }
 export function updateTierLabel(tierId, newLabel) {
@@ -105,7 +144,9 @@ export function updateTierLabel(tierId, newLabel) {
 }
 export function moveItemToTier(itemId, targetTierId, sourceId) {
     if (sourceId === 'unranked') {
-        state.unrankedItemIds = state.unrankedItemIds.filter(id => id !== itemId);
+        state.unrankedItemIds = state.unrankedItemIds.filter(
+            id => id !== itemId,
+        );
     } else {
         const sourceTier = state.tiers.find(t => t.id === sourceId);
         if (sourceTier) {

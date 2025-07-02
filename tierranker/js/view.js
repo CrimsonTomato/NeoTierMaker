@@ -3,6 +3,8 @@
  * @param {HTMLElement} viewElement The view element to make active.
  */
 export function showView(viewElement) {
-    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+    document
+        .querySelectorAll('.view')
+        .forEach(v => v.classList.remove('active'));
     viewElement.classList.add('active');
 }

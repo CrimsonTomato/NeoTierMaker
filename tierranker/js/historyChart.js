@@ -44,7 +44,11 @@ export function destroyHistoryChart() {
 export function renderRankHistoryChart() {
     destroyHistoryChart();
 
-    if (!drawerEl.classList.contains('visible') || !state.rankHistory || state.rankHistory.length < 2) {
+    if (
+        !drawerEl.classList.contains('visible') ||
+        !state.rankHistory ||
+        state.rankHistory.length < 2
+    ) {
         return;
     }
 
@@ -56,7 +60,7 @@ export function renderRankHistoryChart() {
         '#3b82f6', // Rank 2: Blue
         '#22c55e', // Rank 3: Green
         '#f59e0b', // Rank 4: Amber/Yellow
-        '#a855f7'  // Rank 5: Purple
+        '#a855f7', // Rank 5: Purple
     ];
     const neutralColor = '#888888';
 
@@ -102,7 +106,7 @@ export function renderRankHistoryChart() {
         type: 'line',
         data: {
             labels: labels,
-            datasets: datasets
+            datasets: datasets,
         },
         options: {
             responsive: true,
@@ -112,8 +116,10 @@ export function renderRankHistoryChart() {
                     display: showLegend,
                     position: 'top',
                     labels: {
-                        color: getComputedStyle(document.documentElement).getPropertyValue('--text-secondary').trim(),
-                    }
+                        color: getComputedStyle(document.documentElement)
+                            .getPropertyValue('--text-secondary')
+                            .trim(),
+                    },
                 },
                 tooltip: {
                     mode: 'index',
@@ -127,37 +133,49 @@ export function renderRankHistoryChart() {
                     title: {
                         display: true,
                         text: 'Rank',
-                        color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary').trim(),
+                        color: getComputedStyle(document.documentElement)
+                            .getPropertyValue('--text-primary')
+                            .trim(),
                     },
                     ticks: {
                         stepSize: 1,
-                        color: getComputedStyle(document.documentElement).getPropertyValue('--text-secondary').trim(),
+                        color: getComputedStyle(document.documentElement)
+                            .getPropertyValue('--text-secondary')
+                            .trim(),
                     },
                     grid: {
-                        color: getComputedStyle(document.documentElement).getPropertyValue('--border-color').trim(),
-                    }
+                        color: getComputedStyle(document.documentElement)
+                            .getPropertyValue('--border-color')
+                            .trim(),
+                    },
                 },
                 x: {
                     title: {
                         display: true,
                         text: 'Comparison #',
-                        color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary').trim(),
+                        color: getComputedStyle(document.documentElement)
+                            .getPropertyValue('--text-primary')
+                            .trim(),
                     },
                     ticks: {
-                        color: getComputedStyle(document.documentElement).getPropertyValue('--text-secondary').trim(),
+                        color: getComputedStyle(document.documentElement)
+                            .getPropertyValue('--text-secondary')
+                            .trim(),
                     },
                     grid: {
                         display: false,
-                    }
-                }
-            }
-        }
+                    },
+                },
+            },
+        },
     });
 
     // --- ADDED: Update the button's appearance based on the filter state ---
     if (dom.btnToggleHistoryFilter) {
         dom.btnToggleHistoryFilter.classList.toggle('active', showOnlyTop5);
-        dom.btnToggleHistoryFilter.textContent = showOnlyTop5 ? 'Show All' : 'Show Top 5 Only';
+        dom.btnToggleHistoryFilter.textContent = showOnlyTop5
+            ? 'Show All'
+            : 'Show Top 5 Only';
     }
     // --- END ADDED ---
 }

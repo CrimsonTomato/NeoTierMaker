@@ -1,5 +1,11 @@
 import * as dom from './dom.js';
-import { state, updateTierThreshold, addTier, removeLastTier, toggleTierEditMode } from './state.js';
+import {
+    state,
+    updateTierThreshold,
+    addTier,
+    removeLastTier,
+    toggleTierEditMode,
+} from './state.js';
 import { showView } from './view.js';
 import { isColorDark } from './color.js';
 import { renderRankHistoryChart } from './historyChart.js';
@@ -15,7 +21,7 @@ function calculateScores() {
     const n = state.items.length;
     if (n === 0) return;
     state.items.forEach((item, index) => {
-        item.score = n > 1 ? 100 - (index * (100 / (n - 1))) : 100;
+        item.score = n > 1 ? 100 - index * (100 / (n - 1)) : 100;
     });
 }
 
@@ -32,7 +38,7 @@ function setInitialTierThresholds() {
 
 export function assignItemsToTiers() {
     state.tiers.sort((a, b) => b.threshold - a.threshold);
-    state.tiers.forEach(tier => tier.itemIds = []);
+    state.tiers.forEach(tier => (tier.itemIds = []));
     state.items.forEach(item => {
         for (const tier of state.tiers) {
             if (item.score >= tier.threshold) {
@@ -63,7 +69,6 @@ export function updateTierColor(tierId, newHexColor) {
     }
 }
 
-
 export function renderResultsView() {
     dom.resultsListTitle.textContent = state.title;
 
@@ -78,7 +83,6 @@ export function renderResultsView() {
     // --- NEW: Manage Edit Mode state ---
     dom.btnToggleTierEdit.classList.toggle('active', state.tierEditMode);
     document.body.classList.toggle('tier-edit-mode', state.tierEditMode);
-
 
     dom.tierTagContainer.innerHTML = '';
     state.tiers.forEach(tier => {
@@ -95,9 +99,16 @@ export function renderResultsView() {
     dom.rankedListWrapper.innerHTML = '';
     const renderQueue = [
         ...state.items.map(i => ({ ...i, type: 'item' })),
-        ...state.tiers.map(t => ({ type: 'tier', score: t.threshold, tier: t, id: t.id }))
+        ...state.tiers.map(t => ({
+            type: 'tier',
+            score: t.threshold,
+            tier: t,
+            id: t.id,
+        })),
     ];
-    renderQueue.sort((a, b) => (a.score !== b.score) ? b.score - a.score : (a.type === 'item' ? -1 : 1));
+    renderQueue.sort((a, b) =>
+        a.score !== b.score ? b.score - a.score : a.type === 'item' ? -1 : 1,
+    );
 
     let lastItemScore = 101;
     renderQueue.forEach((entity, index) => {
@@ -106,7 +117,9 @@ export function renderResultsView() {
             itemEl.className = 'ranked-item';
             const itemTier = state.tiers.find(t => t.id === entity.tierId);
             if (itemTier) {
-                const rgb = itemTier.color.match(/\w\w/g).map(hex => parseInt(hex, 16));
+                const rgb = itemTier.color
+                    .match(/\w\w/g)
+                    .map(hex => parseInt(hex, 16));
                 itemEl.style.backgroundColor = `rgba(${rgb[0]}, ${rgb[1]}, ${rgb[2]}, 0.1)`;
 
                 const gradientStyle = ` 
@@ -131,14 +144,18 @@ export function renderResultsView() {
 
             // --- Render editable boundaries between items ---
             if (state.tierEditMode) {
-                const nextItemIndex = renderQueue.findIndex((nextEntity, nextIndex) => nextIndex > index && nextEntity.type === 'item');
+                const nextItemIndex = renderQueue.findIndex(
+                    (nextEntity, nextIndex) =>
+                        nextIndex > index && nextEntity.type === 'item',
+                );
                 if (nextItemIndex !== -1) {
                     const nextItem = renderQueue[nextItemIndex];
                     const boundaryScore = (entity.score + nextItem.score) / 2;
 
                     const editableBoundaryEl = document.createElement('div');
                     editableBoundaryEl.className = 'tier-boundary-editable';
-                    editableBoundaryEl.dataset.editableThreshold = boundaryScore;
+                    editableBoundaryEl.dataset.editableThreshold =
+                        boundaryScore;
 
                     const lineEl = document.createElement('div');
                     lineEl.className = 'tier-boundary-line-editable';
@@ -147,7 +164,6 @@ export function renderResultsView() {
                     dom.rankedListWrapper.appendChild(editableBoundaryEl);
                 }
             }
-
         } else if (entity.type === 'tier') {
             const boundaryEl = document.createElement('div');
             boundaryEl.className = 'tier-boundary';
@@ -177,14 +193,17 @@ export function renderResultsView() {
         labelEl.dataset.tierId = tier.id;
         labelEl.style.backgroundColor = tier.color;
         labelEl.style.color = tier.textColor;
-        labelEl.title = "Left-click to change color, Right-click to rename";
+        labelEl.title = 'Left-click to change color, Right-click to rename';
         labelEl.innerText = tier.label;
 
         const itemsEl = document.createElement('div');
         itemsEl.className = 'tier-items';
         itemsEl.innerHTML = tier.itemIds
             .map(id => state.items.find(i => i.id === id))
-            .map(item => `<img class="tier-item" src="${item.image || 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs='}" alt="${item.text}" title="${item.text}">`)
+            .map(
+                item =>
+                    `<img class="tier-item" src="${item.image || 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs='}" alt="${item.text}" title="${item.text}">`,
+            )
             .join('');
 
         tierRowEl.append(labelEl, itemsEl);
@@ -218,7 +237,7 @@ export function onSortDone(sortedItems) {
 
 export function handleTierTagClick(tierId) {
     if (!tierId) return;
-    selectedTierToAssign = (selectedTierToAssign === tierId) ? null : tierId;
+    selectedTierToAssign = selectedTierToAssign === tierId ? null : tierId;
     document.body.classList.toggle('assign-mode', !!selectedTierToAssign);
     renderResultsView();
 }
@@ -232,7 +251,10 @@ export function handleRankedListClick(e) {
 
     const editableBoundary = e.target.closest('[data-editable-threshold]');
     if (selectedTierToAssign && editableBoundary) {
-        updateTierThreshold(selectedTierToAssign, parseFloat(editableBoundary.dataset.editableThreshold));
+        updateTierThreshold(
+            selectedTierToAssign,
+            parseFloat(editableBoundary.dataset.editableThreshold),
+        );
         selectedTierToAssign = null;
         document.body.classList.remove('assign-mode');
         assignItemsToTiers();
@@ -242,7 +264,10 @@ export function handleRankedListClick(e) {
 
     const boundary = e.target.closest('.tier-boundary');
     if (selectedTierToAssign && boundary) {
-        updateTierThreshold(selectedTierToAssign, parseFloat(boundary.dataset.threshold));
+        updateTierThreshold(
+            selectedTierToAssign,
+            parseFloat(boundary.dataset.threshold),
+        );
         selectedTierToAssign = null;
         document.body.classList.remove('assign-mode');
         assignItemsToTiers();
@@ -267,13 +292,21 @@ const MIN_ITEM_SIZE = 32;
 const MAX_ITEM_SIZE = 128;
 
 function getCurrentItemSize() {
-    const currentSizeStr = getComputedStyle(dom.tierListGridEl).getPropertyValue('--tier-item-size');
+    const currentSizeStr = getComputedStyle(
+        dom.tierListGridEl,
+    ).getPropertyValue('--tier-item-size');
     return parseInt(currentSizeStr, 10) || 64;
 }
 
 function setItemSize(newSize) {
-    const clampedSize = Math.max(MIN_ITEM_SIZE, Math.min(newSize, MAX_ITEM_SIZE));
-    dom.tierListGridEl.style.setProperty('--tier-item-size', `${clampedSize}px`);
+    const clampedSize = Math.max(
+        MIN_ITEM_SIZE,
+        Math.min(newSize, MAX_ITEM_SIZE),
+    );
+    dom.tierListGridEl.style.setProperty(
+        '--tier-item-size',
+        `${clampedSize}px`,
+    );
 }
 
 export function handleSizeIncrease() {

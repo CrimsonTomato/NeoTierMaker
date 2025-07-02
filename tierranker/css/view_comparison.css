@@ -53,7 +53,9 @@
     padding: 24px;
     text-align: center;
     cursor: pointer;
-    transition: transform 0.2s, box-shadow 0.2s;
+    transition:
+        transform 0.2s,
+        box-shadow 0.2s;
     border: 2px solid transparent;
 }
 
@@ -143,7 +145,6 @@
     background-color: #d97706;
 }
 
-
 .comparison-card-draggable {
     flex-grow: 1;
     background-color: var(--bg-primary);
@@ -182,11 +183,11 @@
     border: 2px dashed var(--accent-primary);
 }
 
-.triwise-rank-item.sortable-ghost>* {
+.triwise-rank-item.sortable-ghost > * {
     visibility: hidden;
 }
 
-.triwise-rank-item.sortable-ghost>* {
+.triwise-rank-item.sortable-ghost > * {
     visibility: hidden;
 }
 

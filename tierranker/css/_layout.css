@@ -6,21 +6,29 @@
 .app-container {
     display: grid;
     /* The resizer handle will be positioned over the grid line, so it doesn't need its own column. */
-    grid-template-columns: var(--sidebar-left-width-wide) 1fr var(--sidebar-right-width-wide);
+    grid-template-columns: var(--sidebar-left-width-wide) 1fr var(
+            --sidebar-right-width-wide
+        );
     height: 100vh;
     position: relative;
 }
 
 .app-container.left-sidebar-collapsed {
-    grid-template-columns: var(--sidebar-left-width-collapsed) 1fr var(--sidebar-right-width-wide);
+    grid-template-columns: var(--sidebar-left-width-collapsed) 1fr var(
+            --sidebar-right-width-wide
+        );
 }
 
 .app-container.right-sidebar-collapsed {
-    grid-template-columns: var(--sidebar-left-width-wide) 1fr var(--sidebar-right-width-collapsed);
+    grid-template-columns: var(--sidebar-left-width-wide) 1fr var(
+            --sidebar-right-width-collapsed
+        );
 }
 
 .app-container.left-sidebar-collapsed.right-sidebar-collapsed {
-    grid-template-columns: var(--sidebar-left-width-collapsed) 1fr var(--sidebar-right-width-collapsed);
+    grid-template-columns: var(--sidebar-left-width-collapsed) 1fr var(
+            --sidebar-right-width-collapsed
+        );
 }
 
 /* --- Sidebars --- */
@@ -70,7 +78,7 @@
     min-height: 0;
 }
 
-.sidebar-content-wrapper>hr.sidebar-full-content {
+.sidebar-content-wrapper > hr.sidebar-full-content {
     border: none;
     border-top: 1px solid var(--border-color);
     margin: 16px 0;

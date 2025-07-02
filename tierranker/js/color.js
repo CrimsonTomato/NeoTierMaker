@@ -11,7 +11,7 @@ const fac = new FastAverageColor();
  * @returns {number} The luminance.
  */
 function getLuminance(r, g, b) {
-    const a = [r, g, b].map((v) => {
+    const a = [r, g, b].map(v => {
         v /= 255;
         return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
     });
@@ -36,7 +36,8 @@ export function isColorDark(rgb) {
  */
 export function colorInfoFromString(str) {
     let hash = 0;
-    if (str.length === 0) return { background: 'hsl(0, 0%, 85%)', text: '#000000' };
+    if (str.length === 0)
+        return { background: 'hsl(0, 0%, 85%)', text: '#000000' };
     for (let i = 0; i < str.length; i++) {
         hash = str.charCodeAt(i) + ((hash << 5) - hash);
         hash = hash & hash;
@@ -45,7 +46,7 @@ export function colorInfoFromString(str) {
     // The HSL colors are always light, so text is always black.
     return {
         background: `hsl(${h}, 70%, 85%)`,
-        text: '#000000'
+        text: '#000000',
     };
 }
 
@@ -61,13 +62,13 @@ export async function colorInfoFromImage(imageDataUrl) {
 
         return {
             background: color.hex,
-            text: isDark ? '#FFFFFF' : '#000000'
+            text: isDark ? '#FFFFFF' : '#000000',
         };
     } catch (e) {
-        console.error("Could not get color from image", e);
+        console.error('Could not get color from image', e);
         return {
             background: '#cccccc',
-            text: '#000000'
+            text: '#000000',
         };
     }
 }

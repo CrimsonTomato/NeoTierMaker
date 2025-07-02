@@ -20,11 +20,19 @@ export const progressTextEl = document.getElementById('progress-text');
 export const progressBarInnerEl = document.getElementById('progress-bar-inner');
 export const comparisonAreaEl = document.getElementById('comparison-area');
 export const comparisonTitleEl = document.getElementById('comparison-title');
-export const comparisonInstructionsEl = document.getElementById('comparison-instructions');
+export const comparisonInstructionsEl = document.getElementById(
+    'comparison-instructions',
+);
 export const triLayoutControls = document.getElementById('tri-layout-controls');
-export const btnTriLayoutVertical = document.getElementById('btn-tri-layout-vertical');
-export const btnTriLayoutHorizontal = document.getElementById('btn-tri-layout-horizontal');
-export const btnAbortComparison = document.getElementById('btn-abort-comparison');
+export const btnTriLayoutVertical = document.getElementById(
+    'btn-tri-layout-vertical',
+);
+export const btnTriLayoutHorizontal = document.getElementById(
+    'btn-tri-layout-horizontal',
+);
+export const btnAbortComparison = document.getElementById(
+    'btn-abort-comparison',
+);
 
 export const btnUndoComparison = document.getElementById('btn-undo-comparison');
 export const btnSkipComparison = document.getElementById('btn-skip-comparison');
@@ -32,7 +40,9 @@ export const btnSkipComparison = document.getElementById('btn-skip-comparison');
 export const viewResults = document.getElementById('view-results');
 export const tierTagContainer = document.getElementById('tier-tag-container');
 export const rankedListWrapper = document.getElementById('ranked-list-wrapper');
-export const rankedListContainer = document.getElementById('ranked-list-container');
+export const rankedListContainer = document.getElementById(
+    'ranked-list-container',
+);
 export const tierListGridEl = document.getElementById('tier-list-grid');
 export const btnAddTier = document.getElementById('btn-add-tier');
 export const btnRemoveTier = document.getElementById('btn-remove-tier');
@@ -47,31 +57,49 @@ export const btnExportSession = document.getElementById('btn-export-session');
 export const btnImportSession = document.getElementById('btn-import-session');
 export const sessionFileInput = document.getElementById('session-file-input');
 export const resultsListTitle = document.getElementById('results-list-title');
-export const sortStatsContainer = document.getElementById('sort-stats-container');
+export const sortStatsContainer = document.getElementById(
+    'sort-stats-container',
+);
 export const btnExportBarChart = document.getElementById('btn-export-barchart');
 export const btnCopyBarChart = document.getElementById('btn-copy-barchart');
-export const btnToggleTierEdit = document.getElementById('btn-toggle-tier-edit');
+export const btnToggleTierEdit = document.getElementById(
+    'btn-toggle-tier-edit',
+);
 export const btnToggleHistory = document.getElementById('btn-toggle-history');
-export const btnToggleHistoryFilter = document.getElementById('btn-toggle-history-filter');
+export const btnToggleHistoryFilter = document.getElementById(
+    'btn-toggle-history-filter',
+);
 
 export const viewSeeding = document.getElementById('view-seeding');
 export const seedingCardEl = document.getElementById('seeding-card');
 export const seedTierButtonsEl = document.getElementById('seed-tier-buttons');
-export const seedingProgressTextEl = document.getElementById('seeding-progress-text');
-export const seedingProgressBarInnerEl = document.getElementById('seeding-progress-bar-inner');
+export const seedingProgressTextEl = document.getElementById(
+    'seeding-progress-text',
+);
+export const seedingProgressBarInnerEl = document.getElementById(
+    'seeding-progress-bar-inner',
+);
 export const btnAbortSeeding = document.getElementById('btn-abort-seeding');
 export const btnSkipSeeding = document.getElementById('btn-skip-seeding');
 
-export const comparisonModeRadios = document.querySelectorAll('input[name="comparison-mode"]');
-export const comparisonModeIconRadios = document.querySelectorAll('input[name="comparison-mode-icon"]');
+export const comparisonModeRadios = document.querySelectorAll(
+    'input[name="comparison-mode"]',
+);
+export const comparisonModeIconRadios = document.querySelectorAll(
+    'input[name="comparison-mode-icon"]',
+);
 export const modeChoiceModal = document.getElementById('mode-choice-modal');
 export const modalBtnPairwise = document.getElementById('modal-btn-pairwise');
 export const modalBtnTriwise = document.getElementById('modal-btn-triwise');
 
 export const appContainer = document.getElementById('app-container');
 export const themeToggleButton = document.getElementById('theme-toggle-btn');
-export const toggleLeftSidebarButton = document.getElementById('btn-toggle-left-sidebar');
-export const toggleRightSidebarButton = document.getElementById('btn-toggle-right-sidebar');
+export const toggleLeftSidebarButton = document.getElementById(
+    'btn-toggle-left-sidebar',
+);
+export const toggleRightSidebarButton = document.getElementById(
+    'btn-toggle-right-sidebar',
+);
 export const sidebarResizer = document.getElementById('sidebar-resizer');
 
 export const iconExportButton = document.getElementById('btn-icon-export');

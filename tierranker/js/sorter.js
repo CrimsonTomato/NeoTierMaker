@@ -7,23 +7,46 @@
  * @param {function} [onProgress] Optional callback for intermediate progress.
  * @param {object} [progressContext] Optional context object to pass to the onProgress callback.
  */
-export function createSorter(items, mode, onCompare, onDone, onProgress, progressContext) {
+export function createSorter(
+    items,
+    mode,
+    onCompare,
+    onDone,
+    onProgress,
+    progressContext,
+) {
     const arrCopy = [...items];
 
     if (mode === 3) {
         // Use the new, more efficient Ternary Insertion Sort for 3-item comparisons.
-        ternaryInsertionSort(arrCopy, onCompare, onDone, onProgress, progressContext)
-            .catch(err => console.error("Error in Ternary Sort:", err));
+        ternaryInsertionSort(
+            arrCopy,
+            onCompare,
+            onDone,
+            onProgress,
+            progressContext,
+        ).catch(err => console.error('Error in Ternary Sort:', err));
     } else {
         // Use Merge Sort for pairwise comparisons.
-        pairwiseMergeSort(arrCopy, onCompare, onDone, onProgress, progressContext)
-            .catch(err => console.error("Error in Pairwise Sort:", err));
+        pairwiseMergeSort(
+            arrCopy,
+            onCompare,
+            onDone,
+            onProgress,
+            progressContext,
+        ).catch(err => console.error('Error in Pairwise Sort:', err));
     }
 }
 
 // --- ALGORITHM 1: Ternary Insertion Sort (for 3-item comparison) ---
 
-async function ternaryInsertionSort(arr, onCompare, onDone, onProgress, progressContext) {
+async function ternaryInsertionSort(
+    arr,
+    onCompare,
+    onDone,
+    onProgress,
+    progressContext,
+) {
     // Cache for tri-wise comparison results
     const ternaryComparisonCache = new Map();
 
@@ -31,13 +54,20 @@ async function ternaryInsertionSort(arr, onCompare, onDone, onProgress, progress
     function compareAsync(itemsToCompare) {
         if (itemsToCompare.length === 3) {
             // Generate a cache key from sorted item IDs
-            const key = itemsToCompare.map(item => item.id).sort().join('-');
+            const key = itemsToCompare
+                .map(item => item.id)
+                .sort()
+                .join('-');
             if (ternaryComparisonCache.has(key)) {
                 // Return cached result, ensuring it matches the input order
                 const cachedResult = ternaryComparisonCache.get(key);
                 // Reorder cached result to match the input itemsToCompare order
-                const idToItem = new Map(itemsToCompare.map(item => [item.id, item]));
-                const reorderedResult = cachedResult.map(cachedItem => idToItem.get(cachedItem.id));
+                const idToItem = new Map(
+                    itemsToCompare.map(item => [item.id, item]),
+                );
+                const reorderedResult = cachedResult.map(cachedItem =>
+                    idToItem.get(cachedItem.id),
+                );
                 return Promise.resolve(reorderedResult);
             }
             // Perform comparison and cache the result
@@ -70,15 +100,37 @@ async function ternaryInsertionSort(arr, onCompare, onDone, onProgress, progress
         const oneThird = low + Math.floor((high - low) / 3);
         const twoThirds = high - Math.floor((high - low) / 3);
 
-        const pivots = [itemToInsert, sortedPart[oneThird], sortedPart[twoThirds]];
+        const pivots = [
+            itemToInsert,
+            sortedPart[oneThird],
+            sortedPart[twoThirds],
+        ];
         const result = await compareAsync(pivots);
 
-        if (result[0].id === itemToInsert.id) { // Item belongs in the first third
-            return await findInsertIndex(sortedPart, itemToInsert, low, oneThird - 1);
-        } else if (result[1].id === itemToInsert.id) { // Item belongs in the middle third
-            return await findInsertIndex(sortedPart, itemToInsert, oneThird, twoThirds - 1);
-        } else { // Item belongs in the last third
-            return await findInsertIndex(sortedPart, itemToInsert, twoThirds, high);
+        if (result[0].id === itemToInsert.id) {
+            // Item belongs in the first third
+            return await findInsertIndex(
+                sortedPart,
+                itemToInsert,
+                low,
+                oneThird - 1,
+            );
+        } else if (result[1].id === itemToInsert.id) {
+            // Item belongs in the middle third
+            return await findInsertIndex(
+                sortedPart,
+                itemToInsert,
+                oneThird,
+                twoThirds - 1,
+            );
+        } else {
+            // Item belongs in the last third
+            return await findInsertIndex(
+                sortedPart,
+                itemToInsert,
+                twoThirds,
+                high,
+            );
         }
     }
 
@@ -86,7 +138,12 @@ async function ternaryInsertionSort(arr, onCompare, onDone, onProgress, progress
     for (let i = 1; i < arr.length; i++) {
         const itemToInsert = arr[i];
         const sortedPart = arr.slice(0, i);
-        const insertIndex = await findInsertIndex(sortedPart, itemToInsert, 0, i - 1);
+        const insertIndex = await findInsertIndex(
+            sortedPart,
+            itemToInsert,
+            0,
+            i - 1,
+        );
 
         // Remove item from its current position and insert it at the correct one.
         arr.splice(i, 1);
@@ -99,7 +156,13 @@ async function ternaryInsertionSort(arr, onCompare, onDone, onProgress, progress
 
 // --- ALGORITHM 2: Pairwise Merge Sort ---
 
-async function pairwiseMergeSort(arr, onCompare, onDone, onProgress, progressContext) {
+async function pairwiseMergeSort(
+    arr,
+    onCompare,
+    onDone,
+    onProgress,
+    progressContext,
+) {
     // Helper to wrap the callback-based onCompare into a promise for async/await.
     function compareAsync(itemA, itemB) {
         return new Promise(resolve => onCompare([itemA, itemB], resolve));
@@ -128,10 +191,12 @@ async function pairwiseMergeSort(arr, onCompare, onDone, onProgress, progressCon
 
         while (i < left.length && j < right.length) {
             const result = await compareAsync(left[i], right[j]);
-            if (result >= 0) { // left[i] >= right[j] (stable sort)
+            if (result >= 0) {
+                // left[i] >= right[j] (stable sort)
                 arr[k] = left[i];
                 i++;
-            } else { // left[i] < right[j]
+            } else {
+                // left[i] < right[j]
                 arr[k] = right[j];
                 j++;
             }

@@ -120,7 +120,10 @@ export function showPreview(e, wrapperSelector) {
             const rect = wrapper.getBoundingClientRect();
             const previewHeight = 200;
             const gap = 12;
-            let top = (rect.top > previewHeight + gap) ? rect.top - previewHeight - gap : rect.bottom + gap;
+            let top =
+                rect.top > previewHeight + gap
+                    ? rect.top - previewHeight - gap
+                    : rect.bottom + gap;
             const left = rect.left + rect.width / 2 - 100;
             dom.globalPreviewEl.style.top = `${top}px`;
             dom.globalPreviewEl.style.left = `${left}px`;

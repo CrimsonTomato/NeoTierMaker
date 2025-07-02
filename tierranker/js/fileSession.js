@@ -29,13 +29,12 @@ export async function exportSessionToFile() {
     const stateToSave = JSON.parse(JSON.stringify(state));
 
     // --- FIX: Clear transient sorting state before saving. ---
-    // If a sort was in progress, we don't save its state. The user can restart 
-    // the sort after loading. This prevents saving large base64 strings from 
+    // If a sort was in progress, we don't save its state. The user can restart
+    // the sort after loading. This prevents saving large base64 strings from
     // the comparison object into the session file.
     stateToSave.isSorting = false;
     stateToSave.comparison = { a: null, b: null, callback: null };
     stateToSave.progress = { current: 0, total: 0 };
-
 
     // Process items: extract images, replace data URL with a path
     for (const item of stateToSave.items) {
@@ -49,12 +48,13 @@ export async function exportSessionToFile() {
 
             // For the JSON file, we restore the original path reference.
             item.image = item.originalImagePath;
-
         }
         // Case 2: Item has a NEW image (a data URL without an original path).
         // This happens for images added during the current session.
         else if (item.image && item.image.startsWith('data:image/')) {
-            const fileExtension = item.image.startsWith('data:image/jpeg') ? 'jpg' : 'png';
+            const fileExtension = item.image.startsWith('data:image/jpeg')
+                ? 'jpg'
+                : 'png';
             const fileName = `${item.id}.${fileExtension}`;
             const imagePath = `images/${fileName}`;
 
@@ -75,8 +75,8 @@ export async function exportSessionToFile() {
     // Generate the zip and trigger a download
     const zipBlob = await zip.generateAsync({
         type: 'blob',
-        compression: "DEFLATE",
-        compressionOptions: { level: 9 }
+        compression: 'DEFLATE',
+        compressionOptions: { level: 9 },
     });
 
     const downloadLink = document.createElement('a');
@@ -87,7 +87,6 @@ export async function exportSessionToFile() {
     document.body.removeChild(downloadLink);
     URL.revokeObjectURL(downloadLink.href);
 }
-
 
 /**
  * Reads a .zip file and reconstructs the application state.
@@ -107,14 +106,18 @@ export async function importSessionFromFile(file) {
     const loadedState = JSON.parse(sessionData);
 
     // Re-hydrate images: load them from the zip and convert back to data URLs
-    const imagePromises = loadedState.items.map(async (item) => {
+    const imagePromises = loadedState.items.map(async item => {
         if (item.image && item.image.startsWith('images/')) {
             const originalPath = item.image; // Keep track of the source path
             const imageFile = contents.file(originalPath);
 
             if (imageFile) {
                 const base64 = await imageFile.async('base64');
-                const mimeType = originalPath.endsWith('jpg') || originalPath.endsWith('jpeg') ? 'image/jpeg' : 'image/png';
+                const mimeType =
+                    originalPath.endsWith('jpg') ||
+                    originalPath.endsWith('jpeg')
+                        ? 'image/jpeg'
+                        : 'image/png';
 
                 // Set the displayable image to the rehydrated base64 data URL
                 item.image = `data:${mimeType};base64,${base64}`;
