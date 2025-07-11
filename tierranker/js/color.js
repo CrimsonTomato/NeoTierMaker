@@ -30,23 +30,18 @@ export function isColorDark(rgb) {
 }
 
 /**
- * Generates a deterministic, visually pleasing color from a string.
- * @param {string} str The input string.
+ * Generates a random, visually pleasing light color.
+ * @param {string} str The input string (ignored, but kept for signature consistency).
  * @returns {object} An object containing the background color and contrasting text color.
  */
 export function colorInfoFromString(str) {
-    let hash = 0;
-    if (str.length === 0)
-        return { background: 'hsl(0, 0%, 85%)', text: '#000000' };
-    for (let i = 0; i < str.length; i++) {
-        hash = str.charCodeAt(i) + ((hash << 5) - hash);
-        hash = hash & hash;
-    }
-    const h = hash % 360;
-    // The HSL colors are always light, so text is always black.
+    const h = Math.floor(Math.random() * 360);
+    // Use high saturation and lightness to ensure visually pleasing, light colors.
+    const s = 70;
+    const l = 85;
     return {
-        background: `hsl(${h}, 70%, 85%)`,
-        text: '#000000',
+        background: `hsl(${h}, ${s}%, ${l}%)`,
+        text: '#000000', // Text is always black for these light colors
     };
 }
 

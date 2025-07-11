@@ -63,3 +63,98 @@ body,
     margin: 0;
     padding: 0;
 }
+
+/* 1. Disable image highlighting and interaction */
+.staging-item-img,
+.comparison-card img,
+.triwise-image,
+#seeding-card img,
+.ranked-item-img,
+.tier-item img {
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    pointer-events: none;
+    /* Clicks will pass through to the parent container */
+}
+
+/* 3. Make "Edit Tiers" button thinner */
+#btn-toggle-tier-edit {
+    padding: 6px 12px;
+    font-size: 0.875rem;
+    width: 30%;
+}
+
+.tier-palette-header {
+    align-items: center;
+    /* Vertically align text and button */
+}
+
+/* 4. Style for text-only items in tier lists */
+.tier-item.text-only-item {
+    width: var(--tier-item-size, 64px);
+    height: var(--tier-item-size, 64px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 4px;
+    word-break: break-word;
+    font-size: calc(var(--tier-item-size, 64px) / 5.5);
+    line-height: 1.2;
+    border: 1px solid var(--border-color);
+    box-sizing: border-box;
+    overflow: hidden;
+}
+
+/* 5. Force staging action buttons into a column and style for grid view */
+.staging-item-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.view-grid .staging-item-actions {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    background-color: rgba(0, 0, 0, 0.6);
+    border-radius: 4px;
+    padding: 4px;
+    opacity: 0;
+    transition: opacity 0.2s ease-in-out;
+    z-index: 10;
+}
+
+.view-grid .staging-item:hover .staging-item-actions {
+    opacity: 1;
+}
+
+.staging-item-actions button {
+    background: transparent;
+    border: none;
+    color: white;
+    cursor: pointer;
+    padding: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+    border-radius: 4px;
+}
+
+.staging-item-actions button:hover {
+    color: var(--accent-primary-hover);
+}
+
+/* Ensure list view edit/delete buttons remain styled correctly */
+.view-list .staging-item-actions button {
+    color: var(--text-secondary);
+    background-color: var(--bg-tertiary);
+}
+
+.view-list .staging-item-actions button:hover {
+    color: var(--text-primary);
+    background-color: var(--border-color-hover);
+}

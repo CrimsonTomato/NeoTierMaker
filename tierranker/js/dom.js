@@ -13,6 +13,7 @@ export const stagingListEl = document.getElementById('staging-list');
 export const viewListBtn = document.getElementById('view-list-btn');
 export const viewGridBtn = document.getElementById('view-grid-btn');
 export const globalPreviewEl = document.getElementById('global-image-preview');
+export const itemImageInput = document.getElementById('item-image-input');
 
 export const viewComparison = document.getElementById('view-comparison');
 
@@ -69,6 +70,7 @@ export const btnToggleHistory = document.getElementById('btn-toggle-history');
 export const btnToggleHistoryFilter = document.getElementById(
     'btn-toggle-history-filter',
 );
+export const btnEditInClassic = document.getElementById('btn-edit-in-classic');
 
 export const viewSeeding = document.getElementById('view-seeding');
 export const seedingCardEl = document.getElementById('seeding-card');
@@ -105,3 +107,37 @@ export const sidebarResizer = document.getElementById('sidebar-resizer');
 export const iconExportButton = document.getElementById('btn-icon-export');
 export const iconImportButton = document.getElementById('btn-icon-import');
 export const iconThemeButton = document.getElementById('btn-icon-theme');
+
+export const viewClassic = document.getElementById('view-classic');
+export const btnClassicMode = document.getElementById('btn-classic-mode');
+export const iconClassicMode = document.getElementById('btn-icon-classic-mode');
+export const classicExportArea = document.getElementById(
+    'classic-tier-list-export-area',
+);
+export const classicTierListGrid = document.getElementById(
+    'classic-tier-list-grid',
+);
+export const classicUnrankedPool = document.getElementById(
+    'classic-unranked-pool',
+);
+export const classicTiersSizeIncreaseBtn = document.getElementById(
+    'btn-classic-size-increase',
+);
+export const classicTiersSizeDecreaseBtn = document.getElementById(
+    'btn-classic-size-decrease',
+);
+export const btnClassicBackToStaging = document.getElementById(
+    'btn-classic-back-to-staging',
+);
+export const btnClassicBackToResults = document.getElementById(
+    'btn-classic-back-to-results',
+);
+export const btnClassicRandomize = document.getElementById(
+    'btn-classic-randomize',
+);
+export const btnClassicCopyImage = document.getElementById(
+    'btn-classic-copy-image',
+);
+export const btnClassicExportImage = document.getElementById(
+    'btn-classic-export-image',
+);

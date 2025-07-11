@@ -2,19 +2,27 @@ import * as dom from './dom.js';
 import {
     state,
     updateTierThreshold,
-    addTier,
-    removeLastTier,
     toggleTierEditMode,
+    updateTierColor as updateStateTierColor, // Avoid name clash
+    setEditingTierIdForColor as setStateEditingTierId,
+    handleSizeIncrease,
+    handleSizeDecrease,
 } from './state.js';
 import { showView } from './view.js';
 import { isColorDark } from './color.js';
-import { renderRankHistoryChart } from './historyChart.js';
+import {
+    renderRankHistoryChart,
+    destroyHistoryChart,
+    resetHistoryFilter,
+} from './historyChart.js';
+import { createItemImagePlaceholder } from './ui.js';
 
 let selectedTierToAssign = null;
 export let editingTierIdForColor = null;
 
 export function setEditingTierIdForColor(id) {
     editingTierIdForColor = id;
+    setStateEditingTierId(id); // Keep state module in sync
 }
 
 function calculateScores() {
@@ -43,6 +51,8 @@ export function assignItemsToTiers() {
         for (const tier of state.tiers) {
             if (item.score >= tier.threshold) {
                 item.tierId = tier.id;
+                // Ensure itemIds array exists
+                if (!tier.itemIds) tier.itemIds = [];
                 tier.itemIds.push(item.id);
                 return;
             }
@@ -51,15 +61,7 @@ export function assignItemsToTiers() {
 }
 
 export function updateTierColor(tierId, newHexColor) {
-    const tier = state.tiers.find(t => t.id === tierId);
-    if (!tier) return;
-    const r = parseInt(newHexColor.slice(1, 3), 16);
-    const g = parseInt(newHexColor.slice(3, 5), 16);
-    const b = parseInt(newHexColor.slice(5, 7), 16);
-    const textColor = isColorDark([r, g, b]) ? '#FFFFFF' : '#000000';
-
-    tier.color = newHexColor;
-    tier.textColor = textColor;
+    updateStateTierColor(tierId, newHexColor);
 
     renderResultsView();
     // Also re-render the chart to update its line colors if it's visible
@@ -128,8 +130,10 @@ export function renderResultsView() {
                     background-clip: text;
                 `;
 
+                const imgSrc =
+                    entity.image || createItemImagePlaceholder(entity);
                 itemEl.innerHTML = `
-                    <img class="ranked-item-img" src="${entity.image || 'https://via.placeholder.com/30'}" alt="${entity.text}">
+                    <img class="ranked-item-img" src="${imgSrc}" alt="${entity.text}">
                     <div class="ranked-item-info">
                         <div class="bar-container">
                             <div class="ranked-item-bar" style="background-color: ${itemTier.color}; width: ${entity.score || 0}%" title="${entity.text}"></div>
@@ -198,12 +202,20 @@ export function renderResultsView() {
 
         const itemsEl = document.createElement('div');
         itemsEl.className = 'tier-items';
-        itemsEl.innerHTML = tier.itemIds
+        itemsEl.innerHTML = (tier.itemIds || [])
             .map(id => state.items.find(i => i.id === id))
-            .map(
-                item =>
-                    `<img class="tier-item" src="${item.image || 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs='}" alt="${item.text}" title="${item.text}">`,
-            )
+            .filter(Boolean) // Make sure item exists before mapping
+            .map(item => {
+                if (item.image) {
+                    return `<img class="tier-item" src="${item.image}" alt="${item.text}" title="${item.text}">`;
+                } else {
+                    const color = item.color || {
+                        background: '#eee',
+                        text: '#111',
+                    };
+                    return `<div class="tier-item text-only-item" title="${item.text}" style="background-color: ${color.background}; color: ${color.text};"><span>${item.text}</span></div>`;
+                }
+            })
             .join('');
 
         tierRowEl.append(labelEl, itemsEl);
@@ -225,9 +237,18 @@ export function onSortDone(sortedItems) {
     showView(dom.viewResults);
     renderResultsView();
 
+    // --- FIX: Explicitly hide the drawer and reset its state on sort completion ---
+    const drawerEl = document.getElementById('rank-history-drawer');
+    drawerEl.classList.remove('visible');
+    drawerEl.style.height = '';
+    dom.btnToggleHistory.querySelector('span').textContent =
+        'Show Rank History';
+    resetHistoryFilter();
+    destroyHistoryChart();
+    // --- END FIX ---
+
     // Show the drawer container if data exists, but don't render the chart yet.
     // The user will trigger the render by clicking the button.
-    const drawerEl = document.getElementById('rank-history-drawer');
     if (state.rankHistory && state.rankHistory.length >= 2) {
         drawerEl.style.display = 'flex';
     } else {
@@ -273,46 +294,4 @@ export function handleRankedListClick(e) {
         assignItemsToTiers();
         renderResultsView();
     }
-}
-
-export function handleAddTier() {
-    addTier();
-    assignItemsToTiers();
-    renderResultsView();
-}
-
-export function handleRemoveLastTier() {
-    removeLastTier();
-    assignItemsToTiers();
-    renderResultsView();
-}
-
-const ITEM_SIZE_STEP = 8;
-const MIN_ITEM_SIZE = 32;
-const MAX_ITEM_SIZE = 128;
-
-function getCurrentItemSize() {
-    const currentSizeStr = getComputedStyle(
-        dom.tierListGridEl,
-    ).getPropertyValue('--tier-item-size');
-    return parseInt(currentSizeStr, 10) || 64;
-}
-
-function setItemSize(newSize) {
-    const clampedSize = Math.max(
-        MIN_ITEM_SIZE,
-        Math.min(newSize, MAX_ITEM_SIZE),
-    );
-    dom.tierListGridEl.style.setProperty(
-        '--tier-item-size',
-        `${clampedSize}px`,
-    );
-}
-
-export function handleSizeIncrease() {
-    setItemSize(getCurrentItemSize() + ITEM_SIZE_STEP);
-}
-
-export function handleSizeDecrease() {
-    setItemSize(getCurrentItemSize() - ITEM_SIZE_STEP);
 }

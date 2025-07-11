@@ -20,6 +20,10 @@
     /* Height is set dynamically by JS */
 }
 
+#rank-history-drawer:not(.visible) #rank-history-content {
+    display: none;
+}
+
 .history-toggle-btn {
     width: 100%;
     padding: 12px;
@@ -69,7 +73,6 @@
     height: calc(100% - 32px) !important;
 }
 
-/* --- ADDED STYLES FOR NEW BUTTON --- */
 .history-filter-btn {
     position: absolute;
     top: 20px;

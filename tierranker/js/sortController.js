@@ -3,7 +3,7 @@ import { state, abortSort, setComparisonMode } from './state.js';
 import { showView } from './view.js';
 import { createSorter } from './sorter.js';
 import { onSortDone } from './resultsController.js';
-import { hidePreview, showPreview } from './ui.js';
+import { hidePreview, showPreview, createItemImagePlaceholder } from './ui.js';
 import Sortable from 'sortablejs';
 
 let currentlySeedingItem = null;
@@ -49,6 +49,7 @@ function handleKeyboardSorting(e) {
             break;
     }
     if (choiceMade) {
+        hidePreview();
         e.preventDefault();
     }
 }
@@ -69,7 +70,7 @@ function displayNextSeedItem() {
         const img = dom.seedingCardEl.querySelector('img');
         img.src =
             currentlySeedingItem.image ||
-            'https://via.placeholder.com/200/f0f2f5/050505?text=TXT';
+            createItemImagePlaceholder(currentlySeedingItem);
         img.alt = currentlySeedingItem.text;
 
         dom.seedingProgressTextEl.textContent = `Rating Item ${state.seedingProgress.current} of ${state.seedingProgress.total}`;
@@ -393,7 +394,10 @@ function updateComparisonView() {
                         <div class="triwise-rank-label rank-${index + 1}">${ranks[index]}</div>
                         <div class="comparison-card-draggable">
                              <div class="card-image-container triwise-image-wrapper">
-                                 <img class="triwise-image" src="${item.image || 'https://via.placeholder.com/150'}" alt="${item.text}">
+                                 <img class="triwise-image" src="${
+                                     item.image ||
+                                     createItemImagePlaceholder(item)
+                                 }" alt="${item.text}">
                              </div>
                              <h3 class="card-text">${item.text}</h3>
                         </div>
@@ -456,11 +460,15 @@ function updateComparisonView() {
         dom.comparisonAreaEl.innerHTML = `
             <div class="pairwise-container">
                 <div class="comparison-card" data-choice="a">
-                    <div class="card-image-container"><img src="${items[0].image || 'https://via.placeholder.com/200'}" alt="${items[0].text}"></div>
+                    <div class="card-image-container"><img src="${
+                        items[0].image || createItemImagePlaceholder(items[0])
+                    }" alt="${items[0].text}"></div>
                     <h3 class="card-text">${items[0].text}</h3>
                 </div>
                 <div class="comparison-card" data-choice="b">
-                    <div class="card-image-container"><img src="${items[1].image || 'https://via.placeholder.com/200'}" alt="${items[1].text}"></div>
+                    <div class="card-image-container"><img src="${
+                        items[1].image || createItemImagePlaceholder(items[1])
+                    }" alt="${items[1].text}"></div>
                     <h3 class="card-text">${items[1].text}</h3>
                 </div>
             </div>
@@ -469,6 +477,9 @@ function updateComparisonView() {
         dom.comparisonAreaEl.onclick = e => {
             const choice = e.target.closest('[data-choice]')?.dataset.choice;
             if (!choice) return;
+
+            hidePreview(); // FIX: Immediately hide preview on click to prevent it getting stuck.
+
             if (state.isResolvingSkips && choice === 'tie') return; // Disallow tie in resolution phase
             if (choice === 'a') callback(1);
             else if (choice === 'b') callback(-1);

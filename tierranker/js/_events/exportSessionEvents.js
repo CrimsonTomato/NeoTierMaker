@@ -1,13 +1,10 @@
 import * as dom from '../dom.js';
-import { state } from '../state.js';
+import { state, handleSizeIncrease, handleSizeDecrease } from '../state.js';
 import { exportElementAsImage, copyElementAsImage } from '../export.js';
 import { exportSessionToFile, importSessionFromFile } from '../fileSession.js';
 import { renderStagingList } from '../ui.js';
-import {
-    renderResultsView,
-    handleSizeIncrease,
-    handleSizeDecrease,
-} from '../resultsController.js'; // Added handleSizeIncrease, handleSizeDecrease
+import { renderResultsView } from '../resultsController.js';
+import { prepareAndShowClassicView } from '../classicTierListController.js';
 import { showView } from '../view.js';
 
 export function initializeExportSessionEvents() {
@@ -151,23 +148,30 @@ export function initializeExportSessionEvents() {
         }
         try {
             const loadedState = await importSessionFromFile(file);
-            Object.assign(state, {
-                items: loadedState.items || [],
-                tiers: loadedState.tiers || [],
-                title: loadedState.title || 'Tier List',
-                editingItemId: null,
-                isSorting: false,
-            });
+            // Overwrite the live state with the loaded state.
+            Object.assign(state, loadedState);
+
+            // Reset any transient UI state that shouldn't persist.
+            state.editingItemId = null;
+            state.tierEditMode = false;
+            state.isSorting = false;
+            state.isSeeding = false;
+            state.comparison = { items: [], callback: null };
 
             renderStagingList();
             alert('Session imported successfully!');
 
+            // Decide which view to show.
             if (
                 state.items.length > 0 &&
-                state.items.some(item => item.score !== undefined)
+                state.items.every(item => item.score !== undefined)
             ) {
                 showView(dom.viewResults);
                 renderResultsView();
+            } else if (state.items.length > 0) {
+                // If there are items, default to the classic view to let the user arrange them.
+                prepareAndShowClassicView();
+                showView(dom.viewClassic);
             } else {
                 showView(dom.viewInput);
             }

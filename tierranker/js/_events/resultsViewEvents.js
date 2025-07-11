@@ -11,12 +11,8 @@ import {
     renderResultsView,
     handleTierTagClick,
     handleRankedListClick,
-    handleAddTier,
-    handleRemoveLastTier,
-    updateTierColor,
-    setEditingTierIdForColor,
-    editingTierIdForColor,
 } from '../resultsController.js';
+import { switchToClassicMode } from '../classicTierListController.js';
 
 export function initializeResultsViewEvents() {
     // --- Results View Events ---
@@ -26,12 +22,20 @@ export function initializeResultsViewEvents() {
     });
 
     dom.rankedListWrapper.addEventListener('click', handleRankedListClick);
-    dom.btnAddTier.addEventListener('click', handleAddTier);
-    dom.btnRemoveTier.addEventListener('click', handleRemoveLastTier);
 
     dom.btnToggleTierEdit.addEventListener('click', () => {
         toggleTierEditMode();
         renderResultsView();
+    });
+
+    dom.btnEditInClassic.addEventListener('click', () => {
+        if (
+            confirm(
+                'This will take you to the classic editor. Any changes you make can be discarded if you return to this results screen.',
+            )
+        ) {
+            switchToClassicMode();
+        }
     });
 
     dom.btnBackToStaging.addEventListener('click', () => {
@@ -53,54 +57,6 @@ export function initializeResultsViewEvents() {
         ) {
             window.location.reload();
         }
-    });
-
-    // Tier Color Picker
-    dom.tierListGridEl.addEventListener('click', e => {
-        const tierLabel = e.target.closest('.tier-label');
-        if (!tierLabel || tierLabel.querySelector('textarea')) return; // Avoid re-triggering if already editing
-        setEditingTierIdForColor(tierLabel.dataset.tierId);
-        dom.tierColorInput.click();
-    });
-
-    dom.tierColorInput.addEventListener('input', e => {
-        if (editingTierIdForColor) {
-            updateTierColor(editingTierIdForColor, e.target.value);
-        }
-    });
-
-    // Tier Label Editing (Context Menu)
-    dom.tierListGridEl.addEventListener('contextmenu', e => {
-        e.preventDefault(); // Prevent default context menu
-        const tierLabel = e.target.closest('.tier-label');
-        if (!tierLabel || tierLabel.querySelector('textarea')) return;
-
-        const tierId = tierLabel.dataset.tierId;
-        const originalText = state.tiers.find(t => t.id === tierId).label;
-        const editInput = document.createElement('textarea');
-        editInput.className = 'tier-label-edit';
-        editInput.value = originalText;
-
-        const saveChanges = () => {
-            const newLabel = editInput.value.trim();
-            if (newLabel) updateTierLabel(tierId, newLabel);
-            renderResultsView();
-        };
-
-        editInput.addEventListener('blur', saveChanges);
-        editInput.addEventListener('keydown', evt => {
-            if (evt.key === 'Enter' && !evt.shiftKey) {
-                evt.preventDefault();
-                saveChanges();
-            } else if (evt.key === 'Escape') {
-                renderResultsView(); // Cancel changes
-            }
-        });
-
-        tierLabel.innerHTML = ''; // Clear label and append input
-        tierLabel.appendChild(editInput);
-        editInput.focus();
-        editInput.select();
     });
 
     // Results List Title Editing

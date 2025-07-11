@@ -79,6 +79,7 @@
 .results-column-actions {
     display: flex;
     gap: 8px;
+    align-items: center;
 }
 
 .results-column-actions .btn {
@@ -275,19 +276,21 @@ body.assign-mode .tier-boundary-editable:hover .tier-boundary-line-editable {
 }
 
 /* --- Generated Tier List Grid --- */
-#tier-list-grid {
+#tier-list-grid,
+#classic-tier-list-grid {
     flex-grow: 1;
     overflow-y: auto;
     display: flex;
     flex-direction: column;
-    --tier-item-size: 64px;
     padding-right: 8px;
     margin-top: 12px;
+}
+#classic-tier-list-grid {
+    margin-top: 0;
 }
 
 .tier-row {
     display: flex;
-    min-height: 80px;
     margin-bottom: 4px;
 }
 
@@ -313,6 +316,7 @@ body.assign-mode .tier-boundary-editable:hover .tier-boundary-line-editable {
     flex-wrap: wrap;
     align-content: flex-start;
     gap: 8px;
+    min-height: calc(var(--tier-item-size) + 16px);
 }
 
 .tier-item {
@@ -362,11 +366,8 @@ body.assign-mode .tier-boundary-editable:hover .tier-boundary-line-editable {
     flex-shrink: 0;
     margin-bottom: 16px;
     display: grid;
-    /* MODIFIED */
     grid-template-columns: 1fr auto;
-    /* MODIFIED */
     gap: 16px;
-    /* MODIFIED */
     align-items: center;
 }
 
@@ -380,7 +381,7 @@ body.assign-mode .tier-boundary-editable:hover .tier-boundary-line-editable {
     display: flex;
     align-items: center;
     gap: 4px;
-    /* margin-left: auto; -- REMOVED */
+    justify-self: end;
 }
 
 .size-controls span {

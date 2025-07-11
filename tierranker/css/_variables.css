@@ -17,6 +17,7 @@
     --sidebar-left-width-collapsed: 64px;
     --sidebar-right-width-wide: 320px;
     --sidebar-right-width-collapsed: 64px;
+    --tier-item-size: 64px;
 }
 
 html.dark-mode {

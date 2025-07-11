@@ -13,6 +13,11 @@
     background-color: var(--accent-secondary);
 }
 
+.sortable-drag img {
+    pointer-events: none;
+    user-select: none;
+}
+
 /* --- View Containers --- */
 .view {
     display: none;

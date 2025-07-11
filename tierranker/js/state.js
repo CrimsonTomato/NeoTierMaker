@@ -1,4 +1,5 @@
 import { destroyHistoryChart } from './historyChart.js';
+import { isColorDark } from './color.js'; // Import for color logic
 
 export const state = {
     items: [],
@@ -42,6 +43,7 @@ export const state = {
             color: '#ff7f7f',
             textColor: '#000000',
             threshold: 90,
+            itemIds: [],
         },
         {
             id: crypto.randomUUID(),
@@ -49,6 +51,7 @@ export const state = {
             color: '#ffbf7f',
             textColor: '#000000',
             threshold: 75,
+            itemIds: [],
         },
         {
             id: crypto.randomUUID(),
@@ -56,6 +59,7 @@ export const state = {
             color: '#ffff7f',
             textColor: '#000000',
             threshold: 60,
+            itemIds: [],
         },
         {
             id: crypto.randomUUID(),
@@ -63,6 +67,7 @@ export const state = {
             color: '#7fff7f',
             textColor: '#000000',
             threshold: 45,
+            itemIds: [],
         },
         {
             id: crypto.randomUUID(),
@@ -70,10 +75,16 @@ export const state = {
             color: '#7fbfff',
             textColor: '#000000',
             threshold: 0,
+            itemIds: [],
         },
     ],
     unrankedItemIds: [],
 };
+
+export let editingTierIdForColor = null;
+export function setEditingTierIdForColor(id) {
+    editingTierIdForColor = id;
+}
 
 export function abortSort() {
     state.isSorting = false;
@@ -123,52 +134,107 @@ export function updateTitle(newTitle) {
     state.title = newTitle;
 }
 
-export function addTier() {
-    const lastThreshold =
-        state.tiers.length > 0
-            ? state.tiers[state.tiers.length - 1].threshold
-            : 0;
-    const newThreshold = Math.max(0, lastThreshold - 15);
-    state.tiers.push({
-        id: crypto.randomUUID(),
-        label: 'New',
-        color: '#cccccc',
-        textColor: '#000000',
-        threshold: newThreshold,
-    });
+export function addTier(newTier) {
+    state.tiers.push(newTier);
     state.tiers.sort((a, b) => b.threshold - a.threshold);
 }
 export function updateTierLabel(tierId, newLabel) {
     const tier = state.tiers.find(t => t.id === tierId);
     if (tier) tier.label = newLabel;
 }
-export function moveItemToTier(itemId, targetTierId, sourceId) {
-    if (sourceId === 'unranked') {
-        state.unrankedItemIds = state.unrankedItemIds.filter(
-            id => id !== itemId,
-        );
+
+export function moveItemInClassicView(
+    itemId,
+    fromId,
+    toId,
+    oldIndex,
+    newIndex,
+) {
+    let sourceList;
+    if (fromId === 'unranked') {
+        sourceList = state.unrankedItemIds;
     } else {
-        const sourceTier = state.tiers.find(t => t.id === sourceId);
-        if (sourceTier) {
-            sourceTier.itemIds = sourceTier.itemIds.filter(id => id !== itemId);
+        const sourceTier = state.tiers.find(t => t.id === fromId);
+        if (sourceTier) sourceList = sourceTier.itemIds;
+    }
+
+    let targetList;
+    if (toId === 'unranked') {
+        targetList = state.unrankedItemIds;
+    } else {
+        const targetTier = state.tiers.find(t => t.id === toId);
+        if (targetTier) {
+            if (!targetTier.itemIds) targetTier.itemIds = [];
+            targetList = targetTier.itemIds;
         }
     }
-    const targetTier = state.tiers.find(t => t.id === targetTierId);
-    if (targetTier) {
-        targetTier.itemIds.push(itemId);
+
+    if (sourceList && targetList) {
+        // 1. Remove from source
+        const [movedItem] = sourceList.splice(oldIndex, 1);
+
+        // 2. Add to target
+        if (movedItem) {
+            targetList.splice(newIndex, 0, movedItem);
+        }
     }
 }
-export function removeLastTier() {
-    if (state.tiers.length > 1) {
-        state.tiers.pop();
+
+export function deleteTierAndReassignItems(tierId) {
+    const tierIndex = state.tiers.findIndex(t => t.id === tierId);
+    if (tierIndex > -1) {
+        const [deletedTier] = state.tiers.splice(tierIndex, 1);
+        if (deletedTier.itemIds && deletedTier.itemIds.length > 0) {
+            if (!state.unrankedItemIds) state.unrankedItemIds = [];
+            state.unrankedItemIds.push(...deletedTier.itemIds);
+        }
     }
 }
+
+export function randomizeTierAssignments() {
+    if (state.items.length === 0) return;
+    if (state.tiers.length === 0) return;
+
+    // 1. Collect all item IDs into one array
+    let allItemIds = state.items.map(item => item.id);
+
+    // 2. Shuffle the array (Fisher-Yates shuffle)
+    for (let i = allItemIds.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [allItemIds[i], allItemIds[j]] = [allItemIds[j], allItemIds[i]];
+    }
+
+    // 3. Clear all existing assignments
+    state.unrankedItemIds = [];
+    state.tiers.forEach(tier => {
+        tier.itemIds = [];
+    });
+
+    // 4. Distribute the shuffled items randomly among the tiers
+    allItemIds.forEach(itemId => {
+        const randomTierIndex = Math.floor(Math.random() * state.tiers.length);
+        state.tiers[randomTierIndex].itemIds.push(itemId);
+    });
+}
+
 export function updateTierThreshold(tierId, newThreshold) {
     const tier = state.tiers.find(t => t.id === tierId);
     if (tier) {
         tier.threshold = Math.max(0, Math.min(100, newThreshold));
         state.tiers.sort((a, b) => b.threshold - a.threshold);
     }
+}
+
+export function updateTierColor(tierId, newHexColor) {
+    const tier = state.tiers.find(t => t.id === tierId);
+    if (!tier) return;
+
+    const r = parseInt(newHexColor.slice(1, 3), 16);
+    const g = parseInt(newHexColor.slice(3, 5), 16);
+    const b = parseInt(newHexColor.slice(5, 7), 16);
+
+    tier.color = newHexColor;
+    tier.textColor = isColorDark([r, g, b]) ? '#FFFFFF' : '#000000';
 }
 
 export function setItemSeedValue(itemId, seedValue) {
@@ -207,4 +273,34 @@ export function discardSortResults() {
     // Reset comparison mode to 'ask' so the modal shows again
     // when the user starts a new sort.
     state.comparisonMode = 'ask';
+}
+
+const ITEM_SIZE_STEP = 8;
+const MIN_ITEM_SIZE = 32;
+const MAX_ITEM_SIZE = 128;
+
+function getCurrentItemSize() {
+    const currentSizeStr = getComputedStyle(
+        document.documentElement,
+    ).getPropertyValue('--tier-item-size');
+    return parseInt(currentSizeStr, 10) || 64;
+}
+
+function setItemSize(newSize) {
+    const clampedSize = Math.max(
+        MIN_ITEM_SIZE,
+        Math.min(newSize, MAX_ITEM_SIZE),
+    );
+    document.documentElement.style.setProperty(
+        '--tier-item-size',
+        `${clampedSize}px`,
+    );
+}
+
+export function handleSizeIncrease() {
+    setItemSize(getCurrentItemSize() + ITEM_SIZE_STEP);
+}
+
+export function handleSizeDecrease() {
+    setItemSize(getCurrentItemSize() - ITEM_SIZE_STEP);
 }

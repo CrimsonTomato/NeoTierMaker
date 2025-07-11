@@ -1,0 +1,127 @@
+/*
+  Styles for the classic tier list editor view.
+*/
+
+#view-classic {
+    display: none; /* Hidden by default */
+}
+#view-classic.active {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.classic-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border-color);
+    margin-bottom: 16px;
+    flex-shrink: 0;
+    flex-wrap: wrap; /* Allow controls to wrap on smaller screens */
+    gap: 16px;
+}
+
+/* Ensure the results-actions class (reused for the button group) works well here */
+.classic-controls .results-actions {
+    flex-wrap: wrap;
+}
+
+#classic-tier-list-export-area {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden; /* Important for containing the scrolling grid */
+    /* Add a background for export consistency */
+    background-color: var(--bg-primary);
+    padding: 16px;
+    border-radius: var(--radius);
+}
+
+#classic-tier-list-grid {
+    flex-grow: 1; /* Takes up space within the export area */
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+}
+
+#classic-tier-list-grid .tier-row {
+    position: relative; /* For action buttons */
+}
+
+/* Make action buttons visible on hover */
+.tier-row-actions {
+    position: absolute;
+    right: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    opacity: 0;
+    transition: opacity 0.2s;
+    z-index: 10;
+}
+#classic-tier-list-grid .tier-row:hover .tier-row-actions {
+    opacity: 1;
+}
+
+.tier-action-btn {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    border: 1px solid var(--border-color);
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    cursor: pointer;
+    font-size: 1.2rem;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.tier-action-btn:hover {
+    background-color: var(--bg-tertiary);
+}
+
+#classic-unranked-pool-container {
+    flex-shrink: 0;
+    background-color: var(--bg-secondary);
+    border-top: 1px solid var(--border-color);
+    margin-top: 16px;
+    display: flex;
+    flex-direction: column;
+    border-radius: var(--radius);
+}
+
+#classic-unranked-pool-container h4 {
+    margin: 8px 16px 0;
+    font-size: 1rem;
+}
+#classic-unranked-pool-container p {
+    font-size: 0.85rem;
+    margin: 0 16px 8px;
+}
+
+#classic-unranked-pool {
+    flex-grow: 1;
+    padding: 8px 16px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    min-height: calc(
+        var(--tier-item-size) + 16px
+    ); /* Ensure it has a minimum height */
+}
+
+#classic-unranked-pool .tier-item {
+    height: var(--tier-item-size, 64px);
+    width: auto;
+    max-width: 150px;
+    object-fit: contain;
+    cursor: grab;
+    flex-shrink: 0;
+}

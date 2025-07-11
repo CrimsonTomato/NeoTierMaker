@@ -14,6 +14,7 @@ import {
     setDragging,
 } from '../ui.js';
 import { startSort, handleSimulateSort } from '../sortController.js';
+import { colorInfoFromImage } from '../color.js';
 import Sortable from 'sortablejs';
 
 export function initializeInputStagingEvents() {
@@ -41,6 +42,34 @@ export function initializeInputStagingEvents() {
         e.target.value = null; // Clear the input so same file can be selected again
     });
 
+    // --- Listener for changing/adding an image to a specific item ---
+    dom.itemImageInput.addEventListener('change', async e => {
+        const file = e.target.files[0];
+        const itemId = e.target.dataset.editingItemId;
+        if (!file || !itemId) return;
+
+        const item = state.items.find(i => i.id === itemId);
+        if (!item) return;
+
+        try {
+            const reader = new FileReader();
+            reader.onload = async () => {
+                const imageDataUrl = reader.result;
+                const colorInfo = await colorInfoFromImage(imageDataUrl);
+                item.image = imageDataUrl;
+                item.color = colorInfo;
+                renderStagingList();
+            };
+            reader.readAsDataURL(file);
+        } catch (error) {
+            console.error('Error updating item image:', error);
+            alert('Could not update the image.');
+        } finally {
+            e.target.value = null;
+            delete e.target.dataset.editingItemId;
+        }
+    });
+
     dom.imageDropZone.addEventListener('dragenter', e => {
         e.preventDefault();
         dom.imageDropZone.classList.add('drag-over');
@@ -66,7 +95,9 @@ export function initializeInputStagingEvents() {
 
     // --- Staging List Events ---
     dom.stagingListEl.addEventListener('click', e => {
-        const action = e.target.dataset.action;
+        hidePreview(); // Immediately hide preview on any click.
+        const button = e.target.closest('button');
+        const action = button?.dataset.action;
         if (!action) return;
         const itemId = e.target.closest('.staging-item')?.dataset.id;
         if (!itemId) return;
@@ -93,6 +124,9 @@ export function initializeInputStagingEvents() {
         } else if (action === 'cancel') {
             setEditingItemId(null);
             renderStagingList();
+        } else if (action === 'change-image') {
+            dom.itemImageInput.dataset.editingItemId = itemId;
+            dom.itemImageInput.click();
         }
     });
 
