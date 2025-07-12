@@ -5,17 +5,29 @@
 
 /* --- SortableJS --- */
 .sortable-drag {
+    /* This class is applied to the original item in the list. */
+    /* By default, SortableJS sets its display to none. We will let it do that. */
+    /* We only need to ensure the cursor is correct for the fallback element. */
     cursor: grabbing;
 }
 
-.sortable-ghost {
+.ghost-placeholder {
+    /* This class is applied to the placeholder clone in the list. */
+    /* Because it's a clone, it has the correct dimensions automatically. */
+    /* We just make it look like a placeholder. This prevents all layout shift/lag. */
     opacity: 0.4;
-    background-color: var(--accent-secondary);
+    background: var(--bg-tertiary);
+    border: 1px dashed var(--accent-primary);
 }
 
-.sortable-drag img {
-    pointer-events: none;
-    user-select: none;
+.sortable-fallback {
+    /* This is the clone that follows the mouse. It must be visible. */
+    cursor: grabbing !important;
+    opacity: 1; /* Make it fully visible */
+    background: transparent; /* It's a clone of the item, it has its own styling */
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+    z-index: 9999;
+    /* Remove the old fixed size rules */
 }
 
 /* --- View Containers --- */

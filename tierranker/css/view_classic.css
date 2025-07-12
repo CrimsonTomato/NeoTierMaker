@@ -107,14 +107,17 @@
 #classic-unranked-pool {
     flex-grow: 1;
     padding: 8px 16px;
-    overflow-x: auto;
-    overflow-y: hidden;
+    overflow-y: auto;
+    overflow-x: hidden;
     display: flex;
+    flex-wrap: wrap;
+    align-content: flex-start;
     align-items: flex-start;
     gap: 8px;
-    min-height: calc(
-        var(--tier-item-size) + 16px
-    ); /* Ensure it has a minimum height */
+    height: calc(
+        var(--tier-item-size) * 2 + 24px
+    ); /* Space for 2 rows + gap + padding */
+    min-height: auto;
 }
 
 #classic-unranked-pool .tier-item {

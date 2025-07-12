@@ -14,6 +14,27 @@ body {
     background-color: var(--bg-primary);
     color: var(--text-primary);
     overflow: hidden;
+
+    /* Scrollbar styles for Firefox */
+    scrollbar-width: thin; /* "auto" or "thin" */
+    scrollbar-color: var(--scrollbar-thumb-color) var(--scrollbar-track-color); /* thumb track */
+}
+
+/* Scrollbar styles for Webkit (Chrome, Safari, Edge) */
+body::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+
+body::-webkit-scrollbar-track {
+    background: var(--scrollbar-track-color);
+    border-radius: 5px;
+}
+
+body::-webkit-scrollbar-thumb {
+    background-color: var(--scrollbar-thumb-color);
+    border-radius: 5px;
+    border: 2px solid var(--scrollbar-track-color); /* Creates a subtle margin around the thumb */
 }
 
 h1,
@@ -65,12 +86,12 @@ body,
 }
 
 /* 1. Disable image highlighting and interaction */
+/* FIXED: Removed img.tier-item from this rule, as it must receive pointer events for SortableJS to work. */
 .staging-item-img,
 .comparison-card img,
 .triwise-image,
 #seeding-card img,
-.ranked-item-img,
-.tier-item img {
+.ranked-item-img {
     user-select: none;
     -webkit-user-select: none;
     -moz-user-select: none;

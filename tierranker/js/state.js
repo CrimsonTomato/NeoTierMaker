@@ -79,6 +79,7 @@ export const state = {
         },
     ],
     unrankedItemIds: [],
+    unrankedPoolVisible: true, // NEW: controls visibility of the unranked pool in classic mode
 };
 
 export let editingTierIdForColor = null;
@@ -116,7 +117,18 @@ export function clearItems() {
 }
 
 export function removeItem(id) {
+    // Remove from main items list
     state.items = state.items.filter(item => item.id !== id);
+
+    // Also remove from unranked pool if present
+    state.unrankedItemIds = state.unrankedItemIds.filter(
+        itemId => itemId !== id,
+    );
+
+    // And remove from any tiers if present (though this should be handled by classic mode drag/drop or results view assignment)
+    state.tiers.forEach(tier => {
+        tier.itemIds = tier.itemIds.filter(itemId => itemId !== id);
+    });
 }
 
 export function updateItemText(id, newText) {
@@ -147,7 +159,7 @@ export function moveItemInClassicView(
     itemId,
     fromId,
     toId,
-    oldIndex,
+    oldIndex, // Kept for potential future use, but logic will use itemId
     newIndex,
 ) {
     let sourceList;
@@ -170,12 +182,23 @@ export function moveItemInClassicView(
     }
 
     if (sourceList && targetList) {
-        // 1. Remove from source
-        const [movedItem] = sourceList.splice(oldIndex, 1);
+        // --- FIX: Make the removal more robust ---
+        // 1. Find the item's actual index in the source list using its ID.
+        // This is more reliable than relying on evt.oldIndex which can be tricky.
+        const itemIndexInSource = sourceList.indexOf(itemId);
 
-        // 2. Add to target
-        if (movedItem) {
-            targetList.splice(newIndex, 0, movedItem);
+        if (itemIndexInSource > -1) {
+            // 2. Remove from source using the found index.
+            const [movedItem] = sourceList.splice(itemIndexInSource, 1);
+
+            // 3. Add to target at the new index provided by SortableJS.
+            if (movedItem) {
+                targetList.splice(newIndex, 0, movedItem);
+            }
+        } else {
+            console.warn(
+                `Item with ID ${itemId} not found in source list ${fromId}`,
+            );
         }
     }
 }
@@ -215,6 +238,32 @@ export function randomizeTierAssignments() {
         const randomTierIndex = Math.floor(Math.random() * state.tiers.length);
         state.tiers[randomTierIndex].itemIds.push(itemId);
     });
+}
+
+export function unrankAllItems() {
+    // NEW FUNCTION
+    if (!state.unrankedItemIds) state.unrankedItemIds = [];
+
+    // Collect all item IDs from all tiers
+    const itemIdsToUnrank = [];
+    state.tiers.forEach(tier => {
+        if (tier.itemIds && tier.itemIds.length > 0) {
+            itemIdsToUnrank.push(...tier.itemIds);
+            tier.itemIds = []; // Clear items from the tier
+        }
+    });
+
+    // Add them to the unranked pool, avoiding duplicates in case of prior state issues
+    itemIdsToUnrank.forEach(itemId => {
+        if (!state.unrankedItemIds.includes(itemId)) {
+            state.unrankedItemIds.push(itemId);
+        }
+    });
+}
+
+export function toggleUnrankedPoolVisibility() {
+    // NEW
+    state.unrankedPoolVisible = !state.unrankedPoolVisible;
 }
 
 export function updateTierThreshold(tierId, newThreshold) {

@@ -15,6 +15,7 @@ import Sortable from 'sortablejs';
 
 let rightSidebarWasCollapsed = false;
 let classicModeOrigin = null; // 'sidebar' or 'results'
+let classicSortables = []; // To hold SortableJS instances for cleanup
 
 /**
  * Manages the transition into Classic Mode.
@@ -62,7 +63,25 @@ export function prepareAndShowClassicView() {
     dom.btnClassicBackToResults.style.display =
         classicModeOrigin === 'results' ? 'flex' : 'none';
 
+    // Set unranked pool visibility based on state
+    dom.classicUnrankedPoolContainer.style.display = state.unrankedPoolVisible
+        ? 'flex'
+        : 'none';
+    dom.btnClassicToggleUnranked.textContent = state.unrankedPoolVisible
+        ? 'Hide Unranked Pool'
+        : 'Show Unranked Pool';
+
     renderClassicTierList();
+}
+
+/**
+ * Destroys any existing Sortable instances to prevent conflicts on re-render.
+ */
+function destroySortables() {
+    if (classicSortables.length) {
+        classicSortables.forEach(s => s.destroy());
+        classicSortables = [];
+    }
 }
 
 function initializeSortables() {
@@ -73,9 +92,12 @@ function initializeSortables() {
 
     const sortableOptions = {
         group: 'tier-list-items',
-        animation: 150,
-        ghostClass: 'sortable-ghost',
+        animation: 0, // Set to 0 to disable animation on drop
+        ghostClass: 'ghost-placeholder', // Use a new class for the placeholder
         dragClass: 'sortable-drag',
+        forceFallback: true, // Use a clone for dragging for better performance
+        fallbackClass: 'sortable-fallback', // Class for the cloned element
+        fallbackOnBody: true, // Append clone to body to avoid clipping issues
         onEnd: evt => {
             const itemId = evt.item.dataset.itemId;
             const fromId = evt.from.dataset.tierId || 'unranked';
@@ -86,13 +108,25 @@ function initializeSortables() {
         },
     };
 
-    tierItemEls.forEach(el => new Sortable(el, sortableOptions));
-    new Sortable(unrankedPoolEl, sortableOptions);
+    tierItemEls.forEach(el =>
+        classicSortables.push(new Sortable(el, sortableOptions)),
+    );
+    // Only initialize Sortable for the unranked pool if it's visible
+    if (state.unrankedPoolVisible) {
+        // MODIFIED
+        classicSortables.push(new Sortable(unrankedPoolEl, sortableOptions));
+    }
 }
 
 export function renderClassicTierList() {
+    // --- FIX: Destroy old instances before clearing and re-rendering the DOM ---
+    destroySortables();
+
     dom.classicTierListGrid.innerHTML = '';
     state.tiers.sort((a, b) => b.threshold - a.threshold); // Ensure tiers are sorted
+
+    // --- PERFORMANCE: Create a map for quick O(1) item lookups ---
+    const itemMap = new Map(state.items.map(item => [item.id, item]));
 
     state.tiers.forEach(tier => {
         const tierRowEl = document.createElement('div');
@@ -111,11 +145,11 @@ export function renderClassicTierList() {
         itemsEl.className = 'tier-items';
         itemsEl.dataset.tierId = tier.id;
         itemsEl.innerHTML = (tier.itemIds || [])
-            .map(id => state.items.find(i => i.id === id))
+            .map(id => itemMap.get(id)) // OPTIMIZED: Use map instead of find()
             .filter(Boolean) // Filter out any undefined items
             .map(item => {
                 if (item.image) {
-                    return `<img class="tier-item" data-item-id="${item.id}" src="${item.image}" alt="${item.text}" title="${item.text}">`;
+                    return `<img class="tier-item" data-item-id="${item.id}" src="${item.image}" alt="${item.text}" title="${item.text}" draggable="false">`;
                 } else {
                     const color = item.color || {
                         background: '#eee',
@@ -141,13 +175,14 @@ export function renderClassicTierList() {
     dom.classicUnrankedPool.dataset.tierId = 'unranked';
 
     (state.unrankedItemIds || []).forEach(id => {
-        const item = state.items.find(i => i.id === id);
+        const item = itemMap.get(id); // OPTIMIZED: Use map instead of find()
         if (item) {
             let itemEl;
             if (item.image) {
                 itemEl = document.createElement('img');
                 itemEl.src = item.image;
                 itemEl.alt = item.text;
+                itemEl.draggable = false; // Prevent native browser image drag
             } else {
                 itemEl = document.createElement('div');
                 itemEl.classList.add('text-only-item');

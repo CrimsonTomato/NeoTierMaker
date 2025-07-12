@@ -9,6 +9,9 @@ import {
     handleSizeDecrease,
     addTier,
     randomizeTierAssignments,
+    // REMOVED: deleteUnrankedItems,
+    unrankAllItems, // NEW
+    toggleUnrankedPoolVisibility, // NEW
 } from '../state.js';
 import { showView } from '../view.js';
 import {
@@ -16,6 +19,7 @@ import {
     handleClassicTierAction,
     switchToClassicMode,
     getSidebarState,
+    prepareAndShowClassicView, // NEW: for toggling unranked pool
 } from '../classicTierListController.js';
 import { renderResultsView } from '../resultsController.js';
 import { exportElementAsImage, copyElementAsImage } from '../export.js';
@@ -58,6 +62,24 @@ export function initializeClassicTierListEvents() {
             randomizeTierAssignments();
             renderClassicTierList();
         }
+    });
+
+    // NEW: Unrank All Items (moves items from tiers to unranked pool)
+    dom.btnClassicUnrankAll.addEventListener('click', () => {
+        if (
+            confirm(
+                'Are you sure you want to unrank ALL items? They will be moved to the unranked pool.',
+            )
+        ) {
+            unrankAllItems();
+            renderClassicTierList();
+        }
+    });
+
+    // Toggle Unranked Pool Visibility
+    dom.btnClassicToggleUnranked.addEventListener('click', () => {
+        toggleUnrankedPoolVisibility();
+        prepareAndShowClassicView(); // Re-calls prepare to update visibility and re-render
     });
 
     dom.btnClassicCopyImage.addEventListener('click', async () => {

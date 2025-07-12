@@ -120,6 +120,9 @@ export const classicTierListGrid = document.getElementById(
 export const classicUnrankedPool = document.getElementById(
     'classic-unranked-pool',
 );
+export const classicUnrankedPoolContainer = document.getElementById(
+    'classic-unranked-pool-container',
+);
 export const classicTiersSizeIncreaseBtn = document.getElementById(
     'btn-classic-size-increase',
 );
@@ -134,6 +137,12 @@ export const btnClassicBackToResults = document.getElementById(
 );
 export const btnClassicRandomize = document.getElementById(
     'btn-classic-randomize',
+);
+export const btnClassicUnrankAll = document.getElementById(
+    'btn-classic-unrank-all',
+);
+export const btnClassicToggleUnranked = document.getElementById(
+    'btn-classic-toggle-unranked',
 );
 export const btnClassicCopyImage = document.getElementById(
     'btn-classic-copy-image',

@@ -317,6 +317,8 @@ body.assign-mode .tier-boundary-editable:hover .tier-boundary-line-editable {
     align-content: flex-start;
     gap: 8px;
     min-height: calc(var(--tier-item-size) + 16px);
+    position: relative; /* For positioning the absolute ghost */
+    will-change: contents; /* Performance hint for when items are dragged in/out */
 }
 
 .tier-item {
