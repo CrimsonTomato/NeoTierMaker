@@ -1,5 +1,5 @@
 import { destroyHistoryChart } from './historyChart.js';
-import { isColorDark } from './color.js'; // Import for color logic
+import { isColorDark } from './color.js';
 
 export const state = {
     items: [],

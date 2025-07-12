@@ -6,14 +6,14 @@ import {
     setEditingItemId,
     updateItemText,
 } from '../state.js';
-import { handleTextInput, handleFileInput } from '../inputController.js';
+import { handleTextInput, handleFileInput } from '../_controllers/inputController.js';
 import {
     renderStagingList,
     showPreview,
     hidePreview,
     setDragging,
 } from '../ui.js';
-import { startSort, handleSimulateSort } from '../sortController.js';
+import { startSort, handleSimulateSort } from '../_controllers/sortController.js';
 import { colorInfoFromImage } from '../color.js';
 import Sortable from 'sortablejs';
 

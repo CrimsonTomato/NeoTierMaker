@@ -1,16 +1,11 @@
-import * as dom from './dom.js';
+import * as dom from '../dom.js';
 import {
     state,
     moveItemInClassicView,
     addTier,
     deleteTierAndReassignItems,
-    updateTierColor,
-    setEditingTierIdForColor,
-    updateTierLabel,
-    handleSizeIncrease,
-    handleSizeDecrease,
-} from './state.js';
-import { showView } from './view.js';
+} from '../state.js';
+import { showView } from '../view.js';
 import Sortable from 'sortablejs';
 
 let rightSidebarWasCollapsed = false;

@@ -1,21 +1,17 @@
-import * as dom from './dom.js';
+import * as dom from '../dom.js';
 import {
     state,
     updateTierThreshold,
-    toggleTierEditMode,
-    updateTierColor as updateStateTierColor, // Avoid name clash
+    updateTierColor as updateStateTierColor,
     setEditingTierIdForColor as setStateEditingTierId,
-    handleSizeIncrease,
-    handleSizeDecrease,
-} from './state.js';
-import { showView } from './view.js';
-import { isColorDark } from './color.js';
+} from '../state.js';
+import { showView } from '../view.js';
 import {
     renderRankHistoryChart,
     destroyHistoryChart,
     resetHistoryFilter,
-} from './historyChart.js';
-import { createItemImagePlaceholder } from './ui.js';
+} from '../historyChart.js';
+import { createItemImagePlaceholder } from '../ui.js';
 
 let selectedTierToAssign = null;
 export let editingTierIdForColor = null;

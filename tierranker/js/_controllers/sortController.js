@@ -1,9 +1,9 @@
-import * as dom from './dom.js';
-import { state, abortSort, setComparisonMode } from './state.js';
-import { showView } from './view.js';
-import { createSorter } from './sorter.js';
-import { onSortDone } from './resultsController.js';
-import { hidePreview, showPreview, createItemImagePlaceholder } from './ui.js';
+import * as dom from '../dom.js';
+import { state, abortSort, setComparisonMode } from '../state.js';
+import { showView } from '../view.js';
+import { createSorter } from '../sorter.js';
+import { onSortDone } from '../_controllers/resultsController.js';
+import { hidePreview, showPreview, createItemImagePlaceholder } from '../ui.js';
 import Sortable from 'sortablejs';
 
 let currentlySeedingItem = null;

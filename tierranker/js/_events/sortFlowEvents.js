@@ -1,5 +1,5 @@
 import * as dom from '../dom.js';
-import { state, abortSort, setComparisonMode } from '../state.js';
+import { abortSort, setComparisonMode } from '../state.js';
 import { showView } from '../view.js';
 import {
     cleanupSortListeners,
@@ -7,8 +7,8 @@ import {
     handleSkipComparison,
     handleSkipSeeding,
     handleSeedButtonClick,
-} from '../sortController.js';
-import { hidePreview, showPreview } from '../ui.js'; // For comparison cards preview
+} from '../_controllers/sortController.js';
+import { hidePreview, showPreview } from '../ui.js';
 
 export function initializeSortFlowEvents() {
     // --- Sorting, Seeding, and Abort Events ---

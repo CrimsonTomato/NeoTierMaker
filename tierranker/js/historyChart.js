@@ -1,4 +1,4 @@
-import * as dom from './dom.js'; // NEW IMPORT
+import * as dom from './dom.js';
 import { state } from './state.js';
 import { Chart, registerables } from 'chart.js';
 

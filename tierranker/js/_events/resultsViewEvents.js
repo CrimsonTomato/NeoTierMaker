@@ -1,7 +1,6 @@
 import * as dom from '../dom.js';
 import {
     state,
-    updateTierLabel,
     updateTitle,
     toggleTierEditMode,
     discardSortResults,
@@ -11,8 +10,8 @@ import {
     renderResultsView,
     handleTierTagClick,
     handleRankedListClick,
-} from '../resultsController.js';
-import { switchToClassicMode } from '../classicTierListController.js';
+} from '../_controllers/resultsController.js';
+import { switchToClassicMode } from '../_controllers/classicTierListController.js';
 
 export function initializeResultsViewEvents() {
     // --- Results View Events ---

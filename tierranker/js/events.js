@@ -1,4 +1,3 @@
-// Import event initialization functions from separate files
 import { initializeThemeSidebarEvents } from './_events/themeSidebarEvents.js';
 import { initializeInputStagingEvents } from './_events/inputStagingEvents.js';
 import { initializeSortFlowEvents } from './_events/sortFlowEvents.js';
@@ -8,7 +7,6 @@ import { initializeHistoryChartEvents } from './historyChart.js';
 import { initializeClassicTierListEvents } from './_events/classicTierListEvents.js';
 
 export function initializeEventListeners() {
-    // Call each initializer to set up event listeners for its respective section
     initializeThemeSidebarEvents();
     initializeInputStagingEvents();
     initializeSortFlowEvents();

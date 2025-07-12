@@ -1,0 +1,65 @@
+<div class="results-header">
+    <h2>Results & Tier Assignment</h2>
+    <div class="results-actions">
+        <button id="btn-edit-in-classic" class="btn btn-secondary">Edit in Classic Mode</button>
+        <button id="btn-back-to-staging" class="btn btn-secondary">Back to staging</button>
+        <button id="btn-restart" class="btn btn-primary">Start Over</button>
+    </div>
+</div>
+<div id="sort-stats-container"></div>
+<p class="instructions">Your items have been sorted. To manually edit tiers, re-order items, or change
+    colors, switch to
+    <b>Classic Tier List</b> mode from the left sidebar.
+</p>
+<div class="results-container">
+    <div class="results-column" id="ranked-list-container">
+        <div class="results-column-header">
+            <h4>Ranked List</h4>
+            <div class="results-column-actions">
+                <button id="btn-copy-barchart" class="btn btn-secondary">Copy Chart</button>
+                <button id="btn-export-barchart" class="btn btn-secondary">Export Chart</button>
+            </div>
+        </div>
+        <div class="tier-tag-palette">
+            <div class="tier-palette-header">
+                <p class="instructions" style="margin-bottom: 0;">Tier boundaries are determined by item scores.
+                </p>
+                <button id="btn-toggle-tier-edit" class="btn btn-secondary">Edit Tiers</button>
+            </div>
+            <div id="tier-tag-container"></div>
+        </div>
+        <div id="ranked-list-wrapper"></div>
+    </div>
+    <div class="results-column" id="tier-list-container">
+        <div id="tier-list-export-area">
+            <div class="results-column-header">
+                <h4 id="results-list-title">Generated Tier List</h4>
+                <div class="results-column-actions">
+                    <!-- Move Size controls here, as they affect export -->
+                    <div class="size-controls">
+                        <button id="btn-size-decrease" class="btn-adjust" title="Decrease item size">-</button>
+                        <button id="btn-size-increase" class="btn-adjust" title="Increase item size">+</button>
+                    </div>
+                    <button id="btn-copy-image" class="btn btn-secondary">Copy Image</button>
+                    <button id="btn-export-image" class="btn btn-secondary">Export as Image</button>
+                </div>
+            </div>
+            <div id="tier-list-grid">
+            </div>
+        </div>
+    </div>
+    <div id="rank-history-drawer">
+        <button id="btn-toggle-history" class="history-toggle-btn">
+            <span>Show Rank History</span>
+            <svg viewBox="0 0 24 24">
+                <path d="M7.41,8.58L12,13.17L16.59,8.58L18,10L12,16L6,10L7.41,8.58Z" />
+            </svg>
+        </button>
+        <div id="rank-history-content">
+            <canvas id="rank-history-chart"></canvas>
+            <button id="btn-toggle-history-filter" class="btn btn-secondary history-filter-btn">
+                Show Top 5 Only
+            </button>
+        </div>
+    </div>
+</div>

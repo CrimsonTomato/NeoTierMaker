@@ -1,0 +1,89 @@
+<aside class="sidebar-left">
+    <div class="sidebar-header">
+        <h1 class="sidebar-full-content">TierRanker</h1>
+        <button id="btn-toggle-left-sidebar" class="sidebar-toggle-btn" title="Toggle Sidebar">
+            <svg viewBox="0 0 24 24">
+                <path fill="currentColor" d="M20,11V13H8L13.5,18.5L12.08,19.92L4.16,12L12.08,4.08L13.5,5.5L8,11H20Z" />
+            </svg>
+        </button>
+    </div>
+    <hr>
+    <div class="sidebar-content-wrapper">
+        <div class="sidebar-section sidebar-full-content">
+            <h4>Session</h4>
+            <button id="btn-export-session" class="btn btn-secondary">Export to File</button>
+            <button id="btn-import-session" class="btn btn-secondary">Import from File</button>
+        </div>
+        <hr class="sidebar-full-content">
+        <div class="sidebar-section sidebar-full-content">
+            <h4>Editing Mode</h4>
+            <button id="btn-classic-mode" class="btn btn-secondary">Classic Tier List</button>
+        </div>
+        <hr class="sidebar-full-content">
+        <div class="sidebar-section sidebar-full-content">
+            <h4>Configuration</h4>
+            <div class="config-group">
+                <label>Theme:</label>
+                <button id="theme-toggle-btn" class="btn btn-secondary" style="margin-top: 4px;">Toggle Dark
+                    Mode</button>
+            </div>
+            <div class="config-group">
+                <label>Comparison Mode:</label>
+                <div class="segmented-control">
+                    <input type="radio" id="mode-pairwise" name="comparison-mode" value="2">
+                    <label for="mode-pairwise" class="segmented-control-option">Pairwise</label>
+                    <input type="radio" id="mode-triwise" name="comparison-mode" value="3">
+                    <label for="mode-triwise" class="segmented-control-option">Tri-wise</label>
+                    <input type="radio" id="mode-ask" name="comparison-mode" value="ask" checked>
+                    <label for="mode-ask" class="segmented-control-option"
+                        title="Ask which mode to use before each sort">Ask (?)</label>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="sidebar-icon-bar">
+        <button id="btn-icon-export" class="sidebar-icon-btn" title="Export to File">
+            <svg viewBox="0 0 24 24">
+                <path fill="currentColor" d="M5,20H19V18H5M19,9H15V3H9V9H5L12,16L19,9Z" />
+            </svg>
+        </button>
+        <button id="btn-icon-import" class="sidebar-icon-btn" title="Import from File">
+            <svg viewBox="0 0 24 24">
+                <path fill="currentColor" d="M9,16V10H5L12,3L19,10H15V16H9M5,20V18H19V20H5Z" />
+            </svg>
+        </button>
+        <button id="btn-icon-theme" class="sidebar-icon-btn" title="Toggle Dark Mode">
+            <svg viewBox="0 0 24 24">
+                <path fill="currentColor"
+                    d="M12,18C11.11,18 10.26,17.8 9.5,17.45C11.56,16.84 13,14.94 13,12.5C13,10.06 11.56,8.16 9.5,7.55C10.26,7.2 11.11,7 12,7C15.31,7 18,9.69 18,13C18,16.31 15.31,19 12,19M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z" />
+            </svg>
+        </button>
+        <hr style="width: 80%; margin: 8px 0;">
+        <button id="btn-icon-classic-mode" class="sidebar-icon-btn" title="Classic Tier List Mode">
+            <svg viewBox="0 0 24 24">
+                <path fill="currentColor" d="M4,18H20V16H4V18M4,13H20V11H4V13M4,8H20V6H4V8Z" />
+            </svg>
+        </button>
+        <hr style="width: 80%; margin: 8px 0;">
+        <div class="radio-group-icon">
+            <input type="radio" id="mode-pairwise-icon" name="comparison-mode-icon" value="2">
+            <label for="mode-pairwise-icon" class="sidebar-icon-btn text-icon" title="Pairwise (A/B)">
+                <div>A/B</div>
+            </label>
+        </div>
+        <div class="radio-group-icon">
+            <input type="radio" id="mode-triwise-icon" name="comparison-mode-icon" value="3">
+            <label for="mode-triwise-icon" class="sidebar-icon-btn text-icon" title="Tri-wise (1/2/3)">
+                <div>I/II/III</div>
+            </label>
+        </div>
+        <div class="radio-group-icon">
+            <input type="radio" id="mode-ask-icon" name="comparison-mode-icon" value="ask" checked>
+            <label for="mode-ask-icon" class="sidebar-icon-btn text-icon"
+                title="Ask which mode to use before each sort">
+                <div>?</div>
+            </label>
+        </div>
+    </div>
+</aside>

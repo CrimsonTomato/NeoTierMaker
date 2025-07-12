@@ -7,11 +7,9 @@ import {
     updateTierColor,
     handleSizeIncrease,
     handleSizeDecrease,
-    addTier,
     randomizeTierAssignments,
-    // REMOVED: deleteUnrankedItems,
-    unrankAllItems, // NEW
-    toggleUnrankedPoolVisibility, // NEW
+    unrankAllItems,
+    toggleUnrankedPoolVisibility,
 } from '../state.js';
 import { showView } from '../view.js';
 import {
@@ -19,9 +17,9 @@ import {
     handleClassicTierAction,
     switchToClassicMode,
     getSidebarState,
-    prepareAndShowClassicView, // NEW: for toggling unranked pool
-} from '../classicTierListController.js';
-import { renderResultsView } from '../resultsController.js';
+    prepareAndShowClassicView,
+} from '../_controllers/classicTierListController.js';
+import { renderResultsView } from '../_controllers/resultsController.js';
 import { exportElementAsImage, copyElementAsImage } from '../export.js';
 
 export function initializeClassicTierListEvents() {

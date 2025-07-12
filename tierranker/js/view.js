@@ -1,6 +1,6 @@
 import { hidePreview } from './ui.js';
 import * as dom from './dom.js';
-import { setClassicModeOrigin } from './classicTierListController.js';
+import { setClassicModeOrigin } from './_controllers/classicTierListController.js';
 
 /**
  * Shows a specific view element and hides all others.

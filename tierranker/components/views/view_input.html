@@ -1,0 +1,23 @@
+<div class="input-methods">
+    <div class="input-group">
+        <h4>Text Input</h4>
+        <p class="instructions">Add items by typing names separated by new lines or commas.</p>
+        <div class="paste-area"><textarea id="text-input-area" placeholder="Item 1
+Item 2, Item 3"></textarea></div>
+        <div class="input-actions">
+            <button id="btn-add-from-text" class="btn btn-primary" style="flex-grow: 1;">Add to Staging</button>
+            <button id="btn-clear-staging" class="btn btn-secondary">Clear All</button>
+        </div>
+    </div>
+    <div class="input-group" id="image-drop-zone">
+        <h4>Image Input</h4>
+        <p class="instructions">Click to upload images or drag and drop files here. The filename will be used as
+            the item's name.</p>
+        <input type="file" id="image-input" multiple accept="image/*" hidden>
+        <button id="btn-upload-images" class="btn btn-secondary">Upload Images</button>
+    </div>
+</div>
+<div class="input-actions" style="margin-top: 24px;">
+    <button id="btn-start-sort" class="btn btn-primary" style="flex-grow: 2;">Begin Sort Process</button>
+    <button id="btn-simulate-sort" class="btn btn-secondary" style="flex-grow: 1;">Simulate Sort</button>
+</div>

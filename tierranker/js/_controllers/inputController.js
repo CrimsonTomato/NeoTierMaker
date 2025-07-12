@@ -1,6 +1,6 @@
-import { state, addItem } from './state.js';
-import { renderStagingList } from './ui.js';
-import { colorInfoFromString, colorInfoFromImage } from './color.js';
+import { state, addItem } from '../state.js';
+import { renderStagingList } from '../ui.js';
+import { colorInfoFromString, colorInfoFromImage } from '../color.js';
 
 export async function handleTextInput(text) {
     // This function is now async

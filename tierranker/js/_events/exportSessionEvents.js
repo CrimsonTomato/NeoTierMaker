@@ -3,8 +3,8 @@ import { state, handleSizeIncrease, handleSizeDecrease } from '../state.js';
 import { exportElementAsImage, copyElementAsImage } from '../export.js';
 import { exportSessionToFile, importSessionFromFile } from '../fileSession.js';
 import { renderStagingList } from '../ui.js';
-import { renderResultsView } from '../resultsController.js';
-import { prepareAndShowClassicView } from '../classicTierListController.js';
+import { renderResultsView } from '../_controllers/resultsController.js';
+import { prepareAndShowClassicView } from '../_controllers/classicTierListController.js';
 import { showView } from '../view.js';
 
 export function initializeExportSessionEvents() {
